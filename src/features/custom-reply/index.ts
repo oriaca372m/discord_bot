@@ -9,15 +9,7 @@ import GlobalConfig from 'Src/global-config'
 
 import * as utils from 'Src/utils'
 import { Images, isValidImageId } from 'Src/features/custom-reply/images'
-import Config from 'Src/features/custom-reply/config'
-
-type Response = {
-	action: string
-	text: string
-	pattern: string
-	image: string
-	reply?: boolean
-}
+import { Config, Response } from 'Src/features/custom-reply/config'
 
 export class CustomReply {
 	private initialized = false
@@ -86,9 +78,9 @@ export class CustomReply {
 			text = utils.replaceEmoji(text, msg.guild.emojis)
 		}
 		if (response.reply !== undefined && !response.reply) {
-			msg.channel.send(text, options)
+			await msg.channel.send(text, options)
 		} else {
-			msg.reply(text, options)
+			await msg.reply(text, options)
 		}
 	}
 
@@ -156,7 +148,7 @@ export class FeatureCustomReply extends CommonFeatureBase {
 	async initImpl(): Promise<void> {
 		this.storageDriver.setChannelStorageConstructor((ch) => {
 			const client = new CustomReply(this, ch)
-			client.init()
+			void(client.init())
 			return new StorageType(
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				new Map<string, any>([['customReply', client]])

@@ -14,7 +14,7 @@ type State =
 	| 'error'
 
 export default class {
-	private readonly features: Map<string, FeatureInterface> = new Map()
+	private readonly features = new Map<string, FeatureInterface>()
 	private readonly _gc: GlobalConfig
 	private sorteadFeatures: FeatureInterface[] = []
 	private _state: State = 'constructed'
@@ -44,6 +44,7 @@ export default class {
 					feature.preInit(this)
 				}
 			} catch (e) {
+				// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
 				throw Error(`failed to pre initialize: ${e}`)
 			}
 
@@ -58,6 +59,7 @@ export default class {
 					await feature.init(this)
 				}
 			} catch (e) {
+				// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
 				throw Error(`failed to initialize: ${e}`)
 			}
 

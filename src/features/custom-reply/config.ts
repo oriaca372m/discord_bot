@@ -7,8 +7,8 @@ import GlobalConfig from 'Src/global-config'
 import * as utils from 'Src/utils'
 import { CustomReply } from 'src/features/custom-reply'
 
-function validateParsedConfig(config: any): boolean {
-	// TODO: バリデーション実施。ダメな時は throw する
+function validateParsedConfig(config: any): config is ReplyConfig {
+	// TODO: バリデーション実施。ダメな時は false を返す
 	return true
 }
 
@@ -17,26 +17,58 @@ function isValidId(id: string): boolean {
 	return validIdRegExp.test(id)
 }
 
-export default class {
-	public readonly config = new Map()
-	private readonly configSources = new Map()
+export type Response = {
+	action: string
+	text: string
+	pattern: string
+	image: string
+	reply?: boolean
+}
+
+export type ReplyConfig = {
+	contents: {
+		target: string
+		responses: Response | Response[]
+	}[]
+}
+
+type ConfigSource = {
+	source: string
+	format: 'toml'
+}
+
+export class Config {
+	public readonly config = new Map<string, ReplyConfig>()
+	private readonly configSources = new Map<string, ConfigSource>()
 
 	constructor(private readonly channelInstance: CustomReply, private readonly gc: GlobalConfig) {}
 
 	private async updateConfig(id: string, viaInternet = false): Promise<void> {
+		const source = this.configSources.get(id)
+		if (source === undefined) {
+			throw new Error(`undefined id: ${id}`)
+		}
+
 		const configFilePath = `./config/custom-reply/${this.channelInstance.channel.id}/${id}.dat`
 
 		if (viaInternet) {
-			const req = await axios(`${this.configSources.get(id).source}?${Math.random()}`)
+			const req = await axios(`${source.source}?${Math.random()}`)
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 			const toml = req.data
 			const parsed = await TOML.parse.async(toml)
-			validateParsedConfig(parsed)
+
+			if (!validateParsedConfig(parsed)) {
+				throw new Error(`invalid config file: ${id}`)
+			}
 			await fs.writeFile(configFilePath, toml)
 			this.config.set(id, parsed)
 		} else {
 			const toml = await fs.readFile(configFilePath, 'utf-8')
 			const parsed = await TOML.parse.async(toml)
-			validateParsedConfig(parsed)
+
+			if (!validateParsedConfig(parsed)) {
+				throw new Error(`invalid config file: ${id}`)
+			}
 			this.config.set(id, parsed)
 		}
 	}
@@ -56,6 +88,7 @@ export default class {
 			return
 		}
 
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 		const parsed = JSON.parse(json)
 		for (const [k, v] of parsed) {
 			this.configSources.set(k, v)
@@ -63,7 +96,7 @@ export default class {
 
 		for (const id of this.configSources.keys()) {
 			try {
-				this.updateConfig(id)
+				await this.updateConfig(id)
 			} catch (e) {
 				console.error(e)
 				continue
@@ -74,7 +107,7 @@ export default class {
 	private async reloadLocalCommand(args: string[], msg: discordjs.Message): Promise<void> {
 		for (const id of this.configSources.keys()) {
 			try {
-				this.updateConfig(id)
+				await this.updateConfig(id)
 			} catch (e) {
 				console.error(e)
 				await this.gc.send(msg, 'customReply.config.errorOnReloading', {

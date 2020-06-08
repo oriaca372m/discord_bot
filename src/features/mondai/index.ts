@@ -51,6 +51,7 @@ export class Mondai {
 		try {
 			;({ args, options } = utils.parseCommandArgs(rawArgs, ['life', 'l']))
 		} catch (e) {
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 			await this.gc.send(msg, 'mondai.invalidCommand', { e })
 			return
 		}

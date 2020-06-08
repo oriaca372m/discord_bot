@@ -18,7 +18,7 @@ export type MusicListFormat = {
 
 async function loadMusicLists(dir: string): Promise<MusicLists> {
 	const files = await fs.readdir(dir)
-	const musicLists: MusicLists = new Map()
+	const musicLists = new Map<string, MusicList>()
 
 	for (const file of files) {
 		const toml = await fs.readFile(path.join(dir, file), 'utf-8')
@@ -59,9 +59,9 @@ export class MusicDatabase {
 	private allMusics: MusicFile[] = []
 	private allMusicsFuse!: Fuse<MusicFile, Fuse.IFuseOptions<Music>>
 
-	private musicLists: Map<string, MusicFile[]> = new Map()
-	private artists: Map<string, MusicFile[]> = new Map()
-	private albums: Map<string, MusicFile[]> = new Map()
+	private musicLists = new Map<string, MusicFile[]>()
+	private artists = new Map<string, MusicFile[]>()
+	private albums = new Map<string, MusicFile[]>()
 
 	constructor(public readonly musicListsDir: string) {}
 

@@ -3,6 +3,7 @@ import youtubedl from 'youtube-dl'
 import { Readable } from 'stream'
 
 type FieldNames<T> = {
+	// eslint-disable-next-line @typescript-eslint/ban-types
 	[P in keyof T]: T[P] extends Function ? never : P
 }[keyof T]
 type Fields<T> = { [P in FieldNames<T>]: T[P] }
@@ -59,7 +60,11 @@ export class MusicFile implements Music {
 	}
 
 	toListString(): string {
-		return `${this.metadata.title} (from: ${this.memberMusicList})`
+		if (this.memberMusicList !== undefined) {
+			return `${this.metadata.title} (from: ${this.memberMusicList})`
+		} else {
+			return this.metadata.title
+		}
 	}
 
 	select(): Music[] | undefined {

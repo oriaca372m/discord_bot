@@ -98,7 +98,7 @@ export class AddInteractor {
 
 			if (res.every((x) => x !== undefined)) {
 				this.setMusicResult(res as Music[])
-				this.show(1)
+				await this.show(1)
 				return
 			}
 		}
@@ -181,7 +181,7 @@ export class AddInteractor {
 			return
 		}
 
-		utils.subCommandProxy(
+		await utils.subCommandProxy(
 			{
 				help: async () => {
 					await this.gc.send(msg, 'playMusic.interactor.help')

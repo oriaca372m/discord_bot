@@ -17,7 +17,7 @@ type Config = {
 
 export default class {
 	private config: Config | undefined
-	private readonly templateCache: Map<string, lodash.TemplateExecutor> = new Map()
+	private readonly templateCache = new Map<string, lodash.TemplateExecutor>()
 
 	constructor(private paths: string[]) {}
 
@@ -55,7 +55,7 @@ export default class {
 			if (typeof value === 'string') {
 				templateText = value
 			} else if (value instanceof Array) {
-				const picked = utils.randomPick(value)
+				const picked = utils.randomPick<string | { text: string }>(value)
 
 				if (typeof picked === 'string') {
 					templateText = picked
