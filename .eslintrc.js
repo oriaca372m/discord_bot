@@ -10,7 +10,8 @@ module.exports = {
 		'plugin:@typescript-eslint/recommended-requiring-type-checking',
 		'plugin:jest/recommended',
 		'plugin:jest/style',
-		'plugin:prettier/recommended'
+		'prettier',
+		'prettier/@typescript-eslint'
 	],
 	'globals': {
 		'Atomics': 'readonly',
@@ -25,30 +26,5 @@ module.exports = {
 	'plugins': [
 		'@typescript-eslint',
 		'jest'
-	],
-	'rules': {
-		'indent': [
-			'error',
-			'tab'
-		],
-		'linebreak-style': [
-			'error',
-			'unix'
-		],
-		'quotes': [
-			'error',
-			'single',
-			{ 'avoidEscape': true }
-		],
-		'semi': [
-			'error',
-			'never'
-		],
-		'@typescript-eslint/member-delimiter-style': ['error', {
-			'multiline': {
-				'delimiter': 'none'
-			}
-		}],
-		'@typescript-eslint/require-await': 'warn'
-	}
+	]
 }
