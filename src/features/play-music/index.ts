@@ -9,6 +9,7 @@ import { Playlist } from 'Src/features/play-music/playlist'
 import { Music, YouTubeMusic } from 'Src/features/play-music/music'
 import { MusicDatabase } from 'Src/features/play-music/music-database'
 import { AddInteractor } from 'Src/features/play-music/add-interactor'
+import { title } from 'process'
 
 class PlayMusicCommand implements Command {
 	private readonly gc: GlobalConfig
@@ -127,6 +128,7 @@ class PlayMusicCommand implements Command {
 
 	async stop(): Promise<void> {
 		await this.feature.closeConnection()
+		this.feature.playlist.clear()
 	}
 
 	async reload(): Promise<void> {
@@ -135,6 +137,16 @@ class PlayMusicCommand implements Command {
 
 	async next(): Promise<void> {
 		await this.feature.next()
+	}
+
+	async now(rawArgs: string[], msg: discordjs.Message): Promise<void> {
+		const music = this.feature.playlist.currentMusic
+		if (music === undefined) {
+			msg.reply('今流れている曲は無いよ…')
+		} else {
+			const title = music.getTitle()
+			msg.reply('今流れている曲はこれだよ！' + title)
+		}
 	}
 
 	async command(msg: discordjs.Message, args: string[]): Promise<void> {
@@ -146,6 +158,7 @@ class PlayMusicCommand implements Command {
 				reload: () => this.reload(),
 				edit: (a, m) => this.edit(a, m),
 				next: () => this.next(),
+				now: (a, m) => this.now(a, m),
 			},
 			args,
 			msg
