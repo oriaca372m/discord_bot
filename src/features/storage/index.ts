@@ -8,7 +8,7 @@ export class StorageType {
 	private storage: Map<string, any>
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	constructor(defaultValue: Map<string, any> = new Map()) {
+	constructor(defaultValue = new Map<string, any>()) {
 		this.storage = defaultValue
 	}
 
@@ -26,7 +26,7 @@ export class StorageType {
 			this.storage.set(key, defaultConstructor())
 		}
 
-		return this.storage.get(key)
+		return this.storage.get(key) as T
 	}
 }
 
@@ -34,8 +34,8 @@ type ChannelStorageConstructorType = (channel: utils.LikeTextChannel) => Storage
 type GuildStorageConstructorType = (guild: discordjs.Guild) => StorageType
 
 export class StorageDriver {
-	private _channels: Map<string, StorageType> = new Map()
-	private _guilds: Map<string, StorageType> = new Map()
+	private _channels = new Map<string, StorageType>()
+	private _guilds = new Map<string, StorageType>()
 
 	private channelStorageConstructor: ChannelStorageConstructorType = () => new StorageType()
 	private guildStorageConstructor: GuildStorageConstructorType = () => new StorageType()
@@ -77,7 +77,7 @@ export class StorageDriver {
 }
 
 export class FeatureStorage extends FeatureBase {
-	private storageDrivers: Map<FeatureInterface, StorageDriver> = new Map()
+	private storageDrivers = new Map<FeatureInterface, StorageDriver>()
 
 	getStorageDriver(feature: FeatureInterface): StorageDriver {
 		if (!this.storageDrivers.has(feature)) {

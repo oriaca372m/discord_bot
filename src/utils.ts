@@ -223,7 +223,7 @@ export function randomPick<T>(array: T | T[]): T {
 		return array
 	}
 
-	const weights = array.map((x) => lodash.get(x, 'weight', 100))
+	const weights = array.map((x) => lodash.get(x, 'weight', 100) as number)
 	return array[weightedRandom(weights)]
 }
 
@@ -236,7 +236,7 @@ export async function subCommandProxy(
 ): Promise<void> {
 	const validSubCommands = Object.keys(table).join(' ')
 	if (!subcommand) {
-		msg.channel.send(`サブコマンドを指定して欲しいロボ: ${validSubCommands}`)
+		await msg.channel.send(`サブコマンドを指定して欲しいロボ: ${validSubCommands}`)
 		return
 	}
 
@@ -244,7 +244,7 @@ export async function subCommandProxy(
 	if (func) {
 		await func(args, msg)
 	} else {
-		msg.channel.send(`知らないサブコマンドロボねえ…: ${validSubCommands}`)
+		await msg.channel.send(`知らないサブコマンドロボねえ…: ${validSubCommands}`)
 	}
 }
 

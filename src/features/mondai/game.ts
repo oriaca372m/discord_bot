@@ -29,14 +29,12 @@ function generateMondaiImage(
 	}
 
 	return new Promise((resolve, reject) => {
-		// TODO: ReadonlyArray<string> に代入出来ない?
 		const args: ReadonlyArray<string> = [
 			...optArgs,
 			mode,
 			inPath,
 			outPath,
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		] as any
+		]
 		execFile('./tools/mondai.rb', args, {}, (error: Error | null, stdout: string | Buffer) => {
 			if (error) {
 				reject(error)
@@ -198,7 +196,7 @@ export class Game {
 		// 降参
 		if (new RegExp(this.config.options.surrenderPattern, 'i').test(text)) {
 			this.incorrectCount++
-			this.pushIncorrectImageLog()
+			await this.pushIncorrectImageLog()
 
 			if (this.isRepeat && this.incorrectCount == this.incorrectLimit) {
 				await this._postResultMessage(msg, 'reachedIncorrectLimit', ans, title)
@@ -222,7 +220,7 @@ export class Game {
 				this.incorrectCount++
 
 				if (this.incorrectCount == this.incorrectLimit) {
-					this.pushIncorrectImageLog()
+					await this.pushIncorrectImageLog()
 					await this._postResultMessage(msg, 'reachedIncorrectLimit', ans, title)
 					return false
 				}

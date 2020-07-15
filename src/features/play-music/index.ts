@@ -29,8 +29,9 @@ class PlayMusicCommand implements Command {
 	async edit(rawArgs: string[], msg: discordjs.Message): Promise<void> {
 		let args
 		try {
-			;({ args } = utils.parseCommandArgs(rawArgs, [], 0))
+			({ args } = utils.parseCommandArgs(rawArgs, [], 0))
 		} catch (e) {
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 			await this.gc.send(msg, 'playMusic.invalidCommand', { e })
 			return
 		}
@@ -81,6 +82,7 @@ class PlayMusicCommand implements Command {
 		try {
 			;({ args, options } = utils.parseCommandArgs(rawArgs, ['youtube'], 0))
 		} catch (e) {
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 			await this.gc.send(msg, 'playMusic.invalidCommand', { e })
 			return
 		}
@@ -91,13 +93,13 @@ class PlayMusicCommand implements Command {
 		}
 
 		if (!member.voice.channel) {
-			msg.reply('ボイスチャンネルに入ってから言うロボ')
+			await msg.reply('ボイスチャンネルに入ってから言うロボ')
 			return
 		}
 
 		if (args.length === 0) {
 			if (this.feature.playlist.isEmpty) {
-				msg.reply('今はプレイリストが空ロボ')
+				await msg.reply('今はプレイリストが空ロボ')
 				return
 			}
 
@@ -119,6 +121,7 @@ class PlayMusicCommand implements Command {
 		try {
 			;({ args, options } = utils.parseCommandArgs(rawArgs, ['youtube'], 1))
 		} catch (e) {
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 			await this.gc.send(msg, 'playMusic.invalidCommand', { e })
 			return
 		}
@@ -225,7 +228,7 @@ export class FeaturePlayMusic extends CommonFeatureBase {
 		}
 
 		this.dispatcher.on('finish', () => {
-			this.next()
+			void(this.next())
 		})
 
 		this.dispatcher.on('error', (error) => {
