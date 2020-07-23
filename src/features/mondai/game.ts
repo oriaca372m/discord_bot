@@ -4,7 +4,7 @@ import { promises as fs } from 'fs'
 import * as path from 'path'
 import * as discordjs from 'discord.js'
 
-import GlobalConfig from 'Src/global-config'
+import { FeatureGlobalConfig } from 'Src/features/global-config'
 import * as utils from 'Src/utils'
 import { FeatureMondai, Mondai, MondaiConfig } from 'Src/features/mondai'
 import { generateImageMap } from 'Src/features/mondai/image-map'
@@ -71,7 +71,7 @@ export class Game {
 
 	constructor(
 		private readonly channelInstance: Mondai,
-		private readonly gc: GlobalConfig,
+		private readonly gc: FeatureGlobalConfig,
 		private readonly mode: GameMode,
 		private readonly options: GameOption
 	) {

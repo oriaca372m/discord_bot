@@ -5,7 +5,7 @@ import * as discordjs from 'discord.js'
 import CommonFeatureBase from 'Src/features/common-feature-base'
 import { Command } from 'Src/features/command'
 import { StorageType } from 'Src/features/storage'
-import GlobalConfig from 'Src/global-config'
+import { FeatureGlobalConfig } from 'Src/features/global-config'
 
 import * as utils from 'Src/utils'
 import { Game, GameOption } from 'Src/features/mondai/game'
@@ -25,14 +25,14 @@ export type MondaiConfig = {
 
 export class Mondai {
 	private game: Game | undefined
-	private gc: GlobalConfig
+	private gc: FeatureGlobalConfig
 
 	constructor(
 		public readonly feature: FeatureMondai,
 		public readonly channel: utils.LikeTextChannel,
 		public readonly config: MondaiConfig
 	) {
-		this.gc = feature.manager.gc
+		this.gc = feature.gc
 	}
 
 	private async finalizeGame(): Promise<void> {

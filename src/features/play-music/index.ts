@@ -2,7 +2,7 @@ import * as discordjs from 'discord.js'
 
 import CommonFeatureBase from 'Src/features/common-feature-base'
 import { Command } from 'Src/features/command'
-import GlobalConfig from 'Src/global-config'
+import { FeatureGlobalConfig } from 'Src/features/global-config'
 import * as utils from 'Src/utils'
 
 import { Playlist } from 'Src/features/play-music/playlist'
@@ -11,10 +11,10 @@ import { MusicDatabase } from 'Src/features/play-music/music-database'
 import { AddInteractor } from 'Src/features/play-music/add-interactor'
 
 class PlayMusicCommand implements Command {
-	private readonly gc: GlobalConfig
+	private readonly gc: FeatureGlobalConfig
 
 	constructor(private readonly cmdName: string, private readonly feature: FeaturePlayMusic) {
-		this.gc = this.feature.manager.gc
+		this.gc = this.feature.gc
 	}
 
 	name(): string {

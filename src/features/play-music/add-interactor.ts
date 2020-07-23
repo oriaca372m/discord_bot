@@ -1,7 +1,7 @@
 import lodash from 'lodash'
 import * as discordjs from 'discord.js'
 
-import GlobalConfig from 'Src/global-config'
+import { FeatureGlobalConfig } from 'Src/features/global-config'
 import * as utils from 'Src/utils'
 
 import { FeaturePlayMusic } from 'Src/features/play-music'
@@ -47,7 +47,7 @@ function parseIndexes(strings: string[], min: number, max: number): number[] {
 }
 
 export class AddInteractor {
-	private gc: GlobalConfig
+	private gc: FeatureGlobalConfig
 	private searchResult: SearchResultType = { kind: 'undefined' }
 
 	constructor(
@@ -56,7 +56,7 @@ export class AddInteractor {
 		private playlist: Playlist,
 		private done: () => void
 	) {
-		this.gc = this.feature.manager.gc
+		this.gc = this.feature.gc
 	}
 
 	private setMusicResult(musics: Music[]): void {
