@@ -1,6 +1,5 @@
 import * as discordjs from 'discord.js'
 
-import GlobalConfig from 'Src/global-config'
 import { FeatureInterface, FeatureEventContext } from 'Src/features/feature'
 
 import * as utils from 'Src/utils'
@@ -15,20 +14,11 @@ type State =
 
 export default class {
 	private readonly features = new Map<string, FeatureInterface>()
-	private readonly _gc: GlobalConfig
 	private sorteadFeatures: FeatureInterface[] = []
 	private _state: State = 'constructed'
 
 	get state(): State {
 		return this._state
-	}
-
-	constructor() {
-		this._gc = new GlobalConfig(['./config/config-default.toml', './config/config.toml'])
-	}
-
-	get gc(): GlobalConfig {
-		return this._gc
 	}
 
 	async init(): Promise<void> {
@@ -62,8 +52,6 @@ export default class {
 				// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
 				throw Error(`failed to initialize: ${e}`)
 			}
-
-			await this._gc.init()
 		} catch (e) {
 			this._state = 'error'
 			throw e

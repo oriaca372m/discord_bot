@@ -2,7 +2,7 @@ import { promises as fs } from 'fs'
 import axios from 'axios'
 import * as discordjs from 'discord.js'
 
-import GlobalConfig from 'Src/global-config'
+import { FeatureGlobalConfig } from 'Src/features/global-config'
 import * as utils from 'Src/utils'
 import { CustomReply } from 'src/features/custom-reply'
 
@@ -16,7 +16,7 @@ export class Images {
 	private state = 'free'
 	private imageName: string | undefined
 
-	constructor(private readonly channelInstance: CustomReply, private readonly gc: GlobalConfig) {}
+	constructor(private readonly channelInstance: CustomReply, private readonly gc: FeatureGlobalConfig) {}
 
 	async init(): Promise<void> {
 		this._images = await fs.readdir(
