@@ -2,6 +2,7 @@ import { promises as fs } from 'fs'
 import TOML from '@iarna/toml'
 import lodash from 'lodash'
 import * as discordjs from 'discord.js'
+import { FeatureBase } from 'Src/features/feature'
 
 import * as utils from 'Src/utils'
 
@@ -15,13 +16,16 @@ type Config = {
 	readonly message: { [_: string]: Messages }
 }
 
-export default class {
+export class FeatureGlobalConfig extends FeatureBase {
 	private config: Config | undefined
 	private readonly templateCache = new Map<string, lodash.TemplateExecutor>()
+	readonly priority = 50000
 
-	constructor(private paths: string[]) {}
+	constructor(private paths: string[]) {
+		super()
+	}
 
-	async init(): Promise<void> {
+	protected async initImpl(): Promise<void> {
 		let config = {}
 		for (const path of this.paths) {
 			const toml = await fs.readFile(path, 'utf-8')
