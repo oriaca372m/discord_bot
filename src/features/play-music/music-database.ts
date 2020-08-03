@@ -57,7 +57,7 @@ function createMap<K, V>(array: V[], keyFunc: (val: V) => K | undefined): Map<K,
 
 export class MusicDatabase {
 	private allMusics: MusicFile[] = []
-	private allMusicsFuse!: Fuse<MusicFile, Fuse.IFuseOptions<Music>>
+	private allMusicsFuse!: Fuse<MusicFile>
 
 	private musicLists = new Map<string, MusicFile[]>()
 	private artists = new Map<string, MusicFile[]>()
