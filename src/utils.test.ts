@@ -142,3 +142,39 @@ describe('parseCommand', () => {
 		})
 	})
 })
+
+describe('retry', () => {
+	test('正しい値が返ってくること', async () => {
+		const res = await utils.retry(() => Promise.resolve('hoge'), 1)
+		expect(res).toEqual('hoge')
+	})
+
+	test('正しい例外が返ってくること', async () => {
+		await expect(utils.retry(() => Promise.reject('hoge'), 1)).rejects.toThrow(utils.RetryError)
+	})
+
+	test('例外が発生した時に正しい回数試行されること', async () => {
+		let count = 0
+		try {
+			await utils.retry(() => {
+				count++
+				return Promise.reject()
+			}, 5)
+		} catch {
+			// 例外を無視
+		}
+		expect(count).toBe(5)
+	})
+
+	test('成功した時にそれ以上試行されないこと', async () => {
+		let count = 0
+		await utils.retry(() => {
+			count++
+			if (count == 3) {
+				return Promise.resolve()
+			}
+			return Promise.reject()
+		}, 5)
+		expect(count).toBe(3)
+	})
+})
