@@ -27,6 +27,11 @@ incorrectImageMap = '''
 %><%= a.title %>
 <% } %>'''
 
+onErrorExit = '''
+エラーが発生したので問題を強制終了するロボ…
+最後の問題の正解は**<%= title %>**で再生時間は<%= time %>ロボ
+'''
+
 [message.mondai.answer]
 reachedIncorrectLimit = '''
 :no_entry_sign: 間違えすぎロボよ… 正解は**<%= title %>**で再生時間は<%= time %>ロボ

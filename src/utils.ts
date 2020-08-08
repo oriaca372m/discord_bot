@@ -310,3 +310,27 @@ export function pagination<T>(
 	const pagedArray = array.slice(firstIndex, pageLength * page)
 	return { kind: 'ok', maxPage, value: pagedArray, firstIndex }
 }
+
+export class RetryError extends Error {
+	constructor(public cause: any) { super() }
+}
+
+export async function retry<T>(func: () => Promise<T>, ntimes: number, logging = false): Promise<T> {
+	let lastError: any
+
+	for (let i = 0; i < ntimes; i++) {
+		try {
+			const a = await func()
+			return a
+		} catch (e) {
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+			lastError = e
+			if (logging) {
+				console.error(e)
+			}
+		}
+
+	}
+
+	throw new RetryError(lastError)
+}
