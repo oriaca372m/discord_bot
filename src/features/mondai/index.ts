@@ -35,7 +35,7 @@ export class Mondai {
 		this.gc = feature.gc
 	}
 
-	private async finalizeGame(): Promise<void> {
+	private async finalizeGame(isError = false): Promise<void> {
 		// 2回以上 Game.finalize() が呼ばれないようにする
 		if (this.game === undefined) {
 			return
@@ -43,7 +43,7 @@ export class Mondai {
 
 		const instance = this.game
 		this.game = undefined
-		await instance.finalize()
+		await instance.finalize(isError)
 	}
 
 	async onCommand(msg: discordjs.Message, rawArgs: string[]): Promise<void> {
@@ -106,7 +106,7 @@ export class Mondai {
 			try {
 				res = await this.game.onMessage(msg)
 			} catch (e) {
-				this.game = undefined
+				await this.finalizeGame(true)
 				throw e
 			}
 

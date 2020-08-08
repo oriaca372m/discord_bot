@@ -104,33 +104,37 @@ export class Game {
 	}
 
 	private async postMondai(): Promise<void> {
-		const episode = utils.randomPick(this.config.episodes)
 		const outputPath = this.getTmpPath(this.isAudioMode ? 'audio.mp3' : 'image.jpg')
-		const mosaicOriginalPath = path.join(this.tmpDir ?? utils.unreachable(), 'original.jpg')
-		const options: { [_: string]: string } = {}
-		if (this.isMosaicMode) {
-			options.o = mosaicOriginalPath
-		}
-		if (episode.excludeRange) {
-			options.r = episode.excludeRange
-		}
 
-		try {
-			const generateResult = await generateMondaiImage(
-				this.mode,
-				episode.filename,
-				outputPath,
-				options
-			)
-			this.answer = {
-				title: episode.title,
-				pattern: episode.pattern,
-				time: generateResult.time,
+		await utils.retry(async () => {
+			const episode = utils.randomPick(this.config.episodes)
+			const options: { [_: string]: string } = {}
+			if (this.isMosaicMode) {
+				const mosaicOriginalPath = path.join(this.tmpDir ?? utils.unreachable(), 'original.jpg')
+				options.o = mosaicOriginalPath
 			}
-		} catch (e) {
-			// TODO: 特別なエラー型にラップする
-			throw Error(e)
-		}
+			if (episode.excludeRange) {
+				options.r = episode.excludeRange
+			}
+
+			try {
+				const res = await generateMondaiImage(
+					this.mode,
+					episode.filename,
+					outputPath,
+					options
+				)
+
+				this.answer = {
+					title: episode.title,
+					pattern: episode.pattern,
+					time: res.time,
+				}
+			} catch (e) {
+				// TODO: 特別なエラー型にラップする
+				throw Error(e)
+			}
+		}, 5, true)
 
 		await this.gc.sendToChannel(
 			this.channelInstance.channel,
@@ -246,7 +250,15 @@ export class Game {
 		return res
 	}
 
-	async finalize(): Promise<void> {
+	async finalize(isError = false): Promise<void> {
+		if (isError && this.answer !== undefined) {
+			await this.gc.sendToChannel(
+				this.channelInstance.channel,
+				'mondai.onErrorExit',
+				{ title: this.answer.title, time: this.answer.time }
+			)
+		}
+
 		if (this.isRepeat) {
 			await this.gc.sendToChannel(this.channelInstance.channel, 'mondai.repeatResult', {
 				correctCount: this.correctCount,
