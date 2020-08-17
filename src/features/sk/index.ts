@@ -21,15 +21,14 @@ class SetSkCommand implements Command {
 			await msg.reply('引数の数isダメ')
 			return
 		}
-		const nb = parseInt(args[0], 10)
-		if (isNaN(nb)) {
-			await msg.reply('第一引数が数じゃない')
-			return
-		}
 
-		const map = this.storageDriver.channel(msg).get<Map<number, string[]>>('sk')
+		const nbs = utils.parseIndexes(args[0].split(','), 1, 256)
+
 		const skmsgs = args.splice(1)
-		map.set(nb, skmsgs)
+		for (const nb of nbs) {
+			const map = this.storageDriver.channel(msg).get<Map<number, string[]>>('sk')
+			map.set(nb, skmsgs)
+		}
 		await msg.reply('skを設定したよ: ' + skmsgs.join(','))
 	}
 }
