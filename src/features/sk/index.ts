@@ -5,6 +5,9 @@ import CommonFeatureBase from 'Src/features/common-feature-base'
 import { StorageType, StorageDriver } from '../storage'
 import * as utils from 'Src/utils'
 
+type SkMessage = { message: string, weight: number }
+type SkStore = Map<number, SkMessage[]>
+
 class SetSkCommand implements Command {
 	constructor(private readonly cmdName: string, private readonly storageDriver: StorageDriver) { }
 
@@ -24,12 +27,23 @@ class SetSkCommand implements Command {
 
 		const nbs = utils.parseIndexes(args[0].split(','), 1, 256)
 
-		const skmsgs = args.splice(1)
+		const skmsgs = args.splice(1).map(x => {
+			const res = /^(.+):(\d+)$/.exec(x)
+			if (res !== null) {
+				const nb = parseInt(res[2], 10)
+				if (!isNaN(nb) && 0 < nb) {
+					return { message: res[1], weight: nb }
+				}
+			}
+
+			return { message: x, weight: 1 }
+		})
+
 		for (const nb of nbs) {
-			const map = this.storageDriver.channel(msg).get<Map<number, string[]>>('sk')
+			const map = this.storageDriver.channel(msg).get<SkStore>('sk')
 			map.set(nb, skmsgs)
 		}
-		await msg.reply('skを設定したよ: ' + skmsgs.join(','))
+		await msg.reply('skを設定したよ: ' + skmsgs.map(x => x.message).join(','))
 	}
 }
 
@@ -44,7 +58,7 @@ export class FeatureSk extends CommonFeatureBase {
 	initImpl(): Promise<void> {
 		this.storageDriver.setChannelStorageConstructor(() =>
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			new StorageType(new Map<string, any>([['sk', new Map<number, string[]>()]])))
+			new StorageType(new Map<string, any>([['sk', new Map<number, SkStore>()]])))
 		this.featureCommand.registerCommand(new SetSkCommand(this.setCmdName, this.storageDriver))
 		return Promise.resolve()
 	}
@@ -58,10 +72,10 @@ export class FeatureSk extends CommonFeatureBase {
 				let res = picked.get(nb)
 				if (res === undefined) {
 					res = match
-					const map = this.storageDriver.channel(msg).get<Map<number, string[]>>('sk')
+					const map = this.storageDriver.channel(msg).get<SkStore>('sk')
 					const arr = map.get(nb)
 					if (arr !== undefined) {
-						res = utils.randomPick(arr)
+						res = utils.randomPick(arr).message
 						picked.set(nb, res)
 					}
 				}
