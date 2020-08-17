@@ -334,3 +334,35 @@ export async function retry<T>(func: () => Promise<T>, ntimes: number, logging =
 
 	throw new RetryError(lastError)
 }
+
+export function parseIndexes(strings: string[], min: number, max: number): number[] {
+	let ret: number[] = []
+
+	for (const str of strings) {
+		const match = /(\d+)(?:-|\.\.)(\d+)/.exec(str)
+		if (match) {
+			const start = parseInt(match[1], 10)
+			const end = parseInt(match[2], 10)
+
+			if (!(start < end)) {
+				throw new Error('invalid expression')
+			}
+
+			ret = [...ret, ...lodash.range(start, end + 1)]
+			continue
+		}
+
+		const index = parseInt(str, 10)
+		if (isNaN(index)) {
+			throw new Error(`failed to parse ${str} as int`)
+		}
+
+		ret.push(index)
+	}
+
+	if (!ret.every((v) => min <= v && v <= max)) {
+		throw new Error('out of range')
+	}
+
+	return ret
+}
