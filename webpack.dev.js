@@ -1,4 +1,5 @@
 const common = require('./webpack.common.js')
+const NodemonPlugin = require('nodemon-webpack-plugin')
 
 module.exports = {
 	...common,
@@ -17,5 +18,10 @@ module.exports = {
 			},
 			...common.module.rules
 		]
-	}
+	},
+	plugins: [
+		new NodemonPlugin({
+			nodeArgs: ['-r', 'dotenv/config']
+		})
+	]
 }
