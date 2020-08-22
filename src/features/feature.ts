@@ -55,9 +55,7 @@ export class FeatureBase implements FeatureInterface {
 		return Promise.resolve()
 	}
 
-	// TODO: disable-next-line を使わずに警告を消す方法は無いか?
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	onMessage(msg: discordjs.Message, context: FeatureEventContext): FeatureEventResult {
+	onMessage(_msg: discordjs.Message, _context: FeatureEventContext): FeatureEventResult {
 		return {}
 	}
 

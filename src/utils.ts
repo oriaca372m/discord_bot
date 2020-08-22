@@ -4,7 +4,6 @@ import * as discordjs from 'discord.js'
 export function unreachable(): never
 export function unreachable(_: never): never
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function unreachable(_?: unknown): never {
 	throw Error('This must never happen!')
 }
