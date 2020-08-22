@@ -7,7 +7,8 @@ import { FeatureGlobalConfig } from 'Src/features/global-config'
 import * as utils from 'Src/utils'
 import { CustomReply } from 'src/features/custom-reply'
 
-function validateParsedConfig(config: any): config is ReplyConfig {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function validateParsedConfig(config: unknown): config is ReplyConfig {
 	// TODO: バリデーション実施。ダメな時は false を返す
 	return true
 }
