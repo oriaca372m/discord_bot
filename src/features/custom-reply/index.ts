@@ -77,10 +77,10 @@ export class CustomReply {
 		if (msg.guild) {
 			text = utils.replaceEmoji(text, msg.guild.emojis)
 		}
-		if (response.reply !== undefined && !response.reply) {
-			await msg.channel.send(text, options)
-		} else {
+		if (response.reply) {
 			await msg.reply(text, options)
+		} else {
+			await msg.channel.send(text, options)
 		}
 	}
 

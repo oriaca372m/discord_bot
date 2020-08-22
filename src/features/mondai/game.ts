@@ -83,11 +83,11 @@ export class Game {
 	}
 
 	private get isRepeat(): boolean {
-		return this.options.repeat === undefined ? false : this.options.repeat
+		return this.options.repeat ?? false
 	}
 
 	private get incorrectLimit(): number {
-		return this.options.life === undefined ? 3 : this.options.life
+		return this.options.life ?? 3
 	}
 
 	private get isAudioMode(): boolean {
