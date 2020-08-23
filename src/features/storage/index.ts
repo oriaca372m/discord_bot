@@ -16,7 +16,7 @@ export class StorageType {
 		return this.storage.has(key)
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
 	set(key: string, value: any): void {
 		this.storage.set(key, value)
 	}

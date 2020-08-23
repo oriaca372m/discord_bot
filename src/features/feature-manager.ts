@@ -107,9 +107,8 @@ export default class {
 			const res = feature.onMessage(msg, context)
 			context = res.context ?? context
 
-			// TODO: これなんで?
-			if ('continuation' in res) {
-				continuations.push(res.continuation!)
+			if (res.continuation) {
+				continuations.push(res.continuation)
 			}
 
 			if (res.preventNext) {

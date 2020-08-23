@@ -7,8 +7,7 @@ export function calcDivisionNumber(total: number): { x: number; y: number } {
 	let x = 1,
 		y = 1
 
-	// eslint-disable-next-line no-constant-condition
-	while (true) {
+	for (;;) {
 		if (total <= x * y) {
 			return { x, y }
 		}
