@@ -311,10 +311,16 @@ export function pagination<T>(
 }
 
 export class RetryError extends Error {
-	constructor(public cause: Error) { super() }
+	constructor(public cause: Error) {
+		super()
+	}
 }
 
-export async function retry<T>(func: () => Promise<T>, ntimes: number, logging = false): Promise<T> {
+export async function retry<T>(
+	func: () => Promise<T>,
+	ntimes: number,
+	logging = false
+): Promise<T> {
 	let lastError: Error | undefined
 
 	for (let i = 0; i < ntimes; i++) {

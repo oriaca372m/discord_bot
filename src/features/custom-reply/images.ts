@@ -16,7 +16,10 @@ export class Images {
 	private state = 'free'
 	private imageName: string | undefined
 
-	constructor(private readonly channelInstance: CustomReply, private readonly gc: FeatureGlobalConfig) {}
+	constructor(
+		private readonly channelInstance: CustomReply,
+		private readonly gc: FeatureGlobalConfig
+	) {}
 
 	async init(): Promise<void> {
 		this._images = await fs.readdir(

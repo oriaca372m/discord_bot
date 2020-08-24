@@ -13,7 +13,10 @@ export default class extends FeatureBase {
 	public storageDriver!: StorageDriver
 
 	protected preInitImpl(): void {
-		this.gc = this.manager.registerFeature('gc', () => new FeatureGlobalConfig(['./config/config-default.toml', './config/config.toml']))
+		this.gc = this.manager.registerFeature(
+			'gc',
+			() => new FeatureGlobalConfig(['./config/config-default.toml', './config/config.toml'])
+		)
 
 		this.featureCommand = this.manager.registerFeature('command', () => new FeatureCommand())
 		this.featureStorage = this.manager.registerFeature('storage', () => new FeatureStorage())

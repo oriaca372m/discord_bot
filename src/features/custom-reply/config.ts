@@ -41,7 +41,10 @@ export class Config {
 	public readonly config = new Map<string, ReplyConfig>()
 	private readonly configSources = new Map<string, ConfigSource>()
 
-	constructor(private readonly channelInstance: CustomReply, private readonly gc: FeatureGlobalConfig) {}
+	constructor(
+		private readonly channelInstance: CustomReply,
+		private readonly gc: FeatureGlobalConfig
+	) {}
 
 	private async updateConfig(id: string, viaInternet = false): Promise<void> {
 		const source = this.configSources.get(id)

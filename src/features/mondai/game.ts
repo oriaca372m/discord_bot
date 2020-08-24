@@ -29,12 +29,7 @@ function generateMondaiImage(
 	}
 
 	return new Promise((resolve, reject) => {
-		const args: ReadonlyArray<string> = [
-			...optArgs,
-			mode,
-			inPath,
-			outPath,
-		]
+		const args: ReadonlyArray<string> = [...optArgs, mode, inPath, outPath]
 		execFile('./tools/mondai.rb', args, {}, (error: Error | null, stdout: string | Buffer) => {
 			if (error) {
 				reject(error)
@@ -106,35 +101,42 @@ export class Game {
 	private async postMondai(): Promise<void> {
 		const outputPath = this.getTmpPath(this.isAudioMode ? 'audio.mp3' : 'image.jpg')
 
-		await utils.retry(async () => {
-			const episode = utils.randomPick(this.config.episodes)
-			const options: { [_: string]: string } = {}
-			if (this.isMosaicMode) {
-				const mosaicOriginalPath = path.join(this.tmpDir ?? utils.unreachable(), 'original.jpg')
-				options.o = mosaicOriginalPath
-			}
-			if (episode.excludeRange) {
-				options.r = episode.excludeRange
-			}
-
-			try {
-				const res = await generateMondaiImage(
-					this.mode,
-					episode.filename,
-					outputPath,
-					options
-				)
-
-				this.answer = {
-					title: episode.title,
-					pattern: episode.pattern,
-					time: res.time,
+		await utils.retry(
+			async () => {
+				const episode = utils.randomPick(this.config.episodes)
+				const options: { [_: string]: string } = {}
+				if (this.isMosaicMode) {
+					const mosaicOriginalPath = path.join(
+						this.tmpDir ?? utils.unreachable(),
+						'original.jpg'
+					)
+					options.o = mosaicOriginalPath
 				}
-			} catch (e) {
-				// TODO: 特別なエラー型にラップする
-				throw Error(e)
-			}
-		}, 5, true)
+				if (episode.excludeRange) {
+					options.r = episode.excludeRange
+				}
+
+				try {
+					const res = await generateMondaiImage(
+						this.mode,
+						episode.filename,
+						outputPath,
+						options
+					)
+
+					this.answer = {
+						title: episode.title,
+						pattern: episode.pattern,
+						time: res.time,
+					}
+				} catch (e) {
+					// TODO: 特別なエラー型にラップする
+					throw Error(e)
+				}
+			},
+			5,
+			true
+		)
 
 		await this.gc.sendToChannel(
 			this.channelInstance.channel,
@@ -252,11 +254,10 @@ export class Game {
 
 	async finalize(isError = false): Promise<void> {
 		if (isError && this.answer !== undefined) {
-			await this.gc.sendToChannel(
-				this.channelInstance.channel,
-				'mondai.onErrorExit',
-				{ title: this.answer.title, time: this.answer.time }
-			)
+			await this.gc.sendToChannel(this.channelInstance.channel, 'mondai.onErrorExit', {
+				title: this.answer.title,
+				time: this.answer.time,
+			})
 		}
 
 		if (this.isRepeat) {

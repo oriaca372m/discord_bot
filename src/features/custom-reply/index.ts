@@ -148,7 +148,7 @@ export class FeatureCustomReply extends CommonFeatureBase {
 	async initImpl(): Promise<void> {
 		this.storageDriver.setChannelStorageConstructor((ch) => {
 			const client = new CustomReply(this, ch)
-			void(client.init())
+			void client.init()
 			return new StorageType(
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				new Map<string, any>([['customReply', client]])
