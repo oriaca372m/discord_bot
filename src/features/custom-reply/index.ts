@@ -85,13 +85,18 @@ export class CustomReply {
 	}
 
 	async _processCustomResponse(msg: discordjs.Message): Promise<void> {
+		let matches: Response[] = []
 		for (const [, v] of this.config.config) {
 			for (const content of v.contents) {
 				if (new RegExp(content.target).test(msg.content)) {
-					const response = utils.randomPick(content.responses)
-					await this.processPickedResponse(msg, response)
+					matches = matches.concat(content.responses)
 				}
 			}
+		}
+
+		if (0 < matches.length) {
+			const response = utils.randomPick(matches)
+			await this.processPickedResponse(msg, response)
 		}
 	}
 
