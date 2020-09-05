@@ -63,8 +63,8 @@ export class FeatureSk extends CommonFeatureBase {
 	initImpl(): Promise<void> {
 		this.storageDriver.setChannelStorageConstructor(
 			() =>
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				new StorageType(
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					new Map<string, any>([['sk', new Map<number, SkStore>()]])
 				)
 		)
