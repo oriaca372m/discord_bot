@@ -28,7 +28,7 @@ class PlayMusicCommand implements Command {
 	async edit(rawArgs: string[], msg: discordjs.Message): Promise<void> {
 		let args
 		try {
-			({ args } = utils.parseCommandArgs(rawArgs, [], 0))
+			;({ args } = utils.parseCommandArgs(rawArgs, [], 0))
 		} catch (e) {
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 			await this.gc.send(msg, 'playMusic.invalidCommand', { e })
@@ -227,7 +227,7 @@ export class FeaturePlayMusic extends CommonFeatureBase {
 		}
 
 		this.dispatcher.on('finish', () => {
-			void(this.next())
+			void this.next()
 		})
 
 		this.dispatcher.on('error', (error) => {

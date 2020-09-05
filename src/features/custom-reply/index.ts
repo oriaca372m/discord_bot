@@ -77,10 +77,10 @@ export class CustomReply {
 		if (msg.guild) {
 			text = utils.replaceEmoji(text, msg.guild.emojis)
 		}
-		if (response.reply !== undefined && !response.reply) {
-			await msg.channel.send(text, options)
-		} else {
+		if (response.reply) {
 			await msg.reply(text, options)
+		} else {
+			await msg.channel.send(text, options)
 		}
 	}
 
@@ -148,7 +148,7 @@ export class FeatureCustomReply extends CommonFeatureBase {
 	async initImpl(): Promise<void> {
 		this.storageDriver.setChannelStorageConstructor((ch) => {
 			const client = new CustomReply(this, ch)
-			void(client.init())
+			void client.init()
 			return new StorageType(
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				new Map<string, any>([['customReply', client]])

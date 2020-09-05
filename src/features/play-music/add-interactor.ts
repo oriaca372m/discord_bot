@@ -143,6 +143,10 @@ export class AddInteractor {
 	}
 
 	async onMessage(msg: discordjs.Message): Promise<void> {
+		if (msg.channel.id !== this.channel.id) {
+			return
+		}
+
 		const res = utils.parseShellLikeCommand(msg.content)
 		if (res === undefined || res.length < 1) {
 			await this.gc.send(msg, 'playMusic.interactor.invalidCommand')

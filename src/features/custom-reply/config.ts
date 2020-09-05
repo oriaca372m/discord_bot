@@ -7,7 +7,7 @@ import { FeatureGlobalConfig } from 'Src/features/global-config'
 import * as utils from 'Src/utils'
 import { CustomReply } from 'src/features/custom-reply'
 
-function validateParsedConfig(config: any): config is ReplyConfig {
+function validateParsedConfig(_config: unknown): _config is ReplyConfig {
 	// TODO: バリデーション実施。ダメな時は false を返す
 	return true
 }
@@ -41,7 +41,10 @@ export class Config {
 	public readonly config = new Map<string, ReplyConfig>()
 	private readonly configSources = new Map<string, ConfigSource>()
 
-	constructor(private readonly channelInstance: CustomReply, private readonly gc: FeatureGlobalConfig) {}
+	constructor(
+		private readonly channelInstance: CustomReply,
+		private readonly gc: FeatureGlobalConfig
+	) {}
 
 	private async updateConfig(id: string, viaInternet = false): Promise<void> {
 		const source = this.configSources.get(id)

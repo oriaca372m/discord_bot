@@ -13,7 +13,10 @@ export default class extends FeatureBase {
 	public storageDriver!: StorageDriver
 
 	protected preInitImpl(): void {
-		this.gc = this.manager.registerFeature('gc', () => new FeatureGlobalConfig(['./config/config-default.toml', './config/config.toml']))
+		this.gc = this.manager.registerFeature(
+			'gc',
+			() => new FeatureGlobalConfig(['./config/config-default.toml', './config/config.toml'])
+		)
 
 		this.featureCommand = this.manager.registerFeature('command', () => new FeatureCommand())
 		this.featureStorage = this.manager.registerFeature('storage', () => new FeatureStorage())
@@ -28,12 +31,9 @@ export default class extends FeatureBase {
 		}
 	}
 
-	// TODO: disable-next-line を使わずに警告を消す方法は無いか?
 	protected async onMessageImpl(
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		msg: discordjs.Message,
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		context: FeatureEventContext
+		_msg: discordjs.Message,
+		_context: FeatureEventContext
 	): Promise<void> {
 		return Promise.resolve()
 	}

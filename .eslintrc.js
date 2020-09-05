@@ -5,12 +5,11 @@ module.exports = {
 	},
 	'extends': [
 		'eslint:recommended',
-		'plugin:@typescript-eslint/eslint-recommended',
 		'plugin:@typescript-eslint/recommended',
 		'plugin:@typescript-eslint/recommended-requiring-type-checking',
 		'plugin:jest/recommended',
 		'plugin:jest/style',
-		'prettier',
+		'plugin:prettier/recommended',
 		'prettier/@typescript-eslint'
 	],
 	'globals': {
@@ -23,8 +22,7 @@ module.exports = {
 		'sourceType': 'module',
 		'project': './tsconfig.json'
 	},
-	'plugins': [
-		'@typescript-eslint',
-		'jest'
-	]
+	'rules': {
+		'@typescript-eslint/no-unused-vars': ['error', { 'argsIgnorePattern': '^_' }]
+	}
 }

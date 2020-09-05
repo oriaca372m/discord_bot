@@ -10,7 +10,9 @@ let ready = false
 
 client.on('ready', () => {
 	void (async (): Promise<void> => {
-		console.log(`Logged in as ${client.user!.tag}!`)
+		if (client.user) {
+			console.log(`Logged in as ${client.user.tag}!`)
+		}
 
 		try {
 			for (const [k, v] of features) {
