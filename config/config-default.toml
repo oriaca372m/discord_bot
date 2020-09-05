@@ -133,3 +133,7 @@ resultNotFound = '検索結果に表示するものが無いロボ'
 invalidPageId = '無効なページ番号ロボ。最大ページ数は<%= maxPage %>ロボよ'
 list = "検索結果ロボよー (<%= currentPage %>/<%= maxPage %>):\n<%= results %>"
 haveToSpecifyKeyword = '検索キーワードを指定するロボ'
+
+[message.sk.set]
+set = 'skを設定したロボ: <%= sk %>'
+invalidCommand = '変なコマンドロボね…'
