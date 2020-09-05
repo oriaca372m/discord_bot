@@ -6,11 +6,15 @@ import { StorageType, StorageDriver } from '../storage'
 import { FeatureGlobalConfig } from 'Src/features/global-config'
 import * as utils from 'Src/utils'
 
-type SkMessage = { message: string, weight: number }
+type SkMessage = { message: string; weight: number }
 type SkStore = Map<number, SkMessage[]>
 
 class SetSkCommand implements Command {
-	constructor(private readonly cmdName: string, private readonly storageDriver: StorageDriver, private readonly gc: FeatureGlobalConfig) { }
+	constructor(
+		private readonly cmdName: string,
+		private readonly storageDriver: StorageDriver,
+		private readonly gc: FeatureGlobalConfig
+	) {}
 
 	name(): string {
 		return this.cmdName
@@ -28,7 +32,7 @@ class SetSkCommand implements Command {
 
 		const nbs = utils.parseIndexes(args[0].split(','), 1, 256)
 
-		const skmsgs = args.splice(1).map(x => {
+		const skmsgs = args.splice(1).map((x) => {
 			const res = /^(.+):(\d+)$/.exec(x)
 			if (res !== null) {
 				const nb = parseInt(res[2], 10)
@@ -44,7 +48,7 @@ class SetSkCommand implements Command {
 			const map = this.storageDriver.channel(msg).get<SkStore>('sk')
 			map.set(nb, skmsgs)
 		}
-		await this.gc.send(msg, 'sk.set.set', { sk: skmsgs.map(x => x.message).join(',') })
+		await this.gc.send(msg, 'sk.set.set', { sk: skmsgs.map((x) => x.message).join(',') })
 	}
 }
 
@@ -57,10 +61,16 @@ export class FeatureSk extends CommonFeatureBase {
 	}
 
 	initImpl(): Promise<void> {
-		this.storageDriver.setChannelStorageConstructor(() =>
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			new StorageType(new Map<string, any>([['sk', new Map<number, SkStore>()]])))
-		this.featureCommand.registerCommand(new SetSkCommand(this.setCmdName, this.storageDriver, this.gc))
+		this.storageDriver.setChannelStorageConstructor(
+			() =>
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				new StorageType(
+					new Map<string, any>([['sk', new Map<number, SkStore>()]])
+				)
+		)
+		this.featureCommand.registerCommand(
+			new SetSkCommand(this.setCmdName, this.storageDriver, this.gc)
+		)
 		return Promise.resolve()
 	}
 
@@ -68,20 +78,22 @@ export class FeatureSk extends CommonFeatureBase {
 		if (msg.content.includes(this.skCmdName)) {
 			const picked = new Map<number, string>()
 
-			await msg.reply(msg.content.replace(this.skRegExp, (match, strnb) => {
-				const nb = parseInt(strnb, 10)
-				let res = picked.get(nb)
-				if (res === undefined) {
-					res = match
-					const map = this.storageDriver.channel(msg).get<SkStore>('sk')
-					const arr = map.get(nb)
-					if (arr !== undefined) {
-						res = utils.randomPick(arr).message
-						picked.set(nb, res)
+			await msg.reply(
+				msg.content.replace(this.skRegExp, (match, strnb) => {
+					const nb = parseInt(strnb, 10)
+					let res = picked.get(nb)
+					if (res === undefined) {
+						res = match
+						const map = this.storageDriver.channel(msg).get<SkStore>('sk')
+						const arr = map.get(nb)
+						if (arr !== undefined) {
+							res = utils.randomPick(arr).message
+							picked.set(nb, res)
+						}
 					}
-				}
-				return res
-			}))
+					return res
+				})
+			)
 		}
 	}
 }
