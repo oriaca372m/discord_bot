@@ -110,6 +110,9 @@ class PlayMusicCommand implements Command {
 		this.feature.playlist.clear()
 
 		await this.addToPlaylist(msg, args, utils.getOption(options, ['y', 'youtube']) as boolean)
+		if (this.feature.playlist.isEmpty) {
+			return
+		}
 
 		await this.feature.makeConnection(member.voice.channel)
 		await this.feature.play()
@@ -141,7 +144,7 @@ class PlayMusicCommand implements Command {
 		await this.feature.next()
 	}
 
-	async now(rawArgs: string[], msg: discordjs.Message): Promise<void> {
+	async now(_rawArgs: string[], msg: discordjs.Message): Promise<void> {
 		const music = this.feature.playlist.currentMusic
 		if (music === undefined) {
 			await msg.reply('今流れている曲は無いよ…')
