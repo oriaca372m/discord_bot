@@ -14,6 +14,7 @@ import { ActionGacha } from 'Src/features/custom-reply/actions/gacha'
 import { ActionSenko } from 'Src/features/custom-reply/actions/senko'
 import { ActionDefault } from 'Src/features/custom-reply/actions/default'
 import { ActionDoNothing } from 'Src/features/custom-reply/actions/do-nothing'
+import { ActionJakuraiClock } from 'Src/features/custom-reply/actions/jakurai-clock'
 
 export class CustomReply {
 	private initialized = false
@@ -31,6 +32,7 @@ export class CustomReply {
 			gacha: new ActionGacha(this.images, this.gc),
 			senko: new ActionSenko(),
 			['do-nothing']: new ActionDoNothing(),
+			['jakurai-clock']: new ActionJakuraiClock(),
 			default: new ActionDefault(this.images, this.gc),
 		}
 	}
