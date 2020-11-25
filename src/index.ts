@@ -21,6 +21,7 @@ client.on('ready', () => {
 
 			await featureManager.init()
 		} catch (e) {
+			console.error(e)
 			process.exit(1)
 		}
 

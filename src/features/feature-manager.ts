@@ -3,6 +3,7 @@ import * as discordjs from 'discord.js'
 import { FeatureInterface, FeatureEventContext } from 'Src/features/feature'
 
 import * as utils from 'Src/utils'
+import { inspect } from 'util'
 
 type State =
 	| 'constructed'
@@ -44,13 +45,12 @@ export default class {
 				(a, b) => b.priority - a.priority
 			)
 
-			try {
-				for (const feature of this.sorteadFeatures) {
+			for (const feature of this.sorteadFeatures) {
+				try {
 					await feature.init(this)
+				} catch (e) {
+					throw Error(`failed to initialize feature '${inspect(feature)}': ${e}`)
 				}
-			} catch (e) {
-				// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-				throw Error(`failed to initialize: ${e}`)
 			}
 		} catch (e) {
 			this._state = 'error'
