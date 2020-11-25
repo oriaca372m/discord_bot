@@ -18,10 +18,10 @@ function isValidId(id: string): boolean {
 }
 
 export type Response = {
-	action: string
-	text: string
-	pattern: string
-	image: string
+	action?: string
+	text?: string
+	pattern?: string
+	image?: string
 	reply?: boolean
 }
 
