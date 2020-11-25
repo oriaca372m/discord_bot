@@ -17,8 +17,15 @@ export type MusicListFormat = {
 }
 
 async function loadMusicLists(dir: string): Promise<MusicLists> {
-	const files = await fs.readdir(dir)
 	const musicLists = new Map<string, MusicList>()
+
+	let files
+	try {
+		files = await fs.readdir(dir)
+	} catch (e) {
+		console.error(`couldn't read a playlist directory: ${dir}`)
+		return musicLists
+	}
 
 	for (const file of files) {
 		const toml = await fs.readFile(path.join(dir, file), 'utf-8')
