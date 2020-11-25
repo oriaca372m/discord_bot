@@ -19,6 +19,12 @@ module.exports = {
 			...common.module.rules
 		]
 	},
+	cache: {
+		type: 'filesystem',
+		buildDependencies: {
+			config: ['./webpack.common.js', './webpack.config.js']
+		}
+	},
 	plugins: [
 		new NodemonPlugin({
 			nodeArgs: ['-r', 'dotenv/config']

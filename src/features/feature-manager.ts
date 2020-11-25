@@ -49,6 +49,7 @@ export default class {
 				try {
 					await feature.init(this)
 				} catch (e) {
+					// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
 					throw Error(`failed to initialize feature '${inspect(feature)}': ${e}`)
 				}
 			}

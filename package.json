@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "main": "src/index.js",
   "scripts": {
-    "build": "webpack --config webpack.dev.js",
-    "start": "webpack --config webpack.dev.js && node -r dotenv/config dist/main.js",
-    "watch": "webpack --config webpack.dev.js --watch",
+    "build": "webpack",
+    "start": "webpack && node -r dotenv/config dist/main.js",
+    "watch": "webpack --watch",
     "test": "jest"
   },
   "license": "MIT",
