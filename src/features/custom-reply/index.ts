@@ -1,6 +1,4 @@
-import { promises as fs } from 'fs'
 import * as discordjs from 'discord.js'
-import lodash from 'lodash'
 
 import CommonFeatureBase from 'Src/features/common-feature-base'
 import { Command } from 'Src/features/command'
@@ -8,19 +6,33 @@ import { StorageType } from 'Src/features/storage'
 import { FeatureGlobalConfig } from 'Src/features/global-config'
 
 import * as utils from 'Src/utils'
-import { Images, isValidImageId } from 'Src/features/custom-reply/images'
+import { Images } from 'Src/features/custom-reply/images'
 import { Config, Response } from 'Src/features/custom-reply/config'
+
+import { Action } from 'Src/features/custom-reply/actions/action'
+import { ActionGacha } from 'Src/features/custom-reply/actions/gacha'
+import { ActionSenko } from 'Src/features/custom-reply/actions/senko'
+import { ActionDefault } from 'Src/features/custom-reply/actions/default'
+import { ActionDoNothing } from 'Src/features/custom-reply/actions/do-nothing'
 
 export class CustomReply {
 	private initialized = false
 	private readonly images: Images
 	private readonly config: Config
 	private gc: FeatureGlobalConfig
+	private readonly _actions: { [key: string]: Action }
 
 	constructor(readonly feature: FeatureCustomReply, public readonly channel: discordjs.Channel) {
 		this.gc = feature.gc
 		this.images = new Images(this, this.gc)
 		this.config = new Config(this, this.gc)
+
+		this._actions = {
+			gacha: new ActionGacha(this.images, this.gc),
+			senko: new ActionSenko(),
+			['do-nothing']: new ActionDoNothing(),
+			default: new ActionDefault(this.images, this.gc),
+		}
 	}
 
 	async init(): Promise<void> {
@@ -30,53 +42,19 @@ export class CustomReply {
 	}
 
 	private async processPickedResponse(msg: discordjs.Message, response: Response): Promise<void> {
-		if (response.action === 'do-nothing') {
+		const action = this._actions[response.action ?? ''] ?? this._actions.default
+		const result = await action.handle(msg, response)
+
+		if (result === undefined) {
 			return
 		}
 
-		let text = response.text || ''
-		const options: discordjs.MessageOptions = {}
-
-		if (response.action === 'gacha') {
-			let list = this.images.images
-			if (response.pattern) {
-				list = list.filter((x) => new RegExp(response.pattern).test(x))
-			}
-
-			if (list.length === 0) {
-				await this.gc.send(msg, 'customReply.gachaImageNotFound')
-				return
-			}
-			options.files = [this.images.getImagePathById(utils.randomPick(list))]
-		} else if (response.action === 'senko') {
-			const chars = [...'せんここうやん']
-			const generated = lodash
-				.range(chars.length)
-				.map(() => utils.randomPick(chars))
-				.join('')
-			text = `${generated}!`
-		} else {
-			const imageId = response.image
-			if (imageId) {
-				if (!isValidImageId(imageId)) {
-					await this.gc.send(msg, 'customReply.invalidImageIdInResponse', { imageId })
-					console.log(`無効な画像ID ${imageId}`)
-					return
-				}
-				const path = this.images.getImagePathById(imageId)
-				try {
-					await fs.access(path)
-				} catch (_) {
-					await this.gc.send(msg, 'customReply.imageIdThatDoesNotExist', { imageId })
-					return
-				}
-				options.files = [path]
-			}
-		}
-
+		let text = result.text ?? ''
+		const options = result.options ?? {}
 		if (msg.guild) {
 			text = utils.replaceEmoji(text, msg.guild.emojis)
 		}
+
 		if (response.reply) {
 			await msg.reply(text, options)
 		} else {
