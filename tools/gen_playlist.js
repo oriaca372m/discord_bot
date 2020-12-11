@@ -14,13 +14,49 @@ function getTitle(filepath) {
 	return filename
 }
 
+function usage() {
+	console.error('usage: node gen_playlist.js <playlist path> <playlist name>')
+	process.exit(1)
+}
+
 async function main() {
 	const stdinBuffer = fs.readFileSync(0, 'utf-8')
 
-	const musics = []
+	const playlistPath = process.argv[2]
+	if (playlistPath === undefined) {
+		usage()
+	}
+
+	const playlistName = process.argv[3]
+	if (playlistPath === undefined) {
+		usage()
+	}
+
+	let cache = new Map()
+	try {
+		const str = fs.readFileSync(playlistPath, 'utf-8')
+		const toml = TOML.parse(str)
+
+		if (toml.name !== playlistName) {
+			console.error("a provided playlist name does not match to input file's one.")
+			process.exit(1)
+		}
+
+		for (const music of toml.musics) {
+			cache.set(music.path, music)
+		}
+	} catch (e) {
+		console.log('failed to parse input file')
+	}
 
 	for (const line of stdinBuffer.split('\n')) {
 		if (line === '') { break }
+
+		cachedMusic = cache.get(line)
+		if (cachedMusic !== undefined) {
+			cachedMusic.used = true
+			continue
+		}
 
 		const metadata = {
 			title: getTitle(line)
@@ -28,10 +64,11 @@ async function main() {
 
 		const music = {
 			path: line,
+			used: true,
 			metadata
 		}
 
-		console.error(`parsing metadata...: ${line}`)
+		console.log(`parsing metadata...: ${line}`)
 		try {
 			const { common } = await mm.parseFile(line, { skipCovers: true })
 
@@ -45,12 +82,21 @@ async function main() {
 			metadata.disk = common.disk
 		} catch (e) {
 			console.error(`failed to parse metadata: ${line}`)
+			continue
 		}
 
-		musics.push(music)
+		cache.set(line, music)
 	}
 
-	console.log(TOML.stringify({musics}))
+	const musics = []
+	for (const [, music] of cache) {
+		if (music.used) {
+			delete music.used
+			musics.push(music)
+		}
+	}
+
+	fs.writeFileSync(playlistPath, TOML.stringify({name: playlistName, musics}))
 }
 
 main()
