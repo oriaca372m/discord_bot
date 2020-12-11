@@ -38,7 +38,7 @@ async function main() {
 		const toml = TOML.parse(str)
 
 		if (toml.name !== playlistName) {
-			console.error("a provided playlist name does not match to input file's one.")
+			console.error("the provided playlist name does not match to input file's one.")
 			process.exit(1)
 		}
 
@@ -46,7 +46,7 @@ async function main() {
 			cache.set(music.path, music)
 		}
 	} catch (e) {
-		console.log('failed to parse input file')
+		console.log('failed to parse the input file')
 	}
 
 	for (const line of stdinBuffer.split('\n')) {
