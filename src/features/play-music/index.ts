@@ -8,7 +8,7 @@ import * as utils from 'Src/utils'
 import { Playlist } from 'Src/features/play-music/playlist'
 import { Music, YouTubeMusic } from 'Src/features/play-music/music'
 import { MusicDatabase } from 'Src/features/play-music/music-database'
-import { AddInteractor } from 'Src/features/play-music/add-interactor'
+import { AddInteractor } from 'Src/features/play-music/interactor/interactor'
 
 class PlayMusicCommand implements Command {
 	private readonly gc: FeatureGlobalConfig
