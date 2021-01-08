@@ -56,7 +56,7 @@ class PlayMusicCommand implements Command {
 	async play(rawArgs: string[], msg: discordjs.Message): Promise<void> {
 		let args, options
 		try {
-			;({ args, options } = utils.parseCommandArgs(rawArgs, ['youtube'], 0))
+			;({ args, options } = utils.parseCommandArgs(rawArgs, [], 0))
 		} catch (e) {
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 			await this.gc.send(msg, 'playMusic.invalidCommand', { e })
@@ -102,7 +102,7 @@ class PlayMusicCommand implements Command {
 	async add(rawArgs: string[], msg: discordjs.Message): Promise<void> {
 		let args, options
 		try {
-			;({ args, options } = utils.parseCommandArgs(rawArgs, ['youtube'], 1))
+			;({ args, options } = utils.parseCommandArgs(rawArgs, [], 1))
 		} catch (e) {
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 			await this.gc.send(msg, 'playMusic.invalidCommand', { e })

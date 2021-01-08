@@ -38,7 +38,7 @@ export class MusicListView implements ListView {
 		return this._musics
 	}
 
-	addToPlaylistByIndex(indexes: string[]): Music[] | 'all' {
+	private addToPlaylistByIndex(indexes: string[]): Music[] | 'all' {
 		if (indexes.length === 0) {
 			for (const music of this._musics) {
 				this.interactor.playlist.addMusic(music)

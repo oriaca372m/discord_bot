@@ -89,14 +89,14 @@ export class AddInteractor {
 	): Promise<boolean> {
 		let args: string[], options
 		try {
-			;({ args, options } = utils.parseCommandArgs(rawArgs, ['youtube'], 1))
+			;({ args, options } = utils.parseCommandArgs(rawArgs, [], 1))
 		} catch (_) {
 			return false
 		}
 
 		const isYouTube = utils.getOption(options, ['y', 'youtube']) as boolean
 
-		if (0 < args.length && args.every((x) => isNaN(parseInt(x, 10)))) {
+		if (args.every((x) => isNaN(parseInt(x, 10)))) {
 			if (cmdname === 'play') {
 				await this.feature.playMusicEditingPlaylist(msg, async (playlist) => {
 					playlist.clear()
@@ -111,7 +111,7 @@ export class AddInteractor {
 			}
 		}
 
-		return false
+		utils.unreachable()
 	}
 
 	async onMessage(msg: discordjs.Message): Promise<void> {
@@ -127,7 +127,7 @@ export class AddInteractor {
 
 		const [cmdname, ...rawArgs] = res
 
-		if (cmdname === 'play' || cmdname === 'add') {
+		if (['play', 'add'].includes(cmdname)) {
 			if (await this.handlePlayAndAdd(msg, cmdname, rawArgs)) {
 				return
 			}
