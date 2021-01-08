@@ -93,11 +93,37 @@ export class AddInteractor {
 			return
 		}
 
+		console.log(res)
+		const [cmdname, ...rawArgs] = res
+
+		if (cmdname === 'play' || cmdname === 'add') {
+			try {
+				const { args, options } = utils.parseCommandArgs(rawArgs, ['youtube'], 1)
+				const isYouTube = utils.getOption(options, ['y', 'youtube']) as boolean
+
+				if (0 < args.length && args.every((x) => isNaN(parseInt(x, 10)))) {
+					if (cmdname === 'play') {
+						await this.feature.playMusicEditingPlaylist(msg, async (playlist) => {
+							playlist.clear()
+							await this.feature.addToPlaylist(msg, args, isYouTube)
+						})
+						return
+					}
+
+					if (cmdname === 'add') {
+						await this.feature.addToPlaylist(msg, args, isYouTube)
+						return
+					}
+				}
+			} catch (_) {
+				// pass
+			}
+		}
+
 		if (this._listView !== undefined) {
-			const [cmdname, ...args] = res
 			for (const action of this._listView.getActions()) {
 				if (action.name === cmdname) {
-					await action.do(args, msg)
+					await action.do(rawArgs, msg)
 					return
 				}
 			}

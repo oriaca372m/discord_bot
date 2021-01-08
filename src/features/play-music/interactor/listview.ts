@@ -102,21 +102,10 @@ class PlayAction implements ListAction {
 	constructor(private readonly lv: MusicListView) {}
 
 	async do(args: string[], msg: discordjs.Message): Promise<void> {
-		const member = msg.member
-		if (!member) {
-			return
-		}
-
-		if (!member.voice.channel) {
-			await this.lv.gc.send(msg, 'playMusic.haveToJoinVoiceChannel')
-			return
-		}
-
-		this.lv.interactor.playlist.clear()
-		await this.lv.add(args)
-
-		await this.lv.interactor.feature.makeConnection(member.voice.channel)
-		await this.lv.interactor.feature.play()
+		await this.lv.interactor.feature.playMusicEditingPlaylist(msg, async (playlist) => {
+			playlist.clear()
+			await this.lv.add(args)
+		})
 	}
 }
 
