@@ -48,7 +48,7 @@ export class SelectableListView implements ListView {
 
 	readonly gc: FeatureGlobalConfig
 
-	getItems(): readonly ListItem[] {
+	getItems(): readonly Selectable[] {
 		return this.selectable
 	}
 }

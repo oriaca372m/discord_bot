@@ -3,7 +3,7 @@ import { Music, YouTubeMusic } from 'Src/features/play-music/music'
 import { FeaturePlayMusic } from 'Src/features/play-music'
 import * as utils from 'Src/utils'
 
-interface ParseArgsResult {
+interface CommandOptions {
 	args: string[]
 	isYouTube: boolean
 	isAddToFirst: boolean
@@ -17,10 +17,10 @@ export class MusicAdder {
 		private readonly _resume: boolean = false
 	) {}
 
-	private async parseArgs(
+	private async parseOptions(
 		msg: discordjs.Message,
 		rawArgs: string[]
-	): Promise<ParseArgsResult | undefined> {
+	): Promise<CommandOptions | undefined> {
 		let args: string[], options
 		try {
 			;({ args, options } = utils.parseCommandArgs(rawArgs, []))
@@ -81,7 +81,7 @@ export class MusicAdder {
 		return musics
 	}
 
-	private addMusicsToPlaylist(musics: readonly Music[], parseResult: ParseArgsResult): void {
+	private addMusicsToPlaylist(musics: readonly Music[], parseResult: CommandOptions): void {
 		let counter = 0
 		if (parseResult.isAddToNext) {
 			const c = this.feature.playlist.currentTrack
@@ -101,7 +101,7 @@ export class MusicAdder {
 
 	private async addInternal(
 		msg: discordjs.Message,
-		parseResult: ParseArgsResult
+		parseResult: CommandOptions
 	): Promise<readonly Music[]> {
 		if (this._listMusics !== undefined && parseResult.args.length === 0) {
 			this.addMusicsToPlaylist(this._listMusics, parseResult)
@@ -128,7 +128,7 @@ export class MusicAdder {
 	}
 
 	async add(msg: discordjs.Message, rawArgs: string[]): Promise<void> {
-		const parseResult = await this.parseArgs(msg, rawArgs)
+		const parseResult = await this.parseOptions(msg, rawArgs)
 		if (parseResult === undefined) {
 			return
 		}
@@ -137,7 +137,7 @@ export class MusicAdder {
 	}
 
 	async play(msg: discordjs.Message, rawArgs: string[]): Promise<void> {
-		const parseResult = await this.parseArgs(msg, rawArgs)
+		const parseResult = await this.parseOptions(msg, rawArgs)
 		if (parseResult === undefined) {
 			return
 		}

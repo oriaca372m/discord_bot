@@ -1,8 +1,9 @@
 import { FeatureGlobalConfig } from 'Src/features/global-config'
 
 import { Playlist } from 'Src/features/play-music/playlist'
+import { Music } from 'Src/features/play-music/music'
 import { AddInteractor } from 'Src/features/play-music/interactor/interactor'
-import { ListView, ListAction, ListItem } from 'Src/features/play-music/interactor/listview'
+import { ListView, ListAction } from 'Src/features/play-music/interactor/listview'
 
 export class PlaylistListView implements ListView {
 	readonly actions = [new MoveAction(this), new ShuffleAction(this)] as const
@@ -13,7 +14,7 @@ export class PlaylistListView implements ListView {
 
 	readonly gc: FeatureGlobalConfig
 
-	getItems(): readonly ListItem[] {
+	getItems(): readonly Music[] {
 		return this.playlist.musics
 	}
 }

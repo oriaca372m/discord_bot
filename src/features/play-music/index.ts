@@ -53,28 +53,6 @@ class PlayMusicCommand implements Command {
 		return
 	}
 
-	async play(rawArgs: string[], msg: discordjs.Message): Promise<void> {
-		const adder = new MusicAdder(this.feature, undefined, true)
-		await adder.play(msg, rawArgs)
-	}
-
-	async add(rawArgs: string[], msg: discordjs.Message): Promise<void> {
-		const adder = new MusicAdder(this.feature)
-		await adder.add(msg, rawArgs)
-	}
-
-	async stop(): Promise<void> {
-		await this.feature.closeConnection()
-	}
-
-	async reload(): Promise<void> {
-		await this.feature.reload()
-	}
-
-	async next(): Promise<void> {
-		await this.feature.next()
-	}
-
 	async now(_rawArgs: string[], msg: discordjs.Message): Promise<void> {
 		const music = this.feature.playlist.currentMusic
 		if (music === undefined) {
@@ -88,13 +66,29 @@ class PlayMusicCommand implements Command {
 	async command(msg: discordjs.Message, args: string[]): Promise<void> {
 		await utils.subCommandProxy(
 			{
-				play: (a, m) => this.play(a, m),
-				add: (a, m) => this.add(a, m),
-				stop: () => this.stop(),
-				reload: () => this.reload(),
-				edit: (a, m) => this.edit(a, m),
-				next: () => this.next(),
-				now: (a, m) => this.now(a, m),
+				play: async (a, m) => {
+					const adder = new MusicAdder(this.feature, undefined, true)
+					await adder.play(m, a)
+				},
+				add: async (a, m) => {
+					const adder = new MusicAdder(this.feature)
+					await adder.add(m, a)
+				},
+				stop: async () => {
+					await this.feature.closeConnection()
+				},
+				reload: async () => {
+					await this.feature.reload()
+				},
+				next: async () => {
+					await this.feature.next()
+				},
+				edit: async (a, m) => {
+					await this.edit(a, m)
+				},
+				now: async (a, m) => {
+					await this.now(a, m)
+				},
 			},
 			args,
 			msg
