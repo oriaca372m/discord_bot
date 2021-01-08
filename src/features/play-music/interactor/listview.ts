@@ -18,7 +18,7 @@ export interface ListAction {
 
 export interface ListView {
 	getItems(): readonly ListItem[]
-	getActions(): readonly ListAction[]
+	actions: readonly ListAction[]
 }
 
 export interface Selectable extends ListItem {
@@ -26,21 +26,16 @@ export interface Selectable extends ListItem {
 }
 
 export class MusicListView implements ListView {
-	private readonly _actions: readonly ListAction[]
+	readonly actions = [new AddAction(this), new PlayAction(this)] as const
 
 	constructor(readonly interactor: AddInteractor, private readonly _musics: Music[]) {
 		this.gc = interactor.gc
-		this._actions = [new AddAction(this), new PlayAction(this)]
 	}
 
 	readonly gc: FeatureGlobalConfig
 
 	getItems(): readonly ListItem[] {
 		return this._musics
-	}
-
-	getActions(): readonly ListAction[] {
-		return this._actions
 	}
 
 	addToPlaylistByIndex(indexes: string[]): Music[] | 'all' {
@@ -110,21 +105,16 @@ class PlayAction implements ListAction {
 }
 
 export class SelectableListView implements ListView {
-	private readonly _actions: readonly ListAction[]
+	readonly actions = [new SelectAction(this)] as const
 
 	constructor(readonly interactor: AddInteractor, public readonly selectable: Selectable[]) {
 		this.gc = interactor.gc
-		this._actions = [new SelectAction(this)]
 	}
 
 	readonly gc: FeatureGlobalConfig
 
 	getItems(): readonly ListItem[] {
 		return this.selectable
-	}
-
-	getActions(): readonly ListAction[] {
-		return this._actions
 	}
 }
 

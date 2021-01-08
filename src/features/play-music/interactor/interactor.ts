@@ -134,7 +134,7 @@ export class AddInteractor {
 		}
 
 		if (this._listView !== undefined) {
-			const action = this._listView.getActions().find((x) => x.name === cmdname)
+			const action = this._listView.actions.find((x) => x.name === cmdname)
 			if (action !== undefined) {
 				await action.do(rawArgs, msg)
 				return
