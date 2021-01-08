@@ -1,4 +1,5 @@
 import { Music } from 'Src/features/play-music/music'
+import lodash from 'lodash'
 
 export class Playlist {
 	private _musics: Music[] = []
@@ -16,7 +17,7 @@ export class Playlist {
 		return this.musics[this.playingTrack]
 	}
 
-	get musics(): ReadonlyArray<Music> {
+	get musics(): readonly Music[] {
 		return this._musics
 	}
 
@@ -53,5 +54,26 @@ export class Playlist {
 		if (this.playingTrack < 0) {
 			this.playingTrack = this.musics.length - 1
 		}
+	}
+
+	switch(to: number): void {
+		if (this.playingTrack === undefined) {
+			throw '駄目なタイミング'
+		}
+
+		if (to < 0 || this.musics.length <= to) {
+			throw 'そんなに曲数が無い'
+		}
+
+		this.playingTrack = to
+	}
+
+	shuffle(): void {
+		if (this.playingTrack === undefined) {
+			throw '駄目なタイミング'
+		}
+
+		this._musics = lodash.shuffle(this.musics)
+		this.playingTrack = 0
 	}
 }

@@ -1,20 +1,13 @@
 import * as discordjs from 'discord.js'
 import youtubedl from 'youtube-dl'
 import { Readable } from 'stream'
+import { ListItem, Selectable } from 'Src/features/play-music/interactor/listview'
 
 type FieldNames<T> = {
 	// eslint-disable-next-line @typescript-eslint/ban-types
 	[P in keyof T]: T[P] extends Function ? never : P
 }[keyof T]
 type Fields<T> = { [P in FieldNames<T>]: T[P] }
-
-export interface ListDisplayable {
-	toListString(): string
-}
-
-export interface Selectable {
-	select(): Music[] | undefined
-}
 
 export class MusicMetadata {
 	readonly title: string
@@ -34,7 +27,7 @@ export class MusicMetadata {
 
 export type MusicMetadataObject = Fields<MusicMetadata>
 
-export interface Music extends ListDisplayable, Selectable {
+export interface Music extends ListItem {
 	getTitle(): string
 	// 戻り値の関数は再生終了後の後処理用
 	createDispatcher(
@@ -80,7 +73,7 @@ export class MusicFile implements Music {
 
 export type MusicObject = Fields<MusicFile> & { readonly metadata: MusicMetadataObject }
 
-export class Artist implements ListDisplayable, Selectable {
+export class Artist implements Selectable {
 	constructor(private readonly _name: string, private readonly musics: Music[]) {}
 
 	get name(): string {
@@ -96,7 +89,7 @@ export class Artist implements ListDisplayable, Selectable {
 	}
 }
 
-export class Album implements ListDisplayable, Selectable {
+export class Album implements Selectable {
 	constructor(private readonly _name: string, private readonly musics: Music[]) {}
 
 	get name(): string {

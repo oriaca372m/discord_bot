@@ -8,7 +8,7 @@ import * as utils from 'Src/utils'
 import { Playlist } from 'Src/features/play-music/playlist'
 import { Music, YouTubeMusic } from 'Src/features/play-music/music'
 import { MusicDatabase } from 'Src/features/play-music/music-database'
-import { AddInteractor } from 'Src/features/play-music/add-interactor'
+import { AddInteractor } from 'Src/features/play-music/interactor/interactor'
 
 class PlayMusicCommand implements Command {
 	private readonly gc: FeatureGlobalConfig
@@ -53,29 +53,6 @@ class PlayMusicCommand implements Command {
 		return
 	}
 
-	private async addToPlaylist(
-		msg: discordjs.Message,
-		keywords: string[],
-		isYouTube: boolean
-	): Promise<void> {
-		for (const keyword of keywords) {
-			let music: Music | undefined
-
-			if (isYouTube) {
-				music = new YouTubeMusic(keyword)
-			} else {
-				music = this.feature.database.search(keyword)[0]
-			}
-
-			if (music) {
-				this.feature.playlist.addMusic(music)
-				await msg.reply(`${music.getTitle()} をプレイリストに追加するロボ!`)
-			} else {
-				await msg.reply('そんな曲は無いロボ')
-			}
-		}
-	}
-
 	async play(rawArgs: string[], msg: discordjs.Message): Promise<void> {
 		let args, options
 		try {
@@ -92,7 +69,7 @@ class PlayMusicCommand implements Command {
 		}
 
 		if (!member.voice.channel) {
-			await msg.reply('ボイスチャンネルに入ってから言うロボ')
+			await this.gc.send(msg, 'playMusic.haveToJoinVoiceChannel')
 			return
 		}
 
@@ -109,7 +86,11 @@ class PlayMusicCommand implements Command {
 
 		this.feature.playlist.clear()
 
-		await this.addToPlaylist(msg, args, utils.getOption(options, ['y', 'youtube']) as boolean)
+		await this.feature.addToPlaylist(
+			msg,
+			args,
+			utils.getOption(options, ['y', 'youtube']) as boolean
+		)
 		if (this.feature.playlist.isEmpty) {
 			return
 		}
@@ -128,7 +109,11 @@ class PlayMusicCommand implements Command {
 			return
 		}
 
-		await this.addToPlaylist(msg, args, utils.getOption(options, ['y', 'youtube']) as boolean)
+		await this.feature.addToPlaylist(
+			msg,
+			args,
+			utils.getOption(options, ['y', 'youtube']) as boolean
+		)
 	}
 
 	async stop(): Promise<void> {
@@ -254,7 +239,50 @@ export class FeaturePlayMusic extends CommonFeatureBase {
 		}
 
 		this.playlist.next()
-		return await this.play()
+		await this.play()
+	}
+
+	async addToPlaylist(
+		msg: discordjs.Message,
+		keywords: string[],
+		isYouTube: boolean
+	): Promise<void> {
+		for (const keyword of keywords) {
+			let music: Music | undefined
+
+			if (isYouTube) {
+				music = new YouTubeMusic(keyword)
+			} else {
+				music = this.database.search(keyword)[0]
+			}
+
+			if (music) {
+				this.playlist.addMusic(music)
+				await msg.reply(`${music.getTitle()} をプレイリストに追加するロボ!`)
+			} else {
+				await msg.reply('そんな曲は無いロボ')
+			}
+		}
+	}
+
+	async playMusicEditingPlaylist(
+		msg: discordjs.Message,
+		playlistEditor: (playlist: Playlist) => Promise<void>
+	): Promise<void> {
+		const member = msg.member
+		if (!member) {
+			return
+		}
+
+		if (!member.voice.channel) {
+			await this.gc.send(msg, 'playMusic.haveToJoinVoiceChannel')
+			return
+		}
+
+		await playlistEditor(this.playlist)
+
+		await this.makeConnection(member.voice.channel)
+		await this.play()
 	}
 
 	destroyDispather(): void {
