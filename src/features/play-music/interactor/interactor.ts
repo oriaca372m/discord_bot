@@ -5,6 +5,7 @@ import * as utils from 'Src/utils'
 
 import { FeaturePlayMusic } from 'Src/features/play-music'
 import { Music } from 'Src/features/play-music/music'
+import { MusicAdder } from 'Src/features/play-music/music-adder'
 import { Playlist } from 'Src/features/play-music/playlist'
 import {
 	ListView,
@@ -82,38 +83,6 @@ export class AddInteractor {
 		}
 	}
 
-	private async handlePlayAndAdd(
-		msg: discordjs.Message,
-		cmdname: string,
-		rawArgs: string[]
-	): Promise<boolean> {
-		let args: string[], options
-		try {
-			;({ args, options } = utils.parseCommandArgs(rawArgs, [], 1))
-		} catch (_) {
-			return false
-		}
-
-		const isYouTube = utils.getOption(options, ['y', 'youtube']) as boolean
-
-		if (args.every((x) => isNaN(parseInt(x, 10)))) {
-			if (cmdname === 'play') {
-				await this.feature.playMusicEditingPlaylist(msg, async (playlist) => {
-					playlist.clear()
-					await this.feature.addToPlaylist(msg, args, isYouTube)
-				})
-				return true
-			}
-
-			if (cmdname === 'add') {
-				await this.feature.addToPlaylist(msg, args, isYouTube)
-				return true
-			}
-		}
-
-		utils.unreachable()
-	}
-
 	async onMessage(msg: discordjs.Message): Promise<void> {
 		if (msg.channel.id !== this.channel.id) {
 			return
@@ -128,9 +97,20 @@ export class AddInteractor {
 		const [cmdname, ...rawArgs] = res
 
 		if (['play', 'add'].includes(cmdname)) {
-			if (await this.handlePlayAndAdd(msg, cmdname, rawArgs)) {
-				return
+			let adder = new MusicAdder(this.feature, undefined, true)
+			if (this._listView instanceof MusicListView) {
+				adder = new MusicAdder(this.feature, this._listView.getItems())
 			}
+
+			if (cmdname === 'play') {
+				await adder.play(msg, rawArgs)
+			}
+
+			if (cmdname === 'add') {
+				await adder.add(msg, rawArgs)
+			}
+
+			return
 		}
 
 		if (this._listView !== undefined) {

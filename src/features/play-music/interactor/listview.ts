@@ -26,7 +26,7 @@ export interface Selectable extends ListItem {
 }
 
 export class MusicListView implements ListView {
-	readonly actions = [new AddAction(this), new PlayAction(this)] as const
+	readonly actions = [] as const
 
 	constructor(readonly interactor: AddInteractor, private readonly _musics: Music[]) {
 		this.gc = interactor.gc
@@ -34,73 +34,8 @@ export class MusicListView implements ListView {
 
 	readonly gc: FeatureGlobalConfig
 
-	getItems(): readonly ListItem[] {
+	getItems(): readonly Music[] {
 		return this._musics
-	}
-
-	private addToPlaylistByIndex(indexes: string[]): Music[] | 'all' {
-		if (indexes.length === 0) {
-			for (const music of this._musics) {
-				this.interactor.playlist.addMusic(music)
-			}
-
-			return 'all'
-		}
-
-		const addedMusics: Music[] = []
-		for (const i of utils.parseIndexes(indexes, 0, this._musics.length)) {
-			const music = this._musics[i]
-			addedMusics.push(music)
-			this.interactor.playlist.addMusic(music)
-		}
-
-		return addedMusics
-	}
-
-	async add(indexes: string[]): Promise<void> {
-		const res = this.addToPlaylistByIndex(indexes)
-		if (res === 'all') {
-			await this.gc.sendToChannel(
-				this.interactor.channel,
-				'playMusic.interactor.addedMusic',
-				{
-					all: true,
-					musics: [],
-				}
-			)
-		} else {
-			await this.gc.sendToChannel(
-				this.interactor.channel,
-				'playMusic.interactor.addedMusic',
-				{
-					all: false,
-					musics: res,
-				}
-			)
-		}
-	}
-}
-
-class AddAction implements ListAction {
-	readonly name = 'add'
-
-	constructor(private readonly lv: MusicListView) {}
-
-	async do(args: string[]): Promise<void> {
-		await this.lv.add(args)
-	}
-}
-
-class PlayAction implements ListAction {
-	readonly name = 'play'
-
-	constructor(private readonly lv: MusicListView) {}
-
-	async do(args: string[], msg: discordjs.Message): Promise<void> {
-		await this.lv.interactor.feature.playMusicEditingPlaylist(msg, async (playlist) => {
-			playlist.clear()
-			await this.lv.add(args)
-		})
 	}
 }
 
