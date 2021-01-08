@@ -16,7 +16,7 @@ export class Playlist {
 		return this.musics[this.playingTrack]
 	}
 
-	get musics(): ReadonlyArray<Music> {
+	get musics(): readonly Music[] {
 		return this._musics
 	}
 

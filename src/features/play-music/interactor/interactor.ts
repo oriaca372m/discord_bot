@@ -12,6 +12,8 @@ import {
 	SelectableListView,
 } from 'Src/features/play-music/interactor/listview'
 
+import { PlaylistListView } from 'Src/features/play-music/interactor/playlist-listview'
+
 export class AddInteractor {
 	readonly gc: FeatureGlobalConfig
 	private _listView: ListView | undefined
@@ -96,7 +98,7 @@ export class AddInteractor {
 			for (const action of this._listView.getActions()) {
 				if (action.name === cmdname) {
 					await action.do(args, msg)
-					break
+					return
 				}
 			}
 		}
@@ -136,6 +138,9 @@ export class AddInteractor {
 				quit: async () => {
 					this.done()
 					await this.gc.send(msg, 'playMusic.interactor.quit')
+				},
+				playlist: async () => {
+					await this.setListView(new PlaylistListView(this, this.playlist))
 				},
 			},
 			res,

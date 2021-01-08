@@ -291,7 +291,7 @@ export type PaginationResult<T> =
 	| { kind: 'empty' }
 
 export function pagination<T>(
-	array: T[],
+	array: readonly T[],
 	page: number,
 	{ pageLength } = { pageLength: 20 }
 ): PaginationResult<T> {

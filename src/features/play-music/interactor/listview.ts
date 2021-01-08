@@ -11,14 +11,14 @@ export interface ListItem {
 	toListString(): string
 }
 
-interface ListAction {
+export interface ListAction {
 	name: string
 	do(args: string[], msg: discordjs.Message): Promise<void>
 }
 
 export interface ListView {
-	getItems(): ListItem[]
-	getActions(): ListAction[]
+	getItems(): readonly ListItem[]
+	getActions(): readonly ListAction[]
 }
 
 export interface Selectable extends ListItem {
@@ -26,7 +26,7 @@ export interface Selectable extends ListItem {
 }
 
 export class MusicListView implements ListView {
-	private readonly _actions: ListAction[]
+	private readonly _actions: readonly ListAction[]
 
 	constructor(readonly interactor: AddInteractor, private readonly _musics: Music[]) {
 		this.gc = interactor.gc
@@ -35,11 +35,11 @@ export class MusicListView implements ListView {
 
 	readonly gc: FeatureGlobalConfig
 
-	getItems(): ListItem[] {
+	getItems(): readonly ListItem[] {
 		return this._musics
 	}
 
-	getActions(): ListAction[] {
+	getActions(): readonly ListAction[] {
 		return this._actions
 	}
 
@@ -121,7 +121,7 @@ class PlayAction implements ListAction {
 }
 
 export class SelectableListView implements ListView {
-	private readonly _actions: ListAction[]
+	private readonly _actions: readonly ListAction[]
 
 	constructor(readonly interactor: AddInteractor, public readonly selectable: Selectable[]) {
 		this.gc = interactor.gc
@@ -130,11 +130,11 @@ export class SelectableListView implements ListView {
 
 	readonly gc: FeatureGlobalConfig
 
-	getItems(): ListItem[] {
+	getItems(): readonly ListItem[] {
 		return this.selectable
 	}
 
-	getActions(): ListAction[] {
+	getActions(): readonly ListAction[] {
 		return this._actions
 	}
 }
