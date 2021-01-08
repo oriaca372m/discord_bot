@@ -149,7 +149,7 @@ export class FeaturePlayMusic extends CommonFeatureBase {
 
 		const music = this.playlist.currentMusic
 		if (!music) {
-			throw 'だめ'
+			throw '流すべき曲がない'
 		}
 
 		this.destroyDispather()

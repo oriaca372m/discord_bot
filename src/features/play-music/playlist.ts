@@ -17,6 +17,10 @@ export class Playlist {
 		return this.musics[this.playingTrack]
 	}
 
+	get currentTrack(): number | undefined {
+		return this.playingTrack
+	}
+
 	get musics(): readonly Music[] {
 		return this._musics
 	}

@@ -7,6 +7,7 @@ interface ParseArgsResult {
 	args: string[]
 	isYouTube: boolean
 	isAddToFirst: boolean
+	isAddToNext: boolean
 }
 
 export class MusicAdder {
@@ -31,11 +32,21 @@ export class MusicAdder {
 
 		const isYouTube = utils.getOption(options, ['y', 'youtube']) as boolean
 		const isAddToFirst = utils.getOption(options, ['f', 'first']) as boolean
+		const isAddToNext = utils.getOption(options, ['n', 'next']) as boolean
+
+		if (isAddToFirst && isAddToNext) {
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+			await this.feature.gc.send(msg, 'playMusic.invalidCommand', {
+				e: 'firstとnextを同時に指定することはできません',
+			})
+			return
+		}
 
 		return {
 			args,
 			isYouTube,
 			isAddToFirst,
+			isAddToNext,
 		}
 	}
 
@@ -70,10 +81,16 @@ export class MusicAdder {
 		return musics
 	}
 
-	private addMusicsToPlaylist(musics: readonly Music[], isAddToFirst: boolean): void {
+	private addMusicsToPlaylist(musics: readonly Music[], parseResult: ParseArgsResult): void {
 		let counter = 0
+		if (parseResult.isAddToNext) {
+			const c = this.feature.playlist.currentTrack
+			if (c !== undefined) {
+				counter = c + 1
+			}
+		}
 		for (const music of musics) {
-			if (isAddToFirst) {
+			if (parseResult.isAddToFirst || parseResult.isAddToNext) {
 				this.feature.playlist.addMusic(music, counter)
 				counter++
 			} else {
@@ -84,10 +101,10 @@ export class MusicAdder {
 
 	private async addInternal(
 		msg: discordjs.Message,
-		{ args, isYouTube, isAddToFirst }: ParseArgsResult
+		parseResult: ParseArgsResult
 	): Promise<readonly Music[]> {
-		if (this._listMusics !== undefined && args.length === 0) {
-			this.addMusicsToPlaylist(this._listMusics, isAddToFirst)
+		if (this._listMusics !== undefined && parseResult.args.length === 0) {
+			this.addMusicsToPlaylist(this._listMusics, parseResult)
 			await this.feature.gc.send(msg, 'playMusic.interactor.addedMusic', {
 				all: true,
 				musics: [],
@@ -96,8 +113,8 @@ export class MusicAdder {
 			return this._listMusics
 		}
 
-		const toAddMusics = this.getMusics(args, isYouTube)
-		this.addMusicsToPlaylist(toAddMusics, isAddToFirst)
+		const toAddMusics = this.getMusics(parseResult.args, parseResult.isYouTube)
+		this.addMusicsToPlaylist(toAddMusics, parseResult)
 
 		if (toAddMusics.length === 0) {
 			await msg.reply('そんな曲は無いロボ…')
