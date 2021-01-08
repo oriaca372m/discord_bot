@@ -82,6 +82,38 @@ export class AddInteractor {
 		}
 	}
 
+	private async handlePlayAndAdd(
+		msg: discordjs.Message,
+		cmdname: string,
+		rawArgs: string[]
+	): Promise<boolean> {
+		let args: string[], options
+		try {
+			;({ args, options } = utils.parseCommandArgs(rawArgs, ['youtube'], 1))
+		} catch (_) {
+			return false
+		}
+
+		const isYouTube = utils.getOption(options, ['y', 'youtube']) as boolean
+
+		if (0 < args.length && args.every((x) => isNaN(parseInt(x, 10)))) {
+			if (cmdname === 'play') {
+				await this.feature.playMusicEditingPlaylist(msg, async (playlist) => {
+					playlist.clear()
+					await this.feature.addToPlaylist(msg, args, isYouTube)
+				})
+				return true
+			}
+
+			if (cmdname === 'add') {
+				await this.feature.addToPlaylist(msg, args, isYouTube)
+				return true
+			}
+		}
+
+		return false
+	}
+
 	async onMessage(msg: discordjs.Message): Promise<void> {
 		if (msg.channel.id !== this.channel.id) {
 			return
@@ -96,35 +128,16 @@ export class AddInteractor {
 		const [cmdname, ...rawArgs] = res
 
 		if (cmdname === 'play' || cmdname === 'add') {
-			try {
-				const { args, options } = utils.parseCommandArgs(rawArgs, ['youtube'], 1)
-				const isYouTube = utils.getOption(options, ['y', 'youtube']) as boolean
-
-				if (0 < args.length && args.every((x) => isNaN(parseInt(x, 10)))) {
-					if (cmdname === 'play') {
-						await this.feature.playMusicEditingPlaylist(msg, async (playlist) => {
-							playlist.clear()
-							await this.feature.addToPlaylist(msg, args, isYouTube)
-						})
-						return
-					}
-
-					if (cmdname === 'add') {
-						await this.feature.addToPlaylist(msg, args, isYouTube)
-						return
-					}
-				}
-			} catch (_) {
-				// pass
+			if (await this.handlePlayAndAdd(msg, cmdname, rawArgs)) {
+				return
 			}
 		}
 
 		if (this._listView !== undefined) {
-			for (const action of this._listView.getActions()) {
-				if (action.name === cmdname) {
-					await action.do(rawArgs, msg)
-					return
-				}
+			const action = this._listView.getActions().find((x) => x.name === cmdname)
+			if (action !== undefined) {
+				await action.do(rawArgs, msg)
+				return
 			}
 		}
 
