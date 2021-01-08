@@ -93,7 +93,6 @@ export class AddInteractor {
 			return
 		}
 
-		console.log(res)
 		const [cmdname, ...rawArgs] = res
 
 		if (cmdname === 'play' || cmdname === 'add') {

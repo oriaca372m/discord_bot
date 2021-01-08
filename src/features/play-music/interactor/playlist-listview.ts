@@ -9,7 +9,7 @@ export class PlaylistListView implements ListView {
 
 	constructor(readonly interactor: AddInteractor, public readonly playlist: Playlist) {
 		this.gc = interactor.gc
-		this._actions = []
+		this._actions = [new MoveAction(this), new ShuffleAction(this)]
 	}
 
 	readonly gc: FeatureGlobalConfig
@@ -20,5 +20,27 @@ export class PlaylistListView implements ListView {
 
 	getActions(): readonly ListAction[] {
 		return this._actions
+	}
+}
+
+class MoveAction implements ListAction {
+	readonly name = 'sw'
+
+	constructor(private readonly lv: PlaylistListView) {}
+
+	async do(args: string[]): Promise<void> {
+		this.lv.playlist.switch(parseInt(args[0], 10))
+		await this.lv.interactor.feature.play()
+	}
+}
+
+class ShuffleAction implements ListAction {
+	readonly name = 'shuffle'
+
+	constructor(private readonly lv: PlaylistListView) {}
+
+	async do(): Promise<void> {
+		this.lv.playlist.shuffle()
+		await this.lv.interactor.feature.play()
 	}
 }

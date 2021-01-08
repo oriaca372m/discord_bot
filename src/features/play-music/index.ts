@@ -239,7 +239,7 @@ export class FeaturePlayMusic extends CommonFeatureBase {
 		}
 
 		this.playlist.next()
-		return await this.play()
+		await this.play()
 	}
 
 	async addToPlaylist(
