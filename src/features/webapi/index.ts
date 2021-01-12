@@ -7,10 +7,9 @@ import { BasicAccessTokenInfo, BasicAuthorizer } from 'Src/features/webapi/autho
 import { bufferToHex } from 'Src/features/webapi/utils'
 import * as utils from 'Src/utils'
 
-export interface Handler {
-	name(): string
-	description(): string
-	command(msg: discordjs.Message, args: string[]): Promise<void>
+export interface WebApiHandler {
+	methodName: string
+	handle(args: unknown): Promise<unknown>
 }
 
 interface AdditionalAccessTokenInfo {
@@ -42,8 +41,31 @@ class AdditionalInfoAuthorizer extends BasicAuthorizer {
 	}
 }
 
+interface MethodCallMessage {
+	method: string
+	args: unknown
+}
+
+function isMethodCallMessage(v: unknown): v is MethodCallMessage {
+	const msg = v as MethodCallMessage
+
+	if (typeof msg !== 'object') {
+		return false
+	}
+
+	if (!('args' in msg)) {
+		return false
+	}
+
+	if (typeof msg.method !== 'string') {
+		return false
+	}
+
+	return true
+}
+
 export class FeatureWebApi extends FeatureBase {
-	private readonly _handlers: Handler[] = []
+	private readonly _handlers = new Map<string, WebApiHandler>()
 	private readonly _webApiServer: WebApiServer
 	private readonly _authorizer = new AdditionalInfoAuthorizer()
 	readonly priority = 10000
@@ -61,14 +83,24 @@ export class FeatureWebApi extends FeatureBase {
 		)
 	}
 
-	private _onMessage(token: string, msg: unknown): Promise<unknown> {
+	private async _onMessage(token: string, msg: unknown): Promise<unknown> {
 		console.log(token)
 		console.log(msg)
-		return Promise.resolve({ text: 'I got this message!', msg })
+
+		if (isMethodCallMessage(msg)) {
+			const handler = this._handlers.get(msg.method)
+			if (handler === undefined) {
+				return { error: `The method '${msg.method} not found!'` }
+			}
+
+			return await handler.handle(msg)
+		}
+
+		return { error: "Couldn't recognize a method call!" }
 	}
 
-	registerHandler(handler: Handler): void {
-		this._handlers.push(handler)
+	registerHandler(handler: WebApiHandler): void {
+		this._handlers.set(handler.methodName, handler)
 	}
 
 	initImpl(): Promise<void> {
