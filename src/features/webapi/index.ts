@@ -4,7 +4,6 @@ import { FeatureBase } from 'Src/features/feature'
 
 import { WebApiServer } from 'Src/features/webapi/webapi-server'
 import { BasicAccessTokenInfo, BasicAuthorizer } from 'Src/features/webapi/authorizer'
-import { bufferToHex } from 'Src/features/webapi/utils'
 import * as utils from 'Src/utils'
 
 export interface WebApiHandler {
@@ -12,12 +11,12 @@ export interface WebApiHandler {
 	handle(args: unknown): Promise<unknown>
 }
 
-interface AdditionalAccessTokenInfo {
+export interface AdditionalAccessTokenInfo {
 	channel: utils.LikeTextChannel
 	guild: discordjs.Guild
 }
 
-interface AccessTokenInfo extends AdditionalAccessTokenInfo {
+export interface AccessTokenInfo extends AdditionalAccessTokenInfo {
 	basicInfo: BasicAccessTokenInfo
 }
 
@@ -72,15 +71,14 @@ export class FeatureWebApi extends FeatureBase {
 
 	constructor() {
 		super()
-
-		const info = this._authorizer.createBasicAccessToken()
-		console.log(info.accessToken)
-		console.log(bufferToHex(info.accessTokenSecret))
-
 		this._webApiServer = new WebApiServer(
 			this._authorizer,
 			async (token, msg) => await this._onMessage(token, msg)
 		)
+	}
+
+	createAccessToken(info: AdditionalAccessTokenInfo): AccessTokenInfo {
+		return this._authorizer.createAccessTokenWithAdditionalInfo(info)
 	}
 
 	private async _onMessage(token: string, msg: unknown): Promise<unknown> {

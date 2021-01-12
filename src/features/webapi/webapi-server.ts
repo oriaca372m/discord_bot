@@ -59,14 +59,20 @@ export class WebApiServer {
 		return this._authorizer.getBasicAccessTokenInfo(accessToken)
 	}
 
+	private _writeErrorResponse(res: http.ServerResponse, code: number) {
+		res.writeHead(code, {
+			'Access-Control-Allow-Origin': '*',
+		})
+		res.end()
+	}
+
 	private async _handleRequestMain(
 		req: http.IncomingMessage,
 		res: http.ServerResponse
 	): Promise<void> {
 		const tokenInfo = this._getAccessToken(req)
 		if (tokenInfo === undefined) {
-			res.writeHead(401)
-			res.end()
+			this._writeErrorResponse(res, 401)
 			return
 		}
 
@@ -78,14 +84,12 @@ export class WebApiServer {
 
 		const message = msgpack.decode(decrypted)
 		if (!isMessage(message)) {
-			res.writeHead(400)
-			res.end()
+			this._writeErrorResponse(res, 400)
 			return
 		}
 
 		if (message.sequenceId <= tokenInfo.sequenceId) {
-			res.writeHead(401)
-			res.end()
+			this._writeErrorResponse(res, 401)
 			return
 		}
 		tokenInfo.sequenceId = message.sequenceId + 1
@@ -99,7 +103,11 @@ export class WebApiServer {
 		const content = msgpack.encode(resMessage)
 		const [resIv, resEncrypted] = encrypt(content, key)
 
-		res.writeHead(200, { 'X-IV': bufferToHex(resIv) })
+		res.writeHead(200, {
+			'Access-Control-Allow-Origin': '*',
+			'Access-Control-Expose-Headers': 'X-IV',
+			'X-IV': bufferToHex(resIv),
+		})
 		res.write(resEncrypted)
 		res.end()
 	}
@@ -119,8 +127,7 @@ export class WebApiServer {
 		}
 
 		if (req.method !== 'POST') {
-			res.writeHead(400)
-			res.end()
+			this._writeErrorResponse(res, 400)
 			return
 		}
 
