@@ -3,8 +3,9 @@ import * as discordjs from 'discord.js'
 import { FeatureBase } from 'Src/features/feature'
 
 import { WebApiServer } from 'Src/features/webapi/webapi-server'
-import { BasicAuthorizer } from 'Src/features/webapi/authorizer'
+import { BasicAccessTokenInfo, BasicAuthorizer } from 'Src/features/webapi/authorizer'
 import { bufferToHex } from 'Src/features/webapi/utils'
+import * as utils from 'Src/utils'
 
 export interface Handler {
 	name(): string
@@ -12,16 +13,45 @@ export interface Handler {
 	command(msg: discordjs.Message, args: string[]): Promise<void>
 }
 
+interface AdditionalAccessTokenInfo {
+	channel: utils.LikeTextChannel
+	guild: discordjs.Guild
+}
+
+interface AccessTokenInfo extends AdditionalAccessTokenInfo {
+	basicInfo: BasicAccessTokenInfo
+}
+
+class AdditionalInfoAuthorizer extends BasicAuthorizer {
+	private readonly _additionalInfos = new Map<string, AccessTokenInfo>()
+
+	createAccessTokenWithAdditionalInfo(
+		additionalInfo: AdditionalAccessTokenInfo
+	): AccessTokenInfo {
+		const basicInfo = this.createBasicAccessToken()
+		const info = {
+			basicInfo,
+			...additionalInfo,
+		}
+		this._additionalInfos.set(basicInfo.accessToken, info)
+		return info
+	}
+
+	getAdditionalAccessTokenInfo(token: string): AccessTokenInfo | undefined {
+		return this._additionalInfos.get(token)
+	}
+}
+
 export class FeatureWebApi extends FeatureBase {
 	private readonly _handlers: Handler[] = []
 	private readonly _webApiServer: WebApiServer
-	private readonly _authorizer = new BasicAuthorizer()
+	private readonly _authorizer = new AdditionalInfoAuthorizer()
 	readonly priority = 10000
 
 	constructor() {
 		super()
 
-		const info = this._authorizer.createNewAccessToken()
+		const info = this._authorizer.createBasicAccessToken()
 		console.log(info.accessToken)
 		console.log(bufferToHex(info.accessTokenSecret))
 

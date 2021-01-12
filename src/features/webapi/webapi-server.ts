@@ -56,7 +56,7 @@ export class WebApiServer {
 			return
 		}
 
-		return this._authorizer.getAccessTokenInfo(accessToken)
+		return this._authorizer.getBasicAccessTokenInfo(accessToken)
 	}
 
 	private async _handleRequestMain(
