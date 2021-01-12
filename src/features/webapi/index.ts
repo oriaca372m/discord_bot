@@ -93,7 +93,12 @@ export class FeatureWebApi extends FeatureBase {
 				return { error: `The method '${msg.method} not found!'` }
 			}
 
-			return await handler.handle(msg)
+			try {
+				return await handler.handle(msg.args)
+			} catch (e) {
+				console.error(e)
+				return { error: 'Internal server error.' }
+			}
 		}
 
 		return { error: "Couldn't recognize a method call!" }
