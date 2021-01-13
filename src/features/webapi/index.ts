@@ -69,9 +69,10 @@ export class FeatureWebApi extends FeatureBase {
 	private readonly _authorizer = new AdditionalInfoAuthorizer()
 	readonly priority = 10000
 
-	constructor() {
+	constructor(private readonly _port: number) {
 		super()
 		this._webApiServer = new WebApiServer(
+			this._port,
 			this._authorizer,
 			async (token, msg) => await this._onMessage(token, msg)
 		)

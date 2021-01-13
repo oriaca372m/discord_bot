@@ -40,6 +40,7 @@ export class WebApiServer {
 	private readonly _server: http.Server
 
 	constructor(
+		private readonly _port: number,
 		private readonly _authorizer: Authorizer,
 		private readonly _recievedMessageHandler: (
 			accessToken: string,
@@ -139,7 +140,7 @@ export class WebApiServer {
 	}
 
 	listen(): void {
-		this._server.listen(25565)
+		this._server.listen(this._port)
 	}
 
 	close(): void {
