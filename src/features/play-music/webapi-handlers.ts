@@ -1,9 +1,10 @@
 import { WebApiHandler } from 'Src/features/webapi'
 
 import { FeaturePlayMusic } from 'Src/features/play-music'
+import { SerializedMusic, deserializeMusic } from 'Src/features/play-music/music'
 
 interface WebApiMusic {
-	readonly uuid: string
+	readonly serialized: SerializedMusic
 	readonly title: string
 	readonly album?: string
 	readonly artist?: string
@@ -22,7 +23,7 @@ export class GetAllMusics implements WebApiHandler {
 	handle(): Promise<GetAllMusicsRes> {
 		return Promise.resolve({
 			musics: this._feature.database.allMusics.map((x) => ({
-				uuid: x.uuid,
+				serialized: x.serialize(),
 				title: x.metadata.title,
 				album: x.metadata.album,
 				artist: x.metadata.artist,
@@ -32,7 +33,7 @@ export class GetAllMusics implements WebApiHandler {
 }
 
 interface AddToPlaylistReq {
-	uuid: string
+	music: SerializedMusic
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface AddToPlaylistRes {}
@@ -43,11 +44,13 @@ export class AddToPlaylist implements WebApiHandler {
 	constructor(private readonly _feature: FeaturePlayMusic) {}
 
 	handle(args: AddToPlaylistReq): Promise<AddToPlaylistRes> {
-		const music = this._feature.database.getByUuid(args.uuid)
-		if (music === undefined) {
-			return Promise.resolve({ error: "couldn't find a music which have that uuid." })
+		try {
+			const music = deserializeMusic(args.music, this._feature.database)
+			this._feature.playlist.addMusic(music)
+		} catch (e) {
+			return Promise.resolve({ error: 'Could not add the music.' })
 		}
-		this._feature.playlist.addMusic(music)
+
 		return Promise.resolve({})
 	}
 }

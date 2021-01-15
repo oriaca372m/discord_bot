@@ -1,6 +1,7 @@
 import * as discordjs from 'discord.js'
 import ytdl from 'ytdl-core'
 import { ListItem, Selectable } from 'Src/features/play-music/interactor/listview'
+import { MusicDatabase } from 'Src/features/play-music/music-database'
 
 type FieldNames<T> = {
 	// eslint-disable-next-line @typescript-eslint/ban-types
@@ -26,8 +27,23 @@ export class MusicMetadata {
 
 export type MusicMetadataObject = Fields<MusicMetadata>
 
+export type SerializedMusic = SerializedMusicFile | SerializedYouTubeMusic
+
+export interface SerializedMusicFile {
+	kind: 'file'
+	uuid: string
+}
+
+export interface SerializedYouTubeMusic {
+	kind: 'youtube'
+	videoId: string
+	title: string
+}
+
 export interface Music extends ListItem {
 	getTitle(): string
+	serialize(): SerializedMusic
+
 	// 戻り値の関数は再生終了後の後処理用
 	createDispatcher(
 		connection: discordjs.VoiceConnection
@@ -49,6 +65,10 @@ export class MusicFile implements Music {
 
 	getTitle(): string {
 		return this.metadata.title
+	}
+
+	serialize(): SerializedMusicFile {
+		return { kind: 'file', uuid: this.uuid }
 	}
 
 	toListString(): string {
@@ -120,6 +140,10 @@ export class YouTubeMusic implements Music {
 		return this._title
 	}
 
+	serialize(): SerializedYouTubeMusic {
+		return { kind: 'youtube', videoId: this._videoId, title: this._title }
+	}
+
 	get videoId(): string {
 		return this._videoId
 	}
@@ -144,4 +168,26 @@ export class YouTubeMusic implements Music {
 			},
 		]
 	}
+
+	static deserialize(data: SerializedYouTubeMusic): YouTubeMusic {
+		const m = new YouTubeMusic(data.videoId)
+		m._videoId = data.videoId
+		m._title = data.title
+		return m
+	}
+}
+
+export function deserializeMusic(data: SerializedMusic, db: MusicDatabase): Music {
+	if (data.kind === 'file') {
+		const music = db.getByUuid(data.uuid)
+		if (music === undefined) {
+			throw '存在しないUUID'
+		}
+
+		return music
+	} else if (data.kind === 'youtube') {
+		return YouTubeMusic.deserialize(data)
+	}
+
+	throw '存在しないkind'
 }
