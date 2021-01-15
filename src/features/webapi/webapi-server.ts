@@ -3,6 +3,7 @@ import stream from 'stream'
 import * as msgpack from '@msgpack/msgpack'
 import { Authorizer, BasicAccessTokenInfo } from 'Src/features/webapi/authorizer'
 import { bufferToHex, hexToBuffer, encrypt, decrypt } from 'Src/features/webapi/utils'
+import pako from 'pako'
 
 interface Message {
 	sequenceId: number
@@ -73,6 +74,7 @@ export class WebApiServer {
 	): Promise<void> {
 		const tokenInfo = this._getAccessToken(req)
 		if (tokenInfo === undefined) {
+			console.error('不正なアクセストークンを利用してのアクセス')
 			this._writeErrorResponse(res, 401)
 			return
 		}
@@ -83,13 +85,15 @@ export class WebApiServer {
 		const iv = hexToBuffer(req.headers['x-iv'] as string)
 		const decrypted = decrypt(encrypted, key, iv)
 
-		const message = msgpack.decode(decrypted)
+		const message = msgpack.decode(pako.inflateRaw(decrypted))
 		if (!isMessage(message)) {
+			console.error('怪しげなアクセス')
 			this._writeErrorResponse(res, 400)
 			return
 		}
 
 		if (message.sequenceId <= tokenInfo.sequenceId) {
+			console.error('不正なシーケンスIDを利用してのアクセス')
 			this._writeErrorResponse(res, 401)
 			return
 		}
@@ -101,7 +105,7 @@ export class WebApiServer {
 			payload: await this._recievedMessageHandler(tokenInfo.accessToken, message.payload),
 		}
 
-		const content = msgpack.encode(resMessage)
+		const content = pako.deflateRaw(msgpack.encode(resMessage))
 		const [resIv, resEncrypted] = encrypt(content, key)
 
 		res.writeHead(200, {
@@ -136,6 +140,8 @@ export class WebApiServer {
 			await this._handleRequestMain(req, res)
 		} catch (e) {
 			console.error(e)
+			this._writeErrorResponse(res, 500)
+			return
 		}
 	}
 
