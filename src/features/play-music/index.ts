@@ -40,7 +40,7 @@ class PlayMusicCommand implements Command {
 			return
 		}
 
-		if (this.feature.interactors.size !== 0) {
+		if (this.feature.isInInteractionMode) {
 			await msg.reply('今まさにインタラクションモード')
 			return
 		}
@@ -97,17 +97,21 @@ class PlayMusicCommand implements Command {
 }
 
 export class FeaturePlayMusic extends CommonFeatureBase {
-	interactors: Set<AddInteractor> = new Set()
+	private readonly interactors: Set<AddInteractor> = new Set()
 	private connection: discordjs.VoiceConnection | undefined
 	private dispatcher: discordjs.StreamDispatcher | undefined
 	private musicFinalizer: (() => void) | undefined
-	database!: MusicDatabase
+	private _database!: MusicDatabase
 
-	playlist: Playlist = new Playlist()
+	readonly playlist: Playlist = new Playlist()
 	currentPlayingTrack: number | undefined
 
 	constructor(public readonly cmdname: string) {
 		super()
+	}
+
+	get database(): MusicDatabase {
+		return this._database
 	}
 
 	protected async initImpl(): Promise<void> {
@@ -133,7 +137,7 @@ export class FeaturePlayMusic extends CommonFeatureBase {
 	async reload(): Promise<void> {
 		const database = new MusicDatabase('./config/playlists')
 		await database.init()
-		this.database = database
+		this._database = database
 	}
 
 	play(): Promise<void> {
@@ -233,5 +237,9 @@ export class FeaturePlayMusic extends CommonFeatureBase {
 
 	async finalize(): Promise<void> {
 		await this.closeConnection()
+	}
+
+	get isInInteractionMode(): boolean {
+		return this.interactors.size !== 0
 	}
 }
