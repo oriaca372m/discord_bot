@@ -50,7 +50,7 @@ export class MusicAdder {
 		}
 	}
 
-	private getMusics(keywords: string[], isYouTube: boolean): Music[] {
+	private async getMusics(keywords: string[], isYouTube: boolean): Promise<Music[]> {
 		const musics = []
 
 		const listMusics = this._listMusics
@@ -69,7 +69,13 @@ export class MusicAdder {
 
 		for (const keyword of keywords) {
 			if (isYouTube) {
-				musics.push(new YouTubeMusic(keyword))
+				const ytMusic = new YouTubeMusic(keyword)
+				try {
+					await ytMusic.init()
+				} catch (_) {
+					continue
+				}
+				musics.push(ytMusic)
 			} else {
 				const music = this.feature.database.search(keyword)[0]
 				if (music !== undefined) {
@@ -113,7 +119,7 @@ export class MusicAdder {
 			return this._listMusics
 		}
 
-		const toAddMusics = this.getMusics(parseResult.args, parseResult.isYouTube)
+		const toAddMusics = await this.getMusics(parseResult.args, parseResult.isYouTube)
 		this.addMusicsToPlaylist(toAddMusics, parseResult)
 
 		if (toAddMusics.length === 0) {

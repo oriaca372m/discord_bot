@@ -1,6 +1,5 @@
 import * as discordjs from 'discord.js'
-import youtubedl from 'youtube-dl'
-import { Readable } from 'stream'
+import ytdl from 'ytdl-core'
 import { ListItem, Selectable } from 'Src/features/play-music/interactor/listview'
 
 type FieldNames<T> = {
@@ -106,14 +105,27 @@ export class Album implements Selectable {
 }
 
 export class YouTubeMusic implements Music {
-	constructor(private url: string) {}
+	private _title!: string
+	private _videoId!: string
+
+	constructor(private _url: string) {}
+
+	async init(): Promise<void> {
+		this._videoId = ytdl.getVideoID(this._url)
+		const info = await ytdl.getBasicInfo(this._videoId)
+		this._title = info.player_response.videoDetails.title
+	}
 
 	getTitle(): string {
-		return this.url
+		return this._title
+	}
+
+	get videoId(): string {
+		return this._videoId
 	}
 
 	toListString(): string {
-		return `(youtube) ${this.url}`
+		return `(youtube ${this.videoId}) ${this.getTitle()}`
 	}
 
 	select(): Music[] | undefined {
@@ -124,7 +136,7 @@ export class YouTubeMusic implements Music {
 		connection: discordjs.VoiceConnection
 	): [discordjs.StreamDispatcher, (() => void) | undefined] {
 		// とりあえず動く
-		const stream = youtubedl(this.url, [], {}) as Readable
+		const stream = ytdl(this._videoId, { quality: 'highestaudio' })
 		return [
 			connection.play(stream),
 			(): void => {
