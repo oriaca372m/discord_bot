@@ -4,7 +4,7 @@ import FeatureManager from 'Src/features/feature-manager'
 import features from '../config/features'
 
 const client = new discordjs.Client()
-const featureManager = new FeatureManager()
+const featureManager = new FeatureManager(client)
 
 let ready = false
 
