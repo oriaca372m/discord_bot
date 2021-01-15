@@ -18,6 +18,8 @@ export default class {
 	private sorteadFeatures: FeatureInterface[] = []
 	private _state: State = 'constructed'
 
+	constructor(public readonly client: discordjs.Client) {}
+
 	get state(): State {
 		return this._state
 	}
