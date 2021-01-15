@@ -116,4 +116,8 @@ export class FeatureWebApi extends FeatureBase {
 		this._webApiServer.close()
 		return Promise.resolve()
 	}
+
+	get port(): number {
+		return this._port
+	}
 }

@@ -4,6 +4,7 @@ import CommonFeatureBase from 'Src/features/common-feature-base'
 import { Command } from 'Src/features/command'
 import { FeatureWebApi, WebApiHandler } from 'Src/features/webapi'
 import { bufferToHex } from 'Src/features/webapi/utils'
+import { URL } from 'url'
 
 class Handler implements WebApiHandler {
 	readonly methodName = 'reply'
@@ -22,11 +23,12 @@ class Handler implements WebApiHandler {
 		return { text: msg.content }
 	}
 }
+
 class CommandOpenWebUi implements Command {
 	constructor(private readonly _feature: FeatureBasicWebApiMethods) {}
 
 	name(): string {
-		return 'webui'
+		return this._feature.webuiCmdName
 	}
 
 	description(): string {
@@ -47,9 +49,12 @@ class CommandOpenWebUi implements Command {
 		const token = info.basicInfo.accessToken
 		const secret = bufferToHex(info.basicInfo.accessTokenSecret)
 
-		await msg.reply(
-			`http://localhost:5000/?server=http://localhost:25565/&accessToken=${token}&accessTokenSecret=${secret}`
-		)
+		const url = new URL(this._feature.webuiUrl)
+		url.searchParams.append('server', `http://localhost:${this._feature.featureWebApi.port}/`)
+		url.searchParams.append('accessToken', token)
+		url.searchParams.append('accessTokenSecret', secret)
+
+		await msg.reply(url.toString())
 	}
 }
 
@@ -57,6 +62,10 @@ export class FeatureBasicWebApiMethods extends CommonFeatureBase {
 	featureWebApi!: FeatureWebApi
 
 	lastMessage: discordjs.Message | undefined
+
+	constructor(public readonly webuiCmdName: string, public readonly webuiUrl: string) {
+		super()
+	}
 
 	preInitImpl(): void {
 		super.preInitImpl()
