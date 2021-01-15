@@ -70,3 +70,29 @@ export class GetPlaylist implements WebApiHandler {
 		})
 	}
 }
+
+interface SetPlaylistReq {
+	musics: SerializedMusic[]
+}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface SetPlaylistRes {}
+
+export class SetPlaylist implements WebApiHandler {
+	readonly methodName = 'play-music/set-playlist'
+
+	constructor(private readonly _feature: FeaturePlayMusic) {}
+
+	handle(args: SetPlaylistReq): Promise<SetPlaylistRes> {
+		this._feature.playlist.clear()
+		for (const serializedMusic of args.musics) {
+			try {
+				const music = deserializeMusic(serializedMusic, this._feature.database)
+				this._feature.playlist.addMusic(music)
+			} catch (_) {
+				// pass
+			}
+		}
+
+		return Promise.resolve({})
+	}
+}

@@ -128,6 +128,7 @@ export class FeaturePlayMusic extends CommonFeatureBase {
 		featureWebApi.registerHandler(new handlers.GetAllMusics(this))
 		featureWebApi.registerHandler(new handlers.AddToPlaylist(this))
 		featureWebApi.registerHandler(new handlers.GetPlaylist(this))
+		featureWebApi.registerHandler(new handlers.SetPlaylist(this))
 	}
 
 	async onMessageImpl(msg: discordjs.Message): Promise<void> {
