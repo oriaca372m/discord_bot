@@ -54,3 +54,19 @@ export class AddToPlaylist implements WebApiHandler {
 		return Promise.resolve({})
 	}
 }
+
+interface GetPlaylistRes {
+	musics: SerializedMusic[]
+}
+
+export class GetPlaylist implements WebApiHandler {
+	readonly methodName = 'play-music/get-playlist'
+
+	constructor(private readonly _feature: FeaturePlayMusic) {}
+
+	handle(): Promise<GetPlaylistRes> {
+		return Promise.resolve({
+			musics: this._feature.playlist.musics.map((x) => x.serialize()),
+		})
+	}
+}
