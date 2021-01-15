@@ -2,25 +2,18 @@ import * as discordjs from 'discord.js'
 
 import CommonFeatureBase from 'Src/features/common-feature-base'
 import { Command } from 'Src/features/command'
-import { FeatureWebApi, WebApiHandler } from 'Src/features/webapi'
+import { FeatureWebApi, WebApiHandler, AccessTokenInfo } from 'Src/features/webapi'
 import { bufferToHex } from 'Src/features/webapi/utils'
 import { URL } from 'url'
 
 class Handler implements WebApiHandler {
-	readonly methodName = 'reply'
+	readonly methodName = 'sendToChannel'
 
-	constructor(private readonly _feature: FeatureBasicWebApiMethods) {}
-
-	async handle(rawArgs: unknown): Promise<unknown> {
+	async handle(rawArgs: unknown, tokenInfo: AccessTokenInfo): Promise<unknown> {
 		const args = rawArgs as { msg: string }
 
-		const msg = this._feature.lastMessage
-		if (msg === undefined) {
-			return { error: 'This bot has not received any messages since running.' }
-		}
-
-		await msg.reply(args.msg)
-		return { text: msg.content }
+		await tokenInfo.channel.send(args.msg)
+		return {}
 	}
 }
 
@@ -76,7 +69,7 @@ export class FeatureBasicWebApiMethods extends CommonFeatureBase {
 	}
 
 	initImpl(): Promise<void> {
-		this.featureWebApi.registerHandler(new Handler(this))
+		this.featureWebApi.registerHandler(new Handler())
 
 		this.featureCommand.registerCommand(new CommandOpenWebUi(this))
 

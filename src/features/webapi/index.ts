@@ -8,7 +8,7 @@ import * as utils from 'Src/utils'
 
 export interface WebApiHandler {
 	methodName: string
-	handle(args: unknown): Promise<unknown>
+	handle(args: unknown, token: AccessTokenInfo): Promise<unknown>
 }
 
 export interface AdditionalAccessTokenInfo {
@@ -87,13 +87,21 @@ export class FeatureWebApi extends FeatureBase {
 		console.log(msg)
 
 		if (isMethodCallMessage(msg)) {
+			const tokenInfo = this._authorizer.getAdditionalAccessTokenInfo(token)
+			if (tokenInfo === undefined) {
+				return {
+					error:
+						'This token cannot invoke method call because it has not additional token info.',
+				}
+			}
+
 			const handler = this._handlers.get(msg.method)
 			if (handler === undefined) {
 				return { error: `The method '${msg.method} not found!'` }
 			}
 
 			try {
-				return await handler.handle(msg.args)
+				return await handler.handle(msg.args, tokenInfo)
 			} catch (e) {
 				console.error(e)
 				return { error: 'Internal server error.' }
