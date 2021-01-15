@@ -25,6 +25,7 @@
     "lodash": "^4.17.20",
     "music-metadata": "^7.6.2",
     "pako": "^2.0.3",
+    "uuid": "^8.3.2",
     "youtube-dl": "^3.0.2"
   },
   "devDependencies": {

@@ -36,13 +36,13 @@ export interface Music extends ListItem {
 }
 
 export class MusicFile implements Music {
-	readonly title: string
+	readonly uuid: string
 	readonly path: string
 	readonly metadata: MusicMetadata
 	readonly memberMusicList?: string
 
 	constructor(obj: MusicObject) {
-		this.title = obj.title
+		this.uuid = obj.uuid
 		this.path = obj.path
 		this.metadata = new MusicMetadata(obj.metadata)
 		this.memberMusicList = obj.memberMusicList

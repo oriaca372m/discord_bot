@@ -3,12 +3,14 @@ import * as discordjs from 'discord.js'
 import CommonFeatureBase from 'Src/features/common-feature-base'
 import { Command } from 'Src/features/command'
 import { FeatureGlobalConfig } from 'Src/features/global-config'
+import { FeatureWebApi } from 'Src/features/webapi'
 import * as utils from 'Src/utils'
 
 import { Playlist } from 'Src/features/play-music/playlist'
 import { MusicDatabase } from 'Src/features/play-music/music-database'
 import { MusicAdder } from 'Src/features/play-music/music-adder'
 import { AddInteractor } from 'Src/features/play-music/interactor/interactor'
+import { AddToPlaylist, GetAllMusics } from 'Src/features/play-music/webapi-handlers'
 
 class PlayMusicCommand implements Command {
 	private readonly gc: FeatureGlobalConfig
@@ -117,6 +119,14 @@ export class FeaturePlayMusic extends CommonFeatureBase {
 	protected async initImpl(): Promise<void> {
 		await this.reload()
 		this.featureCommand.registerCommand(new PlayMusicCommand(this.cmdname, this))
+
+		const featureWebApi = this.manager.getFeature<FeatureWebApi>('webapi')
+		if (featureWebApi === undefined) {
+			return
+		}
+
+		featureWebApi.registerHandler(new GetAllMusics(this))
+		featureWebApi.registerHandler(new AddToPlaylist(this))
 	}
 
 	async onMessageImpl(msg: discordjs.Message): Promise<void> {

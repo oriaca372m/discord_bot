@@ -2,6 +2,7 @@ const TOML = require('@iarna/toml')
 const fs = require('fs')
 const path = require('path')
 const mm = require('music-metadata')
+const { v4: uuidv4 } = require('uuid')
 
 function getTitle(filepath) {
 	const filename = path.basename(filepath, path.extname(filepath))
@@ -63,6 +64,7 @@ async function main() {
 		}
 
 		const music = {
+			uuid: uuidv4(),
 			path: line,
 			used: true,
 			metadata
