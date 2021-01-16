@@ -192,6 +192,7 @@ export class FeaturePlayMusic extends CommonFeatureBase {
 		}
 
 		if (this.playlist.isEmpty) {
+			await this.closeConnection()
 			return
 		}
 
