@@ -137,7 +137,7 @@ export class WebApiServer {
 	}
 
 	listen(): void {
-		this._server.listen(this._port, '127.0.0.1')
+		this._server.listen(this._port, '0.0.0.0')
 	}
 
 	close(): void {
