@@ -1,4 +1,6 @@
 import * as discordjs from 'discord.js'
+import https from 'https'
+import * as utils from 'Src/utils'
 
 import CommonFeatureBase from 'Src/features/common-feature-base'
 import { Command } from 'Src/features/command'
@@ -28,7 +30,15 @@ class CommandOpenWebUi implements Command {
 		return 'WEB UIを開く'
 	}
 
-	async command(msg: discordjs.Message): Promise<void> {
+	async command(msg: discordjs.Message, rawArgs: string[]): Promise<void> {
+		let options
+		try {
+			;({ options } = utils.parseCommandArgs(rawArgs, [], 0))
+		} catch (e) {
+			await msg.reply('コマンドのパースに失敗しました')
+			return
+		}
+
 		if (msg.guild === null) {
 			await msg.reply('サーバーでのみ有効なコマンドです')
 			return
@@ -43,7 +53,18 @@ class CommandOpenWebUi implements Command {
 		const secret = bufferToHex(info.basicInfo.accessTokenSecret)
 
 		const url = new URL(this._feature.webuiUrl)
-		url.searchParams.append('server', `http://localhost:${this._feature.featureWebApi.port}/`)
+
+		if (utils.getOption(options, ['l', 'local', 'localhost'])) {
+			url.searchParams.append(
+				'server',
+				`http://127.0.0.1:${this._feature.featureWebApi.port}/`
+			)
+		} else {
+			url.searchParams.append(
+				'server',
+				`http://${this._feature.globalIpAddr}:${this._feature.featureWebApi.port}/`
+			)
+		}
 		url.searchParams.append('accessToken', token)
 		url.searchParams.append('accessTokenSecret', secret)
 
@@ -51,10 +72,28 @@ class CommandOpenWebUi implements Command {
 	}
 }
 
+async function getGlobalIpAddr(): Promise<string> {
+	return new Promise((resolve, reject) => {
+		https.get('https://ipinfo.io/ip', (res) => {
+			void (async () => {
+				if (res.statusCode !== 200) {
+					reject()
+				}
+
+				try {
+					const buf = await utils.readAll(res)
+					resolve(buf.toString())
+				} catch (e) {
+					reject(e)
+				}
+			})()
+		})
+	})
+}
+
 export class FeatureBasicWebApiMethods extends CommonFeatureBase {
 	featureWebApi!: FeatureWebApi
-
-	lastMessage: discordjs.Message | undefined
+	globalIpAddr!: string
 
 	constructor(public readonly webuiCmdName: string, public readonly webuiUrl: string) {
 		super()
@@ -68,16 +107,11 @@ export class FeatureBasicWebApiMethods extends CommonFeatureBase {
 		}
 	}
 
-	initImpl(): Promise<void> {
+	async initImpl(): Promise<void> {
 		this.featureWebApi.registerHandler(new Handler())
 
 		this.featureCommand.registerCommand(new CommandOpenWebUi(this))
 
-		return Promise.resolve()
-	}
-
-	onMessageImpl(msg: discordjs.Message): Promise<void> {
-		this.lastMessage = msg
-		return Promise.resolve()
+		this.globalIpAddr = await getGlobalIpAddr()
 	}
 }

@@ -1,9 +1,9 @@
 import http from 'http'
-import stream from 'stream'
 import * as msgpack from '@msgpack/msgpack'
 import { Authorizer, BasicAccessTokenInfo } from 'Src/features/webapi/authorizer'
 import { bufferToHex, hexToBuffer, encrypt, decrypt } from 'Src/features/webapi/utils'
 import pako from 'pako'
+import * as utils from 'Src/utils'
 
 interface Message {
 	sequenceId: number
@@ -26,15 +26,6 @@ function isMessage(v: unknown): v is Message {
 	}
 
 	return true
-}
-
-async function readAll(rs: stream.Readable): Promise<Buffer> {
-	const buffers: Buffer[] = []
-	for await (const chunk of rs) {
-		buffers.push(chunk)
-	}
-
-	return Buffer.concat(buffers)
 }
 
 export class WebApiServer {
@@ -80,7 +71,7 @@ export class WebApiServer {
 		}
 
 		// リクエストの復号化
-		const encrypted = new Uint8Array(await readAll(req))
+		const encrypted = new Uint8Array(await utils.readAll(req))
 		const key = tokenInfo.accessTokenSecret
 		const iv = hexToBuffer(req.headers['x-iv'] as string)
 		const decrypted = decrypt(encrypted, key, iv)
@@ -146,7 +137,7 @@ export class WebApiServer {
 	}
 
 	listen(): void {
-		this._server.listen(this._port)
+		this._server.listen(this._port, '127.0.0.1')
 	}
 
 	close(): void {
