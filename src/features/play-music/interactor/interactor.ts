@@ -5,6 +5,7 @@ import * as utils from 'Src/utils'
 
 import { FeaturePlayMusic } from 'Src/features/play-music'
 import { Music } from 'Src/features/play-music/music'
+import { MusicAdder } from 'Src/features/play-music/music-adder'
 import { Playlist } from 'Src/features/play-music/playlist'
 import {
 	ListView,
@@ -95,36 +96,28 @@ export class AddInteractor {
 
 		const [cmdname, ...rawArgs] = res
 
-		if (cmdname === 'play' || cmdname === 'add') {
-			try {
-				const { args, options } = utils.parseCommandArgs(rawArgs, ['youtube'], 1)
-				const isYouTube = utils.getOption(options, ['y', 'youtube']) as boolean
-
-				if (0 < args.length && args.every((x) => isNaN(parseInt(x, 10)))) {
-					if (cmdname === 'play') {
-						await this.feature.playMusicEditingPlaylist(msg, async (playlist) => {
-							playlist.clear()
-							await this.feature.addToPlaylist(msg, args, isYouTube)
-						})
-						return
-					}
-
-					if (cmdname === 'add') {
-						await this.feature.addToPlaylist(msg, args, isYouTube)
-						return
-					}
-				}
-			} catch (_) {
-				// pass
+		if (['play', 'add'].includes(cmdname)) {
+			let adder = new MusicAdder(this.feature, undefined, true)
+			if (this._listView instanceof MusicListView) {
+				adder = new MusicAdder(this.feature, this._listView.getItems())
 			}
+
+			if (cmdname === 'play') {
+				await adder.play(msg, rawArgs)
+			}
+
+			if (cmdname === 'add') {
+				await adder.add(msg, rawArgs)
+			}
+
+			return
 		}
 
 		if (this._listView !== undefined) {
-			for (const action of this._listView.getActions()) {
-				if (action.name === cmdname) {
-					await action.do(rawArgs, msg)
-					return
-				}
+			const action = this._listView.actions.find((x) => x.name === cmdname)
+			if (action !== undefined) {
+				await action.do(rawArgs, msg)
+				return
 			}
 		}
 

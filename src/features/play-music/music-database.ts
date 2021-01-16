@@ -63,7 +63,7 @@ function createMap<K, V>(array: V[], keyFunc: (val: V) => K | undefined): Map<K,
 }
 
 export class MusicDatabase {
-	private allMusics: MusicFile[] = []
+	private _allMusics!: MusicFile[]
 	private allMusicsFuse!: Fuse<MusicFile>
 
 	private musicLists = new Map<string, MusicFile[]>()
@@ -72,9 +72,13 @@ export class MusicDatabase {
 
 	constructor(public readonly musicListsDir: string) {}
 
+	get allMusics(): MusicFile[] {
+		return this._allMusics
+	}
+
 	async init(): Promise<void> {
 		this.musicLists = await loadMusicLists(this.musicListsDir)
-		this.allMusics = getAllMusics(this.musicLists)
+		this._allMusics = getAllMusics(this.musicLists)
 		this.artists = createMap(this.allMusics, (v) => v.metadata.artist)
 		this.albums = createMap(this.allMusics, (v) => v.metadata.album)
 
@@ -85,6 +89,10 @@ export class MusicDatabase {
 				{ name: 'metadata.artist', weight: 0.1 },
 			],
 		})
+	}
+
+	getByUuid(uuid: string): Music | undefined {
+		return this.allMusics.find((x) => x.uuid == uuid)
 	}
 
 	search(keyword: string): Music[] {

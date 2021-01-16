@@ -25,7 +25,8 @@
     "lodash": "^4.17.20",
     "music-metadata": "^7.6.2",
     "pako": "^2.0.3",
-    "youtube-dl": "^3.0.2"
+    "uuid": "^8.3.2",
+    "ytdl-core": "^4.4.3"
   },
   "devDependencies": {
     "@types/jest": "^26.0.19",

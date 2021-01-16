@@ -1,4 +1,5 @@
 import lodash from 'lodash'
+import stream from 'stream'
 import * as discordjs from 'discord.js'
 
 export function unreachable(): never
@@ -372,4 +373,13 @@ export function parseIndexes(strings: string[], min: number, max: number): numbe
 	}
 
 	return ret
+}
+
+export async function readAll(rs: stream.Readable): Promise<Buffer> {
+	const buffers: Buffer[] = []
+	for await (const chunk of rs) {
+		buffers.push(chunk)
+	}
+
+	return Buffer.concat(buffers)
 }

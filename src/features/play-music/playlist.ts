@@ -17,12 +17,24 @@ export class Playlist {
 		return this.musics[this.playingTrack]
 	}
 
+	get currentTrack(): number | undefined {
+		return this.playingTrack
+	}
+
 	get musics(): readonly Music[] {
 		return this._musics
 	}
 
-	addMusic(music: Music): void {
-		this._musics.push(music)
+	addMusic(music: Music, insertBeforeIndex?: number): void {
+		if (insertBeforeIndex !== undefined) {
+			this._musics.splice(insertBeforeIndex, 0, music)
+
+			if (this.playingTrack !== undefined && insertBeforeIndex <= this.playingTrack) {
+				this.playingTrack += 1
+			}
+		} else {
+			this._musics.push(music)
+		}
 
 		if (this.playingTrack === undefined) {
 			this.playingTrack = 0
