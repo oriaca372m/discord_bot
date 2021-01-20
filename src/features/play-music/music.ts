@@ -161,6 +161,10 @@ export class YouTubeMusic implements Music {
 	): [discordjs.StreamDispatcher, (() => void) | undefined] {
 		// とりあえず動く
 		const stream = ytdl(this._videoId, { quality: 'highestaudio' })
+		stream.on('error', () => {
+			console.error('YouTubeの再生中にエラー')
+		})
+
 		return [
 			connection.play(stream),
 			(): void => {
