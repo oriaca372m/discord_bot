@@ -55,7 +55,7 @@ export class Config {
 		return this.configTexts.get(id)
 	}
 
-	async setConifg(id: string, text: string): Promise<string | undefined> {
+	async setConifg(id: string, text: string, writeToFile = true): Promise<string | undefined> {
 		if (!this.configSources.has(id)) {
 			throw new Error(`undefined id: ${id}`)
 		}
@@ -76,7 +76,14 @@ export class Config {
 
 		this.config.set(id, parsed)
 		this.configTexts.set(id, text)
+		if (writeToFile) {
+			await fs.writeFile(this._configFilePath(id), text)
+		}
 		return
+	}
+
+	private _configFilePath(id: string): string {
+		return `./config/custom-reply/${this.channelInstance.channel.id}/${id}.dat`
 	}
 
 	private async updateConfig(id: string, viaInternet = false): Promise<void> {
@@ -85,26 +92,20 @@ export class Config {
 			throw new Error(`undefined id: ${id}`)
 		}
 
-		const configFilePath = `./config/custom-reply/${this.channelInstance.channel.id}/${id}.dat`
-
+		let text
 		if (viaInternet) {
 			const req = await axios(`${source.source}?${Math.random()}`)
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-			const toml = req.data
-			if (typeof toml !== 'string') {
+			const data = req.data as unknown
+			if (typeof data !== 'string') {
 				throw new Error(`invalid response type: ${id}`)
 			}
-
-			if ((await this.setConifg(id, toml)) !== undefined) {
-				throw new Error(`invalid config file: ${id}`)
-			}
-			await fs.writeFile(configFilePath, toml)
+			text = data
 		} else {
-			const toml = await fs.readFile(configFilePath, 'utf-8')
+			text = await fs.readFile(this._configFilePath(id), 'utf-8')
+		}
 
-			if ((await this.setConifg(id, toml)) !== undefined) {
-				throw new Error(`invalid config file: ${id}`)
-			}
+		if ((await this.setConifg(id, text, viaInternet)) !== undefined) {
+			throw new Error(`invalid config file: ${id}`)
 		}
 	}
 
