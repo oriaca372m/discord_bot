@@ -40,14 +40,19 @@ type ConfigSource = {
 export class Config {
 	public readonly config = new Map<string, ReplyConfig>()
 	private readonly configSources = new Map<string, ConfigSource>()
+	private readonly configTexts = new Map<string, string>()
 
 	constructor(
 		private readonly channelInstance: CustomReply,
 		private readonly gc: FeatureGlobalConfig
 	) {}
 
-	getConifgNames(): string[] {
+	getConifgIds(): string[] {
 		return [...this.configSources.keys()]
+	}
+
+	getConifg(id: string): string | undefined {
+		return this.configTexts.get(id)
 	}
 
 	private async updateConfig(id: string, viaInternet = false): Promise<void> {
@@ -62,6 +67,9 @@ export class Config {
 			const req = await axios(`${source.source}?${Math.random()}`)
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 			const toml = req.data
+			if (typeof toml !== 'string') {
+				throw new Error(`invalid response type: ${id}`)
+			}
 			const parsed = await TOML.parse.async(toml)
 
 			if (!validateParsedConfig(parsed)) {
@@ -69,6 +77,7 @@ export class Config {
 			}
 			await fs.writeFile(configFilePath, toml)
 			this.config.set(id, parsed)
+			this.configTexts.set(id, toml)
 		} else {
 			const toml = await fs.readFile(configFilePath, 'utf-8')
 			const parsed = await TOML.parse.async(toml)
@@ -77,6 +86,7 @@ export class Config {
 				throw new Error(`invalid config file: ${id}`)
 			}
 			this.config.set(id, parsed)
+			this.configTexts.set(id, toml)
 		}
 	}
 
@@ -205,6 +215,7 @@ export class Config {
 
 		this.config.delete(id)
 		this.configSources.delete(id)
+		this.configTexts.delete(id)
 		await this.writeSourcesJson()
 
 		await this.gc.send(msg, 'customReply.config.removingComplete', { id })

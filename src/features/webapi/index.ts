@@ -11,6 +11,8 @@ export interface WebApiHandler {
 	handle(args: unknown, token: AccessTokenInfo): Promise<unknown>
 }
 
+export class HandlerError extends Error {}
+
 export interface AdditionalAccessTokenInfo {
 	channel: utils.LikeTextChannel
 	guild: discordjs.Guild
@@ -103,6 +105,10 @@ export class FeatureWebApi extends FeatureBase {
 			try {
 				return await handler.handle(msg.args, tokenInfo)
 			} catch (e) {
+				if (e instanceof HandlerError) {
+					return { error: e.message }
+				}
+
 				console.error(e)
 				return { error: 'Internal server error.' }
 			}
