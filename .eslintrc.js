@@ -24,6 +24,6 @@ module.exports = {
 	},
 	'rules': {
 		'@typescript-eslint/no-unused-vars': ['error', { 'argsIgnorePattern': '^_' }],
-		'@typescript-eslint/no-empty-interface': false
+		'@typescript-eslint/no-empty-interface': 'off'
 	}
 }
