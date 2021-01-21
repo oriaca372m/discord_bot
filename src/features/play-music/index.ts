@@ -3,7 +3,6 @@ import * as discordjs from 'discord.js'
 import CommonFeatureBase from 'Src/features/common-feature-base'
 import { Command } from 'Src/features/command'
 import { FeatureGlobalConfig } from 'Src/features/global-config'
-import { FeatureWebApi } from 'Src/features/webapi'
 import * as utils from 'Src/utils'
 
 import { Playlist } from 'Src/features/play-music/playlist'
