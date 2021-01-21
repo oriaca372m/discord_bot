@@ -39,3 +39,23 @@ export class GetConfig implements WebApiHandler {
 		return Promise.resolve({ text })
 	}
 }
+
+interface SetConifgReq {
+	id: string
+	text: string
+}
+interface SetConfigRes {
+	formatError: string | null
+}
+
+export class SetConfig implements WebApiHandler {
+	readonly methodName = 'custom-reply/set-config'
+
+	constructor(private readonly _feature: FeatureCustomReply) {}
+
+	async handle(req: SetConifgReq, token: AccessTokenInfo): Promise<SetConfigRes> {
+		const config = this._feature.getChannelInstance(token.channel).config
+		const success = await config.setConifg(req.id, req.text)
+		return { formatError: success ?? null }
+	}
+}

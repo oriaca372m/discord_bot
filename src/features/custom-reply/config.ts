@@ -55,6 +55,30 @@ export class Config {
 		return this.configTexts.get(id)
 	}
 
+	async setConifg(id: string, text: string): Promise<string | undefined> {
+		if (!this.configSources.has(id)) {
+			throw new Error(`undefined id: ${id}`)
+		}
+
+		let parsed
+		try {
+			parsed = await TOML.parse.async(text)
+		} catch (e) {
+			if (e instanceof Error) {
+				return e.message
+			}
+			throw e
+		}
+
+		if (!validateParsedConfig(parsed)) {
+			return '不正なフォーマットです。'
+		}
+
+		this.config.set(id, parsed)
+		this.configTexts.set(id, text)
+		return
+	}
+
 	private async updateConfig(id: string, viaInternet = false): Promise<void> {
 		const source = this.configSources.get(id)
 		if (source === undefined) {
@@ -70,23 +94,17 @@ export class Config {
 			if (typeof toml !== 'string') {
 				throw new Error(`invalid response type: ${id}`)
 			}
-			const parsed = await TOML.parse.async(toml)
 
-			if (!validateParsedConfig(parsed)) {
+			if ((await this.setConifg(id, toml)) !== undefined) {
 				throw new Error(`invalid config file: ${id}`)
 			}
 			await fs.writeFile(configFilePath, toml)
-			this.config.set(id, parsed)
-			this.configTexts.set(id, toml)
 		} else {
 			const toml = await fs.readFile(configFilePath, 'utf-8')
-			const parsed = await TOML.parse.async(toml)
 
-			if (!validateParsedConfig(parsed)) {
+			if ((await this.setConifg(id, toml)) !== undefined) {
 				throw new Error(`invalid config file: ${id}`)
 			}
-			this.config.set(id, parsed)
-			this.configTexts.set(id, toml)
 		}
 	}
 

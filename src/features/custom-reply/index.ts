@@ -149,6 +149,7 @@ export class FeatureCustomReply extends CommonFeatureBase {
 
 		webApi.registerHandler(new handlers.GetConfigList(this))
 		webApi.registerHandler(new handlers.GetConfig(this))
+		webApi.registerHandler(new handlers.SetConfig(this))
 		return Promise.resolve()
 	}
 
