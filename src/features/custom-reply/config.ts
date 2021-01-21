@@ -40,11 +40,51 @@ type ConfigSource = {
 export class Config {
 	public readonly config = new Map<string, ReplyConfig>()
 	private readonly configSources = new Map<string, ConfigSource>()
+	private readonly configTexts = new Map<string, string>()
 
 	constructor(
 		private readonly channelInstance: CustomReply,
 		private readonly gc: FeatureGlobalConfig
 	) {}
+
+	getConifgIds(): string[] {
+		return [...this.configSources.keys()]
+	}
+
+	getConifg(id: string): string | undefined {
+		return this.configTexts.get(id)
+	}
+
+	async setConifg(id: string, text: string, writeToFile = true): Promise<string | undefined> {
+		if (!this.configSources.has(id)) {
+			throw new Error(`undefined id: ${id}`)
+		}
+
+		let parsed
+		try {
+			parsed = await TOML.parse.async(text)
+		} catch (e) {
+			if (e instanceof Error) {
+				return e.message
+			}
+			throw e
+		}
+
+		if (!validateParsedConfig(parsed)) {
+			return '不正なフォーマットです。'
+		}
+
+		this.config.set(id, parsed)
+		this.configTexts.set(id, text)
+		if (writeToFile) {
+			await fs.writeFile(this._configFilePath(id), text)
+		}
+		return
+	}
+
+	private _configFilePath(id: string): string {
+		return `./config/custom-reply/${this.channelInstance.channel.id}/${id}.dat`
+	}
 
 	private async updateConfig(id: string, viaInternet = false): Promise<void> {
 		const source = this.configSources.get(id)
@@ -52,27 +92,20 @@ export class Config {
 			throw new Error(`undefined id: ${id}`)
 		}
 
-		const configFilePath = `./config/custom-reply/${this.channelInstance.channel.id}/${id}.dat`
-
+		let text
 		if (viaInternet) {
 			const req = await axios(`${source.source}?${Math.random()}`)
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-			const toml = req.data
-			const parsed = await TOML.parse.async(toml)
-
-			if (!validateParsedConfig(parsed)) {
-				throw new Error(`invalid config file: ${id}`)
+			const data = req.data as unknown
+			if (typeof data !== 'string') {
+				throw new Error(`invalid response type: ${id}`)
 			}
-			await fs.writeFile(configFilePath, toml)
-			this.config.set(id, parsed)
+			text = data
 		} else {
-			const toml = await fs.readFile(configFilePath, 'utf-8')
-			const parsed = await TOML.parse.async(toml)
+			text = await fs.readFile(this._configFilePath(id), 'utf-8')
+		}
 
-			if (!validateParsedConfig(parsed)) {
-				throw new Error(`invalid config file: ${id}`)
-			}
-			this.config.set(id, parsed)
+		if ((await this.setConifg(id, text, viaInternet)) !== undefined) {
+			throw new Error(`invalid config file: ${id}`)
 		}
 	}
 
@@ -201,6 +234,7 @@ export class Config {
 
 		this.config.delete(id)
 		this.configSources.delete(id)
+		this.configTexts.delete(id)
 		await this.writeSourcesJson()
 
 		await this.gc.send(msg, 'customReply.config.removingComplete', { id })

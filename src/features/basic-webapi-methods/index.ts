@@ -101,7 +101,6 @@ export class FeatureBasicWebApiMethods extends CommonFeatureBase {
 
 	preInitImpl(): void {
 		super.preInitImpl()
-		this.featureWebApi = this.manager.getFeature<FeatureWebApi>('webapi')
 		if (this.featureWebApi === undefined) {
 			throw 'webapiにFeatureWebApiがセットされていない'
 		}

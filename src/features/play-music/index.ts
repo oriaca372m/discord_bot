@@ -3,7 +3,6 @@ import * as discordjs from 'discord.js'
 import CommonFeatureBase from 'Src/features/common-feature-base'
 import { Command } from 'Src/features/command'
 import { FeatureGlobalConfig } from 'Src/features/global-config'
-import { FeatureWebApi } from 'Src/features/webapi'
 import * as utils from 'Src/utils'
 
 import { Playlist } from 'Src/features/play-music/playlist'
@@ -120,16 +119,16 @@ export class FeaturePlayMusic extends CommonFeatureBase {
 		await this.reload()
 		this.featureCommand.registerCommand(new PlayMusicCommand(this.cmdname, this))
 
-		const featureWebApi = this.manager.getFeature<FeatureWebApi>('webapi')
-		if (featureWebApi === undefined) {
+		const webApi = this.featureWebApi
+		if (webApi === undefined) {
 			return
 		}
 
-		featureWebApi.registerHandler(new handlers.GetAllMusics(this))
-		featureWebApi.registerHandler(new handlers.AddToPlaylist(this))
-		featureWebApi.registerHandler(new handlers.GetPlaylist(this))
-		featureWebApi.registerHandler(new handlers.SetPlaylist(this))
-		featureWebApi.registerHandler(new handlers.Play(this))
+		webApi.registerHandler(new handlers.GetAllMusics(this))
+		webApi.registerHandler(new handlers.AddToPlaylist(this))
+		webApi.registerHandler(new handlers.GetPlaylist(this))
+		webApi.registerHandler(new handlers.SetPlaylist(this))
+		webApi.registerHandler(new handlers.Play(this))
 	}
 
 	async onMessageImpl(msg: discordjs.Message): Promise<void> {

@@ -4,12 +4,14 @@ import { FeatureBase, FeatureEventContext, FeatureEventResult } from 'Src/featur
 import { FeatureCommand } from 'Src/features/command'
 import { StorageDriver, FeatureStorage } from 'Src/features/storage'
 import { FeatureGlobalConfig } from 'Src/features/global-config'
+import { FeatureWebApi } from 'Src/features/webapi'
 
 export default class extends FeatureBase {
 	public gc!: FeatureGlobalConfig
 
 	protected featureCommand!: FeatureCommand
 	protected featureStorage!: FeatureStorage
+	protected featureWebApi: FeatureWebApi | undefined
 	public storageDriver!: StorageDriver
 
 	protected preInitImpl(): void {
@@ -21,6 +23,7 @@ export default class extends FeatureBase {
 		this.featureCommand = this.manager.registerFeature('command', () => new FeatureCommand())
 		this.featureStorage = this.manager.registerFeature('storage', () => new FeatureStorage())
 		this.storageDriver = this.featureStorage.getStorageDriver(this)
+		this.featureWebApi = this.manager.getFeature<FeatureWebApi>('webapi')
 	}
 
 	onMessage(msg: discordjs.Message, context: FeatureEventContext): FeatureEventResult {

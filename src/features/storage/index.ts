@@ -52,10 +52,14 @@ export class StorageDriver {
 		return map.get(id) ?? utils.unreachable()
 	}
 
-	channel(msg: discordjs.Message): StorageType {
-		return this.getBase(msg.channel.id, this._channels, () =>
-			this.channelStorageConstructor(msg.channel)
+	channelFromChannel(channel: utils.LikeTextChannel): StorageType {
+		return this.getBase(channel.id, this._channels, () =>
+			this.channelStorageConstructor(channel)
 		)
+	}
+
+	channel(msg: discordjs.Message): StorageType {
+		return this.channelFromChannel(msg.channel)
 	}
 
 	setChannelStorageConstructor(storageConstructor: ChannelStorageConstructorType): void {
