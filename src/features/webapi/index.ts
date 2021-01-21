@@ -85,9 +85,6 @@ export class FeatureWebApi extends FeatureBase {
 	}
 
 	private async _onMessage(token: string, msg: unknown): Promise<unknown> {
-		console.log(token)
-		console.log(msg)
-
 		if (isMethodCallMessage(msg)) {
 			const tokenInfo = this._authorizer.getAdditionalAccessTokenInfo(token)
 			if (tokenInfo === undefined) {
