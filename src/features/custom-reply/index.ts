@@ -8,6 +8,7 @@ import { FeatureGlobalConfig } from 'Src/features/global-config'
 import * as utils from 'Src/utils'
 import { Images } from 'Src/features/custom-reply/images'
 import { Config, Response } from 'Src/features/custom-reply/config'
+import * as handlers from 'Src/features/custom-reply/webapi-handlers'
 
 import { Action } from 'Src/features/custom-reply/actions/action'
 import { ActionGacha } from 'Src/features/custom-reply/actions/gacha'
@@ -19,7 +20,7 @@ import { ActionJakuraiClock } from 'Src/features/custom-reply/actions/jakurai-cl
 export class CustomReply {
 	private initialized = false
 	private readonly images: Images
-	private readonly config: Config
+	readonly config: Config
 	private gc: FeatureGlobalConfig
 	private readonly _actions: { [key: string]: Action }
 
@@ -140,7 +141,18 @@ export class FeatureCustomReply extends CommonFeatureBase {
 			)
 		})
 		this.featureCommand.registerCommand(new CustomReplyCommand(this, this.cmdname))
+
+		const webApi = this.featureWebApi
+		if (webApi === undefined) {
+			return Promise.resolve()
+		}
+
+		webApi.registerHandler(new handlers.GetConfigList(this))
 		return Promise.resolve()
+	}
+
+	getChannelInstance(channel: utils.LikeTextChannel): CustomReply {
+		return this.storageDriver.channelFromChannel(channel).get<CustomReply>('customReply')
 	}
 
 	async onMessageImpl(msg: discordjs.Message): Promise<void> {

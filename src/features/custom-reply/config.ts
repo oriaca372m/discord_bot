@@ -46,6 +46,10 @@ export class Config {
 		private readonly gc: FeatureGlobalConfig
 	) {}
 
+	getConifgNames(): string[] {
+		return [...this.configSources.keys()]
+	}
+
 	private async updateConfig(id: string, viaInternet = false): Promise<void> {
 		const source = this.configSources.get(id)
 		if (source === undefined) {

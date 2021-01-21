@@ -23,6 +23,7 @@ module.exports = {
 		'project': './tsconfig.json'
 	},
 	'rules': {
-		'@typescript-eslint/no-unused-vars': ['error', { 'argsIgnorePattern': '^_' }]
+		'@typescript-eslint/no-unused-vars': ['error', { 'argsIgnorePattern': '^_' }],
+		'@typescript-eslint/no-empty-interface': false
 	}
 }
