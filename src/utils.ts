@@ -312,7 +312,8 @@ export function pagination<T>(
 }
 
 export class RetryError extends Error {
-	constructor(public cause: Error) {
+	// eslint-disable-next-line
+	constructor(public cause: any) {
 		super()
 	}
 }
@@ -322,20 +323,18 @@ export async function retry<T>(
 	ntimes: number,
 	logging = false
 ): Promise<T> {
-	let lastError: Error | undefined
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	let lastError: any
 
 	for (let i = 0; i < ntimes; i++) {
 		try {
 			const a = await func()
 			return a
 		} catch (e) {
-			if (e instanceof Error) {
-				lastError = e
-				if (logging) {
-					console.error(e)
-				}
-			} else {
-				throw e
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+			lastError = e
+			if (logging) {
+				console.error(e)
 			}
 		}
 	}
