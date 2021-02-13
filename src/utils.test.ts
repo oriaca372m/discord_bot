@@ -59,8 +59,8 @@ describe('parseShellLikeCommand', () => {
 		})
 
 		test('バックスラッシュ記法が使えること', () => {
-			const res = utils.parseShellLikeCommand('"petit\'s"')
-			expect(res).toEqual(["petit's"])
+			const res = utils.parseShellLikeCommand('"a\\"b\\"c"')
+			expect(res).toEqual(['a"b"c'])
 		})
 
 		test('空の引数を作れること', () => {
