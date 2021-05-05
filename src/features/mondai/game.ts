@@ -280,7 +280,7 @@ export class Game {
 		}
 
 		if (this.tmpDir !== undefined) {
-			await fs.rmdir(this.tmpDir, { recursive: true })
+			await fs.rm(this.tmpDir, { recursive: true })
 		}
 	}
 }
