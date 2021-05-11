@@ -22,7 +22,7 @@
     "ffmpeg-static": "^4.2.7",
     "fuse.js": "^6.4.6",
     "jimp": "^0.16.1",
-    "lodash": "^4.17.20",
+    "lodash": "^4.17.21",
     "music-metadata": "^7.6.7",
     "pako": "^2.0.3",
     "uuid": "^8.3.2",
