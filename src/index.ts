@@ -1,53 +1,66 @@
 import discordjs from 'discord.js'
 
 import FeatureManager from 'Src/features/feature-manager'
-import features from '../config/features'
+import { ConfigLoader } from 'Src/config'
 
-const client = new discordjs.Client()
-const featureManager = new FeatureManager(client)
+async function main() {
+	const config = new ConfigLoader('./config/features.toml')
 
-let ready = false
-
-client.on('ready', () => {
-	void (async (): Promise<void> => {
-		if (client.user) {
-			console.log(`Logged in as ${client.user.tag}!`)
-		}
-
-		try {
-			for (const [k, v] of features) {
-				featureManager.registerFeature(k, () => v)
-			}
-
-			await featureManager.init()
-		} catch (e) {
-			console.error(e)
+	{
+		const ok = await config.load()
+		if (!ok) {
 			process.exit(1)
 		}
+	}
 
-		ready = true
-	})()
-})
+	const client = new discordjs.Client()
+	const featureManager = new FeatureManager(client)
 
-client.on('message', (msg) => {
-	void (async (): Promise<void> => {
-		if (!ready) {
-			return
-		}
+	let ready = false
 
-		if (!msg.partial) {
-			await featureManager.onMessage(msg)
-		}
-	})()
-})
+	client.on('ready', () => {
+		void (async (): Promise<void> => {
+			if (client.user) {
+				console.log(`Logged in as ${client.user.tag}!`)
+			}
 
-process.on('SIGINT', () => {
-	void (async (): Promise<void> => {
-		client.destroy()
-		await featureManager.finalize()
-		console.log('discord bot was shut down.')
-		process.exit(0)
-	})()
-})
+			try {
+				for (const [k, v] of config.features) {
+					featureManager.registerFeature(k, () => v)
+				}
 
-void client.login(process.env.DISCORD_BOT_TOKEN)
+				await featureManager.init()
+			} catch (e) {
+				console.error(e)
+				process.exit(1)
+			}
+
+			ready = true
+		})()
+	})
+
+	client.on('message', (msg) => {
+		void (async (): Promise<void> => {
+			if (!ready) {
+				return
+			}
+
+			if (!msg.partial) {
+				await featureManager.onMessage(msg)
+			}
+		})()
+	})
+
+	process.on('SIGINT', () => {
+		void (async (): Promise<void> => {
+			client.destroy()
+			await featureManager.finalize()
+			console.log('discord bot was shut down.')
+			process.exit(0)
+		})()
+	})
+
+	await client.login(config.token)
+}
+
+void main()
