@@ -156,6 +156,7 @@ export class FeatureLoader {
 			this._features.set(entry.id, feature)
 			return true
 		} catch (e) {
+			console.error(`an error occurred while loading the feature '${entry.feature}':`)
 			console.error(e)
 			return false
 		}
