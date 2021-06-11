@@ -87,7 +87,7 @@ private
   end
 
   def get_video_duration(fn)
-    out = IO.popen(['ffprobe', '-i', fn], err: [:child, :out]) do |io|
+    out = IO.popen(['ffmpeg', '-hide_banner', '-i', fn], err: [:child, :out]) do |io|
       io.each_line(chomp: true).grep(/Duration/).first
     end
     out.strip =~ /^Duration: (\d\d):(\d\d):(\d\d).(\d\d)/ or raise "#{fn} の長さを取得できませんでした。"
