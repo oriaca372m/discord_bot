@@ -13,7 +13,10 @@ import { FeatureSk } from 'Src/features/sk'
 import { FeatureWebApi } from 'Src/features/webapi'
 import { FeatureBasicWebApiMethods } from 'Src/features/basic-webapi-methods'
 
-export const FeatureConfigBase = t.type({ id: t.string, feature: t.string })
+export const FeatureConfigBase = t.intersection([
+	t.type({ feature: t.string }),
+	t.partial({ id: t.string }),
+])
 export type FeatureConfigBaseType = t.TypeOf<typeof FeatureConfigBase>
 
 function loadFeatureSimpleReply(_entry: FeatureConfigBaseType): FeatureSimpleReply {
@@ -129,6 +132,7 @@ const loaders: { [key: string]: (entry: FeatureConfigBaseType) => FeatureInterfa
 
 export class FeatureLoader {
 	private readonly _features = new Map<string, FeatureInterface>()
+	private _unnamedCounter = 0
 
 	addEntry(entry: FeatureConfigBaseType): boolean {
 		const loader = loaders[entry.feature]
@@ -139,6 +143,16 @@ export class FeatureLoader {
 
 		try {
 			const feature = loader(entry)
+
+			if (entry.id === undefined) {
+				if (entry.feature === 'web_api') {
+					entry.id = 'webapi'
+				} else {
+					entry.id = `__unnamed_${this._unnamedCounter}`
+					++this._unnamedCounter
+				}
+			}
+
 			this._features.set(entry.id, feature)
 			return true
 		} catch (e) {
