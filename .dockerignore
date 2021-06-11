@@ -1,8 +1,9 @@
+.git/
+.dockerignore
+.gitignore
+Dockerfile
+config/
 assets/
-config/*
-!config/config-default.toml
-!config/features-example.toml
-/run_docker.sh
 
 # Logs
 logs
