@@ -4,7 +4,7 @@
   "main": "src/index.js",
   "scripts": {
     "build": "webpack",
-    "start": "webpack && node -r dotenv/config dist/main.js",
+    "start": "webpack && node dist/main.js",
     "watch": "webpack --watch",
     "test": "jest"
   },
@@ -18,7 +18,6 @@
     "canvas": "^2.8.0",
     "core-js": "^3.14.0",
     "discord.js": "^12.5.3",
-    "dotenv": "^10.0.0",
     "ffmpeg-static": "^4.3.0",
     "fp-ts": "^2.10.5",
     "fuse.js": "^6.4.6",
