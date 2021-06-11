@@ -1,0 +1,38 @@
+discord_bot_token = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+
+[[features]]
+feature = 'web_api'
+port = 25565
+
+[[features]]
+feature = 'basic_web_api_methods'
+webui_command_name = 'webui'
+webui_url = 'https://oriaca372m.github.io/webui_discord_bot/'
+
+[[features]]
+feature = 'simple_reply'
+
+[[features]]
+feature = 'custom_reply'
+command_name = 'res'
+
+[[features]]
+feature = 'command_alias'
+command_name = 'rls'
+to_name = 'res'
+to_args = ['images', 'list']
+
+[[features]]
+feature = 'command_alias'
+command_name = 'rp'
+to_name = 'res'
+to_args = ['images', 'preview']
+
+[[features]]
+feature = 'play_music'
+command_name = 'music'
+
+[[features]]
+feature = 'sk'
+sk_command_name = 'sk'
+set_command_name = 'setsk'
