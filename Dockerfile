@@ -8,19 +8,23 @@ RUN yarn global add node-gyp
 
 WORKDIR /usr/src/app
 
-COPY . .
-
+COPY package.json .
+COPY yarn.lock .
 RUN yarn install --frozen-lockfile
+
+COPY . .
 RUN yarn run build
 
 FROM alpine:3
 
-RUN apk add --no-cache nodejs ruby ruby-json ffmpeg pixman cairo pango libpng jpeg giflib
+RUN apk add --no-cache nodejs ruby ruby-json pixman cairo pango libpng jpeg giflib
 
 WORKDIR /usr/src/app
 
 COPY --from=builder /usr/src/app/dist ./dist
 COPY --from=builder /usr/src/app/tools ./tools
 COPY --from=builder /usr/src/app/node_modules ./node_modules
+
+ENV PATH $PATH:/usr/src/app/node_modules/ffmpeg-static
 
 CMD ["node", "dist/main.js"]
