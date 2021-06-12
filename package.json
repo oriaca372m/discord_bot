@@ -10,7 +10,7 @@
     "lint": "eslint src/**.{ts,js} && prettier --check src/**.{ts,js}",
     "fix": "eslint --fix src/**.{ts,js} && prettier --write src/**.{ts,js}"
   },
-  "license": "MIT",
+  "license": "Zlib",
   "private": true,
   "dependencies": {
     "@discordjs/opus": "^0.5.3",
