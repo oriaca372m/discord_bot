@@ -15,6 +15,8 @@ RUN yarn install --frozen-lockfile
 COPY . .
 RUN yarn run build
 
+RUN yarn install --frozen-lockfile --production
+
 FROM alpine:3
 
 RUN apk add --no-cache nodejs ruby ruby-json pixman cairo pango libpng jpeg giflib
