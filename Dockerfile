@@ -13,6 +13,7 @@ COPY yarn.lock .
 RUN yarn install --frozen-lockfile
 
 COPY . .
+RUN yarn lint
 RUN yarn run build
 
 RUN yarn install --frozen-lockfile --production
