@@ -24,10 +24,10 @@ RUN apk add --no-cache nodejs ruby ruby-json pixman cairo pango libpng jpeg gifl
 
 WORKDIR /usr/src/app
 
+ENV PATH $PATH:/usr/src/app/node_modules/ffmpeg-static
+
 COPY --from=builder /usr/src/app/dist ./dist
 COPY --from=builder /usr/src/app/tools ./tools
 COPY --from=builder /usr/src/app/node_modules ./node_modules
-
-ENV PATH $PATH:/usr/src/app/node_modules/ffmpeg-static
 
 CMD ["node", "dist/main.js"]
