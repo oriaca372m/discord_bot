@@ -1,8 +1,11 @@
-.git/
-.github/
 .dockerignore
 .gitignore
 Dockerfile
+LICENSE.txt
+README.md
+
+.git/
+.github/
 config/
 assets/
 
