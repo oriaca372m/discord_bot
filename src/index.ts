@@ -51,14 +51,15 @@ async function main() {
 		})()
 	})
 
-	process.on('SIGINT', () => {
-		void (async (): Promise<void> => {
-			client.destroy()
-			await featureManager.finalize()
-			console.log('discord bot was shut down.')
-			process.exit(0)
-		})()
-	})
+	const shutdown = async () => {
+		client.destroy()
+		await featureManager.finalize()
+		console.log('discord bot was shut down.')
+		process.exit(0)
+	}
+
+	process.on('SIGINT', () => void shutdown())
+	process.on('SIGTERM', () => void shutdown())
 
 	await client.login(config.token)
 }
