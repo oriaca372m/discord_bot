@@ -28,9 +28,17 @@ export class FeatureGlobalConfig extends FeatureBase {
 	protected async initImpl(): Promise<void> {
 		let config = {}
 		for (const path of this.paths) {
-			const toml = await fs.readFile(path, 'utf-8')
-			const parsed = await TOML.parse.async(toml)
-			config = lodash.merge(config, parsed)
+			let toml
+			try {
+				toml = await fs.readFile(path, 'utf-8')
+			} catch (_) {
+				// pass
+			}
+
+			if (toml !== undefined) {
+				const parsed = await TOML.parse.async(toml)
+				config = lodash.merge(config, parsed)
+			}
 		}
 
 		this.config = config as Config
