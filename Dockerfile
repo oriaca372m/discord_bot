@@ -26,8 +26,8 @@ WORKDIR /usr/src/app
 
 ENV PATH $PATH:/usr/src/app/node_modules/ffmpeg-static
 
-COPY --from=builder /usr/src/app/dist ./dist
 COPY --from=builder /usr/src/app/tools ./tools
 COPY --from=builder /usr/src/app/node_modules ./node_modules
+COPY --from=builder /usr/src/app/dist ./dist
 
 CMD ["node", "dist/main.js"]
