@@ -1,0 +1,57 @@
+= discord_bot
+
+アニメから1フレーム取り出して、それが何話かを当てる機能とかをもっているDiscordのbot
+
+== 動かし方
+
+. Docker Composeをlink:https://docs.docker.jp/compose/install.html[インストール]
+
+. 適当な空のディレクトリを作る
+
+. その中に `config` ディレクトリを作る
+
+. このリポジトリの `config/config-default.toml` を作った `config` ディレクトリにコピーする
+
+. このリポジトリの `config/features-example.toml` を作った `config` ディレクトリに `features.toml` としてコピーする
+
+. `features.toml` の `discord_bot_token` にトークンを入れる
+
+. `assets` ディレクトリを作る
+
+. `assets` ディレクトリに `chino.png` という名前のかわいいチノちゃんの画像を配置する
+
+. こんな感じの `docker-compose.yaml` を作って
++
+.docker-compose.yaml
+[source,yaml]
+....
+version: "3"
+services:
+  bot:
+    image: ghcr.io/oriaca372m/discord_bot:latest
+    volumes:
+      - ./assets:/usr/src/app/assets
+      - ./config:/usr/src/app/config
+....
+
+. 実行
++
+[source,bash]
+....
+$ docker-compose up
+....
+
+最終的なディレクトリ構成は次のようになります
+....
+作成したディレクトリ
+|- assets
+|  `- chino.png
+|- config
+|  |- config-default.toml
+|  `- features.toml
+`- docker-compose.yaml
+....
+
+== ライセンス
+
+Zlib License

@@ -2,7 +2,7 @@
 .gitignore
 Dockerfile
 LICENSE.txt
-README.md
+README.adoc
 
 .git/
 .github/
