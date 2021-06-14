@@ -87,6 +87,6 @@ export class FeatureGlobalConfig extends FeatureBase {
 		if ('guild' in channel) {
 			text = utils.replaceEmoji(text, channel.guild.emojis)
 		}
-		return await channel.send(text, options)
+		return await channel.send(text, { split: true, ...options })
 	}
 }
