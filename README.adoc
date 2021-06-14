@@ -1,4 +1,5 @@
 = discord_bot
+:toc:
 
 アニメから1フレーム取り出して、それが何話かを当てる機能とかをもっているDiscordのbot
 
@@ -51,6 +52,109 @@ $ docker-compose up
 |  `- features.toml
 `- docker-compose.yaml
 ....
+
+
+== featureの詳細
+
+=== mondai
+
+==== 設定ファイルのフォーマット
+
+.config/features.toml
+[source,toml]
+....
+[[features]]
+feature = 'mondai'
+command_name = 'mondai'
+config_path = './config/mondai-gochiusa.toml'
+....
+
+.config/mondai-gochiusa.toml
+[source,toml]
+....
+[options]
+type = 'video'
+surrenderPattern = '降参'
+
+[[episodes]]
+filename = 'path/to/1羽の動画ファイル'
+title = '1期1羽 「ひと目で尋常でないもふもふだと見抜いたよ」'
+pattern = '(1-1 ?)?ひと目で尋常でないもふもふだと見抜いたよ|1-1|1期1羽|1期1話'
+
+[[episodes]]
+filename = 'path/to/2羽の動画ファイル'
+title = '1期2羽 「小麦を愛した少女と小豆に愛された少女」'
+pattern = '(1-2 ?)?小麦を愛した少女と小豆に愛された少女|1-2|1期2羽|1期2話'
+....
+
+|===
+|キー|値
+
+|feature
+|mondai
+
+|command_name
+|mondaiを開始するためのコマンド
+
+|config_path
+|mondaiの設定が書かれたtomlファイルへのパス(ワーキングディレクトリからの相対パス)
+|===
+
+`config_path` で指定されるファイルの設定
+|===
+|キー|値
+
+|options.type
+|videoかaudio
+
+|options.surrenderPattern
+|降参となるメッセージにマッチする正規表現
+
+|episodes[].filename
+|ある話(videoの場合)やある曲(audioの場合)へのパス
+
+|episodes[].excludeRange
+|
+(videoのみ有効,オプション) 出現してほしくない時間をミリ秒で指定。主にOP/EDが出現しないようにするために使う。範囲を `start..end` のように指定、 `,` で区切る
+
+(例) `130000..220000,1320000..1410000` 130秒(2分10秒)\~220秒(3分40秒)と1320秒(22分)~1410秒(23分30秒)までが問題に出題されなくなる
+
+|episodes[].title
+|正解時に表示されるタイトル
+
+|episodes[].pattern
+|正解/不正解となるメッセージにマッチする正規表現。メッセージ全体がマッチした場合にのみ有効
+|===
+
+==== コマンド
+(`command_name` が `mondai` だと仮定)
+
+`!mondai [mode]`::
+問題になる画像や音声ファイルが送信され、回答を待ち受ける。
++
+|===
+|引数|値|意味
+
+|mode(オプション)
+|
+`type` が `video` の場合: `image` (省略時の値) `mosaic` `audio` +
+`type` が `music` の場合: `music` (省略時の値) `intro`
+|出題する問題のタイプ
+|===
++
+|===
+|オプション|値|意味
+
+|-r, --repeat
+|無し
+|mondaiを繰り返し行う
+
+|-l, --life
+|ライフ(整数) 初期値3
+|不正解できる上限回数を指定する。repeatも自動的に指定される
+|===
+`!mondai stop`::
+進行中の問題を終了する
 
 == ライセンス
 
