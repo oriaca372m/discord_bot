@@ -64,6 +64,10 @@ class VideoPosRange
     @first <= pos && pos <= @last
   end
 
+  def at_least_duration(duration)
+    VideoPosRange.new(first - duration, last)
+  end
+
   attr_reader :first, :last
 end
 
@@ -79,6 +83,8 @@ class SourcePicker
   def pick
     @force_pos ? Source.new(@src_file, @force_pos) : Source.new(@src_file, pick_video_frame(@src_file))
   end
+
+  attr_reader :duration
 
 private
   def pick_video_frame(fn)
@@ -106,7 +112,7 @@ class SourcePickerWithBlacklist < SourcePicker
     duration = get_video_duration(fn) - @duration - VideoPos.new(1000)
 
     while moment = VideoPos.new(rand(0..duration.in_ms))
-      if !black_range.any? { |i| i.cover?(moment) }
+      if !black_range.any? { |i| i.at_least_duration(duration).cover?(moment) }
         return moment
       end
     end
