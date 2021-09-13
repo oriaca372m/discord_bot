@@ -13,7 +13,7 @@ async function main() {
 		}
 	}
 
-	const client = new discordjs.Client()
+	const client = new discordjs.Client({ intents: [discordjs.Intents.FLAGS.GUILDS] })
 	const featureManager = new FeatureManager(client)
 
 	let ready = false

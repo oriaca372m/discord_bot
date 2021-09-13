@@ -24,7 +24,10 @@ export class CustomReply {
 	private gc: FeatureGlobalConfig
 	private readonly _actions: { [key: string]: Action }
 
-	constructor(readonly feature: FeatureCustomReply, public readonly channel: discordjs.Channel) {
+	constructor(
+		readonly feature: FeatureCustomReply,
+		public readonly channel: utils.LikeTextChannel
+	) {
 		this.gc = feature.gc
 		this.images = new Images(this, this.gc)
 		this.config = new Config(this, this.gc)
@@ -53,15 +56,15 @@ export class CustomReply {
 		}
 
 		let text = result.text ?? ''
-		const options = result.options ?? {}
 		if (msg.guild) {
 			text = utils.replaceEmoji(text, msg.guild.emojis)
 		}
+		const options = { ...(result.options ?? {}), content: text }
 
 		if (response.reply) {
-			await msg.reply(text, options)
+			await msg.reply(options)
 		} else {
-			await msg.channel.send(text, options)
+			await msg.channel.send(options)
 		}
 	}
 

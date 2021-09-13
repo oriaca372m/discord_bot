@@ -62,16 +62,13 @@ export class Game {
 	private correctCount = 0
 	private processing = false
 	private tmpDir: string | undefined
-	private readonly feature: FeatureMondai
 
 	constructor(
 		private readonly channelInstance: Mondai,
 		private readonly gc: FeatureGlobalConfig,
 		private readonly mode: GameMode,
 		private readonly options: GameOption
-	) {
-		this.feature = channelInstance.feature
-	}
+	) {}
 
 	private get config(): MondaiConfig {
 		return this.channelInstance.config
@@ -131,7 +128,7 @@ export class Game {
 					}
 				} catch (e) {
 					// TODO: 特別なエラー型にラップする
-					throw Error(e)
+					throw Error(e as string)
 				}
 			},
 			5,
