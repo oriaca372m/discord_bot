@@ -1,4 +1,5 @@
 import * as discordjs from 'discord.js'
+import * as voice from '@discordjs/voice'
 
 import CommonFeatureBase from 'Src/features/common-feature-base'
 import { Command } from 'Src/features/command'
@@ -99,10 +100,11 @@ class PlayMusicCommand implements Command {
 
 export class FeaturePlayMusic extends CommonFeatureBase {
 	private readonly interactors: Set<AddInteractor> = new Set()
-	private connection: discordjs.VoiceConnection | undefined
-	private dispatcher: discordjs.StreamDispatcher | undefined
+	private connection: voice.VoiceConnection | undefined
+	private player: voice.AudioPlayer | undefined
 	private musicFinalizer: (() => void) | undefined
 	private _database!: MusicDatabase
+	private _isPlaying = false
 
 	readonly playlist: Playlist = new Playlist()
 	currentPlayingTrack: number | undefined
@@ -153,7 +155,7 @@ export class FeaturePlayMusic extends CommonFeatureBase {
 	}
 
 	play(): Promise<void> {
-		if (this.connection === undefined) {
+		if (this.connection === undefined || this.player === undefined) {
 			throw '接続中のコネクションがない'
 		}
 
@@ -162,30 +164,18 @@ export class FeaturePlayMusic extends CommonFeatureBase {
 			throw '流すべき曲がない'
 		}
 
-		this.destroyDispather()
+		this.finalizeMusic()
 
-		{
-			const [dispatcher, finalizer] = music.createDispatcher(this.connection)
-			this.dispatcher = dispatcher
-			this.musicFinalizer = finalizer
-		}
-
-		this.dispatcher.on('finish', () => {
-			void this.next()
-		})
-
-		this.dispatcher.on('error', (error) => {
-			console.error(error)
-			this.destroyDispather()
-
-			// TODO: どうにかしてテキストチャンネルに通知を送りたい所
-		})
+		const [resource, finalizer] = music.createResource()
+		this.musicFinalizer = finalizer
+		this._isPlaying = true
+		this.player.play(resource)
 
 		return Promise.resolve()
 	}
 
 	async next(): Promise<void> {
-		this.destroyDispather()
+		this.finalizeMusic()
 		if (this.connection === undefined) {
 			return
 		}
@@ -219,33 +209,70 @@ export class FeaturePlayMusic extends CommonFeatureBase {
 		await this.play()
 	}
 
-	destroyDispather(): void {
-		this.dispatcher?.destroy()
-		this.dispatcher = undefined
+	private finalizeMusic(): void {
+		this._isPlaying = false
+		this.player?.stop()
 
 		if (this.musicFinalizer !== undefined) {
 			this.musicFinalizer()
+			this.musicFinalizer = undefined
 		}
 	}
 
 	async closeConnection(): Promise<void> {
-		this.destroyDispather()
+		this.finalizeMusic()
 		if (this.connection !== undefined) {
-			this.connection.disconnect()
+			this.connection.destroy()
 			this.connection = undefined
+			this.player = undefined
 			// 入れないと次のコネクションの作成がタイムアウトする
 			// 1秒で十分かどうかは知らない
 			await utils.delay(1000)
 		}
 	}
 
-	async makeConnection(channel: discordjs.VoiceChannel): Promise<void> {
-		if (this.connection !== undefined && channel.id === this.connection.channel.id) {
-			this.destroyDispather()
+	private createPlayer(): voice.AudioPlayer {
+		const player = voice.createAudioPlayer()
+
+		player.on(voice.AudioPlayerStatus.Idle, () => {
+			if (this._isPlaying) {
+				void this.next()
+			}
+		})
+
+		player.on('error', (error) => {
+			console.error(error)
+			this.finalizeMusic()
+
+			// TODO: どうにかしてテキストチャンネルに通知を送りたい所
+		})
+
+		return player
+	}
+
+	async makeConnection(channel: discordjs.BaseGuildVoiceChannel): Promise<void> {
+		if (this.connection !== undefined && channel.id === this.connection.joinConfig.channelId) {
+			this.finalizeMusic()
+			return
 		} else {
 			await this.closeConnection()
 		}
-		this.connection = await channel.join()
+
+		const conn = voice.joinVoiceChannel({
+			channelId: channel.id,
+			guildId: channel.guild.id,
+			adapterCreator: channel.guild.voiceAdapterCreator,
+		})
+
+		try {
+			await voice.entersState(conn, voice.VoiceConnectionStatus.Ready, 30e3)
+			this.connection = conn
+			this.player = this.createPlayer()
+			this.connection.subscribe(this.player)
+		} catch (e) {
+			conn.destroy()
+			throw e
+		}
 	}
 
 	async finalize(): Promise<void> {

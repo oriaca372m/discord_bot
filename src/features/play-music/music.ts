@@ -1,4 +1,4 @@
-import * as discordjs from 'discord.js'
+import * as voice from '@discordjs/voice'
 import ytdl from 'ytdl-core'
 import { ListItem, Selectable } from 'Src/features/play-music/interactor/listview'
 import { MusicDatabase } from 'Src/features/play-music/music-database'
@@ -45,9 +45,7 @@ export interface Music extends ListItem {
 	serialize(): SerializedMusic
 
 	// 戻り値の関数は再生終了後の後処理用
-	createDispatcher(
-		connection: discordjs.VoiceConnection
-	): [discordjs.StreamDispatcher, (() => void) | undefined]
+	createResource(): [voice.AudioResource, (() => void) | undefined]
 }
 
 export class MusicFile implements Music {
@@ -83,10 +81,8 @@ export class MusicFile implements Music {
 		return
 	}
 
-	createDispatcher(
-		connection: discordjs.VoiceConnection
-	): [discordjs.StreamDispatcher, (() => void) | undefined] {
-		return [connection.play(this.path), undefined]
+	createResource(): [voice.AudioResource, (() => void) | undefined] {
+		return [voice.createAudioResource(this.path), undefined]
 	}
 }
 
@@ -156,9 +152,7 @@ export class YouTubeMusic implements Music {
 		return
 	}
 
-	createDispatcher(
-		connection: discordjs.VoiceConnection
-	): [discordjs.StreamDispatcher, (() => void) | undefined] {
+	createResource(): [voice.AudioResource, (() => void) | undefined] {
 		// とりあえず動く
 		const stream = ytdl(this._videoId, { quality: 'highestaudio' })
 		stream.on('error', () => {
@@ -166,7 +160,7 @@ export class YouTubeMusic implements Music {
 		})
 
 		return [
-			connection.play(stream),
+			voice.createAudioResource(stream),
 			(): void => {
 				stream.destroy()
 			},

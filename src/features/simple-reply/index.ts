@@ -9,7 +9,7 @@ export class FeatureSimpleReply extends CommonFeatureBase {
 		}
 
 		if (msg.content.includes('チノちゃんかわいい')) {
-			await msg.reply('わかる', { files: ['./assets/chino.png'] })
+			await msg.reply({ content: 'わかる', files: ['./assets/chino.png'] })
 		}
 	}
 }
