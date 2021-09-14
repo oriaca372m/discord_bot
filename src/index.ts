@@ -13,7 +13,13 @@ async function main() {
 		}
 	}
 
-	const client = new discordjs.Client({ intents: [discordjs.Intents.FLAGS.GUILDS] })
+	const client = new discordjs.Client({
+		intents: [
+			discordjs.Intents.FLAGS.GUILDS,
+			discordjs.Intents.FLAGS.GUILD_MESSAGES,
+			discordjs.Intents.FLAGS.GUILD_VOICE_STATES,
+		],
+	})
 	const featureManager = new FeatureManager(client)
 
 	let ready = false
@@ -39,7 +45,7 @@ async function main() {
 		})()
 	})
 
-	client.on('message', (msg) => {
+	client.on('messageCreate', (msg) => {
 		void (async (): Promise<void> => {
 			if (!ready) {
 				return
