@@ -1,8 +1,7 @@
 FROM alpine:3 AS builder
 
-RUN apk add --no-cache nodejs pixman cairo pango libpng jpeg giflib && \
-	apk add --no-cache --virtual build-dependencies yarn \
-	build-base pkgconfig pixman-dev cairo-dev pango-dev libpng-dev jpeg-dev giflib-dev
+RUN apk add --no-cache nodejs-current pixman cairo pango libpng jpeg giflib \
+	yarn build-base pkgconfig pixman-dev cairo-dev pango-dev libpng-dev jpeg-dev giflib-dev libtool autoconf automake
 
 RUN yarn global add node-gyp
 
@@ -20,7 +19,7 @@ RUN yarn install --frozen-lockfile --production
 
 FROM alpine:3
 
-RUN apk add --no-cache nodejs ruby ruby-json pixman cairo pango libpng jpeg giflib imagemagick
+RUN apk add --no-cache nodejs-current ruby ruby-json pixman cairo pango libpng jpeg giflib imagemagick
 
 WORKDIR /usr/src/app
 
