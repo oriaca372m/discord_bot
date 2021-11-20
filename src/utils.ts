@@ -378,7 +378,7 @@ export function parseIndexes(strings: string[], min: number, max: number): numbe
 export async function readAll(rs: stream.Readable): Promise<Buffer> {
 	const buffers: Buffer[] = []
 	for await (const chunk of rs) {
-		buffers.push(chunk)
+		buffers.push(chunk as Buffer)
 	}
 
 	return Buffer.concat(buffers)

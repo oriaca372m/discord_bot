@@ -146,7 +146,7 @@ describe('parseCommand', () => {
 describe('retry', () => {
 	test('正しい値が返ってくること', async () => {
 		const res = await utils.retry(() => Promise.resolve('hoge'), 1)
-		expect(res).toEqual('hoge')
+		expect(res).toBe('hoge')
 	})
 
 	test('正しい例外が返ってくること', async () => {
