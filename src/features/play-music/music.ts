@@ -1,7 +1,7 @@
 import * as voice from '@discordjs/voice'
-import ytdl from 'ytdl-core'
 import { ListItem, Selectable } from 'Src/features/play-music/interactor/listview'
 import { MusicDatabase } from 'Src/features/play-music/music-database'
+import { YouTubeMusic, SerializedYouTubeMusic } from './youtube'
 
 type FieldNames<T> = {
 	// eslint-disable-next-line @typescript-eslint/ban-types
@@ -32,12 +32,6 @@ export type SerializedMusic = SerializedMusicFile | SerializedYouTubeMusic
 export interface SerializedMusicFile {
 	kind: 'file'
 	uuid: string
-}
-
-export interface SerializedYouTubeMusic {
-	kind: 'youtube'
-	videoId: string
-	title: string
 }
 
 export interface Music extends ListItem {
@@ -117,61 +111,6 @@ export class Album implements Selectable {
 
 	select(): Music[] | undefined {
 		return this.musics
-	}
-}
-
-export class YouTubeMusic implements Music {
-	private _title!: string
-	private _videoId!: string
-
-	constructor(private _url: string) {}
-
-	async init(): Promise<void> {
-		this._videoId = ytdl.getVideoID(this._url)
-		const info = await ytdl.getBasicInfo(this._videoId)
-		this._title = info.player_response.videoDetails.title
-	}
-
-	getTitle(): string {
-		return this._title
-	}
-
-	serialize(): SerializedYouTubeMusic {
-		return { kind: 'youtube', videoId: this._videoId, title: this._title }
-	}
-
-	get videoId(): string {
-		return this._videoId
-	}
-
-	toListString(): string {
-		return `(youtube ${this.videoId}) ${this.getTitle()}`
-	}
-
-	select(): Music[] | undefined {
-		return
-	}
-
-	createResource(): [voice.AudioResource, (() => void) | undefined] {
-		// とりあえず動く
-		const stream = ytdl(this._videoId, { quality: 'highestaudio' })
-		stream.on('error', () => {
-			console.error('YouTubeの再生中にエラー')
-		})
-
-		return [
-			voice.createAudioResource(stream),
-			(): void => {
-				stream.destroy()
-			},
-		]
-	}
-
-	static deserialize(data: SerializedYouTubeMusic): YouTubeMusic {
-		const m = new YouTubeMusic(data.videoId)
-		m._videoId = data.videoId
-		m._title = data.title
-		return m
 	}
 }
 

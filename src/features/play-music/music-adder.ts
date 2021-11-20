@@ -1,5 +1,6 @@
 import * as discordjs from 'discord.js'
-import { Music, YouTubeMusic } from 'Src/features/play-music/music'
+import { Music } from 'Src/features/play-music/music'
+import { YouTubeMusic } from 'Src/features/play-music/youtube'
 import { FeaturePlayMusic } from 'Src/features/play-music'
 import * as utils from 'Src/utils'
 

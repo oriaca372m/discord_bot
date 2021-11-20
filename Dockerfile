@@ -1,9 +1,12 @@
 FROM alpine:3 AS builder
 
 RUN apk add --no-cache nodejs-current pixman cairo pango libpng jpeg giflib \
-	yarn build-base pkgconfig pixman-dev cairo-dev pango-dev libpng-dev jpeg-dev giflib-dev libtool autoconf automake
+	yarn build-base pkgconfig pixman-dev cairo-dev pango-dev libpng-dev jpeg-dev giflib-dev libtool autoconf automake curl
 
 RUN yarn global add node-gyp
+
+RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp
+RUN chmod a+rx /usr/local/bin/yt-dlp
 
 WORKDIR /usr/src/app
 
@@ -19,7 +22,7 @@ RUN yarn install --frozen-lockfile --production
 
 FROM alpine:3
 
-RUN apk add --no-cache nodejs-current ruby ruby-json pixman cairo pango libpng jpeg giflib imagemagick
+RUN apk add --no-cache nodejs-current ruby ruby-json pixman cairo pango libpng jpeg giflib imagemagick python3
 
 WORKDIR /usr/src/app
 
@@ -28,5 +31,6 @@ ENV PATH $PATH:/usr/src/app/node_modules/ffmpeg-static
 COPY --from=builder /usr/src/app/tools ./tools
 COPY --from=builder /usr/src/app/node_modules ./node_modules
 COPY --from=builder /usr/src/app/dist ./dist
+COPY --from=builder /usr/local/bin/yt-dlp /usr/local/bin/yt-dlp
 
 CMD ["node", "dist/main.js"]

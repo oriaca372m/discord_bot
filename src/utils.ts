@@ -261,6 +261,12 @@ export function isValidUrl(url: string): boolean {
 	return validUrlRegExp.test(url)
 }
 
+export function mustValidUrl(url: string): void {
+	if (!isValidUrl(url)) {
+		throw new Error(`不正なURL: ${url}`)
+	}
+}
+
 export async function forEachAsyncOf<T>(
 	arr: Iterable<T>,
 	doWithX: (x: T) => Promise<void>
