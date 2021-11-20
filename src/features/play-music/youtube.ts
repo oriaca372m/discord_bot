@@ -20,6 +20,7 @@ function getTitle(url: string): Promise<string | undefined> {
 		execFile(
 			ytdlPath,
 			['--dump-json', '--', url],
+			{ maxBuffer: 1024 * 1024 * 10 },
 			(error: Error | null, stdout: string | Buffer) => {
 				if (error) {
 					reject(error)

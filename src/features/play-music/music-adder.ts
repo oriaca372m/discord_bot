@@ -73,7 +73,8 @@ export class MusicAdder {
 				const ytMusic = new YouTubeMusic(keyword)
 				try {
 					await ytMusic.init()
-				} catch (_) {
+				} catch (e) {
+					console.error('youtubeの曲の初期化中にエラー', e)
 					continue
 				}
 				musics.push(ytMusic)
