@@ -291,7 +291,7 @@ export async function forEachAsyncOf<T>(
 	}
 }
 
-export type LikeTextChannel = discordjs.TextBasedChannels
+export type LikeTextChannel = discordjs.TextBasedChannel
 
 export type PaginationResult<T> =
 	| { kind: 'ok'; maxPage: number; value: T[]; firstIndex: number }
