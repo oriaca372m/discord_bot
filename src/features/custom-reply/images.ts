@@ -1,10 +1,9 @@
-import { promises as fs } from 'fs'
 import axios from 'axios'
 import * as discordjs from 'discord.js'
 
 import { FeatureGlobalConfig } from 'Src/features/global-config'
+import { ObjectStorage } from 'Src/object-storage'
 import * as utils from 'Src/utils'
-import { CustomReply } from 'src/features/custom-reply'
 
 export function isValidImageId(id: string): boolean {
 	const validImageIdRegExp = /^[a-zA-Z0-9-_]{2,32}\.(png|jpg|jpeg|gif)$/
@@ -16,15 +15,18 @@ export class Images {
 	private state = 'free'
 	private imageName: string | undefined
 
-	constructor(
-		private readonly channelInstance: CustomReply,
-		private readonly gc: FeatureGlobalConfig
-	) {}
+	#objectStorage!: ObjectStorage
 
-	async init(): Promise<void> {
-		this._images = await fs.readdir(
-			`./config/custom-reply/${this.channelInstance.channel.id}/images/`
-		)
+	constructor(private readonly gc: FeatureGlobalConfig) {}
+
+	async init(storage: ObjectStorage): Promise<void> {
+		this.#objectStorage = storage
+		await storage.mkdir('.')
+		await this.#reloadImages()
+	}
+
+	async #reloadImages(): Promise<void> {
+		this._images = await this.#objectStorage.readDir()
 		this._images.sort()
 	}
 
@@ -32,8 +34,12 @@ export class Images {
 		return this._images
 	}
 
-	getImagePathById(id: string): string {
-		return `./config/custom-reply/${this.channelInstance.channel.id}/images/${id}`
+	#getImagePathById(id: string): string {
+		return id
+	}
+
+	async getImageBufById(id: string): Promise<Buffer> {
+		return this.#objectStorage.readFile(this.#getImagePathById(id))
 	}
 
 	async uploadCommand(args: string[], msg: discordjs.Message): Promise<void> {
@@ -122,7 +128,7 @@ export class Images {
 		}
 
 		this._images.splice(index)
-		await fs.unlink(this.getImagePathById(args[0]))
+		await this.#objectStorage.unlink(this.#getImagePathById(args[0]))
 
 		await this.gc.send(msg, 'customReply.images.removingComplete')
 	}
@@ -148,13 +154,13 @@ export class Images {
 			'customReply.images.sendPreview',
 			{},
 			{
-				files: [this.getImagePathById(args[0])],
+				files: [await this.getImageBufById(args[0])],
 			}
 		)
 	}
 
 	async reloadLocalCommand(args: string[], msg: discordjs.Message): Promise<void> {
-		await this.init()
+		await this.#reloadImages()
 		await this.gc.send(msg, 'customReply.images.localReloadingComplete')
 	}
 
@@ -187,7 +193,10 @@ export class Images {
 
 			const imageName = this.imageName ?? utils.unreachable()
 
-			await fs.writeFile(this.getImagePathById(imageName), Buffer.from(res.data))
+			await this.#objectStorage.writeFile(
+				this.#getImagePathById(imageName),
+				Buffer.from(res.data)
+			)
 			if (!this._images.includes(imageName)) {
 				this._images.push(imageName)
 				this._images.sort()

@@ -29,7 +29,7 @@ export class CustomReply {
 		public readonly channel: utils.LikeTextChannel
 	) {
 		this.gc = feature.gc
-		this.images = new Images(this, this.gc)
+		this.images = new Images(this.gc)
 		this.config = new Config(this, this.gc)
 
 		this._actions = {
@@ -42,8 +42,9 @@ export class CustomReply {
 	}
 
 	async init(): Promise<void> {
-		await this.config.init()
-		await this.images.init()
+		const storage = await this.gc.defaultObjectStorage.cd(`custom-reply/${this.channel.id}`)
+		await this.config.init(storage)
+		await this.images.init(await storage.cd('images'))
 		this.initialized = true
 	}
 

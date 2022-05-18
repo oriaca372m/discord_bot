@@ -1,8 +1,8 @@
-import { promises as fs } from 'fs'
 import TOML from '@iarna/toml'
 import lodash from 'lodash'
 import * as discordjs from 'discord.js'
 import { FeatureBase } from 'Src/features/feature'
+import { ObjectStorage } from 'Src/object-storage'
 
 import * as utils from 'Src/utils'
 
@@ -20,9 +20,11 @@ export class FeatureGlobalConfig extends FeatureBase {
 	private config: Config | undefined
 	private readonly templateCache = new Map<string, lodash.TemplateExecutor>()
 	readonly priority = 50000
+	readonly #defaultObjectStorage: ObjectStorage
 
-	constructor(private paths: string[]) {
+	constructor(defaultObjectStorage: ObjectStorage, private paths: string[]) {
 		super()
+		this.#defaultObjectStorage = defaultObjectStorage
 	}
 
 	protected async initImpl(): Promise<void> {
@@ -30,7 +32,7 @@ export class FeatureGlobalConfig extends FeatureBase {
 		for (const path of this.paths) {
 			let toml
 			try {
-				toml = await fs.readFile(path, 'utf-8')
+				toml = (await this.defaultObjectStorage.readFile(path)).toString('utf-8')
 			} catch (_) {
 				// pass
 			}
@@ -88,5 +90,9 @@ export class FeatureGlobalConfig extends FeatureBase {
 			text = utils.replaceEmoji(text, channel.guild.emojis)
 		}
 		return await channel.send({ content: text, ...options })
+	}
+
+	get defaultObjectStorage(): ObjectStorage {
+		return this.#defaultObjectStorage
 	}
 }
