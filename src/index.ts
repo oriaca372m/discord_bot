@@ -4,12 +4,18 @@ import FeatureManager from 'Src/features/feature-manager'
 import { FeatureGlobalConfig } from 'Src/features/global-config'
 import { FileSystemObjectStorage } from 'Src/object-storage'
 import { ConfigLoader } from 'Src/config'
+import * as path from 'path'
 
 async function main() {
-	const storage = new FileSystemObjectStorage(process.cwd())
-	const config = new ConfigLoader(
-		(await storage.readFile('config/features.toml')).toString('utf-8')
-	)
+	const storage = (() => {
+		const fsPath = process.env.DISCORD_BOT_FILE_SYSTEM_OBJECT_STORAGE_PATH
+		if (fsPath !== undefined) {
+			return new FileSystemObjectStorage(path.resolve(fsPath))
+		}
+		return new FileSystemObjectStorage(path.resolve('config'))
+	})()
+
+	const config = new ConfigLoader((await storage.readFile('features.toml')).toString('utf-8'))
 
 	{
 		const ok = await config.load()
@@ -28,7 +34,7 @@ async function main() {
 	const featureManager = new FeatureManager(client)
 	featureManager.registerFeature(
 		'gc',
-		() => new FeatureGlobalConfig(storage, ['config/config-default.toml', 'config/config.toml'])
+		() => new FeatureGlobalConfig(storage, ['config-default.toml', 'config.toml'])
 	)
 
 	let ready = false

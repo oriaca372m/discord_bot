@@ -42,9 +42,7 @@ export class CustomReply {
 	}
 
 	async init(): Promise<void> {
-		const storage = await this.gc.defaultObjectStorage.cd(
-			`test-storage/custom-reply/${this.channel.id}`
-		)
+		const storage = await this.gc.defaultObjectStorage.cd(`custom-reply/${this.channel.id}`)
 		await this.config.init(storage)
 		await this.images.init(await storage.cd('images'))
 		this.initialized = true
