@@ -1,11 +1,11 @@
-import { promises as fs } from 'fs'
 import axios from 'axios'
 import TOML from '@iarna/toml'
 import * as discordjs from 'discord.js'
 
 import { FeatureGlobalConfig } from 'Src/features/global-config'
-import * as utils from 'Src/utils'
 import { CustomReply } from 'src/features/custom-reply'
+import { ObjectStorage } from 'Src/object-storage'
+import * as utils from 'Src/utils'
 
 function validateParsedConfig(_config: unknown): _config is ReplyConfig {
 	// TODO: バリデーション実施。ダメな時は false を返す
@@ -41,11 +41,39 @@ export class Config {
 	public readonly config = new Map<string, ReplyConfig>()
 	private readonly configSources = new Map<string, ConfigSource>()
 	private readonly configTexts = new Map<string, string>()
+	#objectStorage!: ObjectStorage
 
 	constructor(
 		private readonly channelInstance: CustomReply,
 		private readonly gc: FeatureGlobalConfig
 	) {}
+
+	async init(storage: ObjectStorage): Promise<void> {
+		this.#objectStorage = storage
+		await this.#objectStorage.mkdir('.')
+
+		let json
+		try {
+			json = (await this.#objectStorage.readFile('sources.json')).toString('utf-8')
+		} catch (_) {
+			return
+		}
+
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+		const parsed = JSON.parse(json)
+		for (const [k, v] of parsed) {
+			this.configSources.set(k, v)
+		}
+
+		for (const id of this.configSources.keys()) {
+			try {
+				await this.updateConfig(id)
+			} catch (e) {
+				console.error(e)
+				continue
+			}
+		}
+	}
 
 	getConifgIds(): string[] {
 		return [...this.configSources.keys()]
@@ -77,13 +105,13 @@ export class Config {
 		this.config.set(id, parsed)
 		this.configTexts.set(id, text)
 		if (writeToFile) {
-			await fs.writeFile(this._configFilePath(id), text)
+			await this.#objectStorage.writeFile(this.#configFilePath(id), text)
 		}
 		return
 	}
 
-	private _configFilePath(id: string): string {
-		return `./config/custom-reply/${this.channelInstance.channel.id}/${id}.dat`
+	#configFilePath(id: string): string {
+		return `${id}.dat`
 	}
 
 	private async updateConfig(id: string, viaInternet = false): Promise<void> {
@@ -101,42 +129,11 @@ export class Config {
 			}
 			text = data
 		} else {
-			text = await fs.readFile(this._configFilePath(id), 'utf-8')
+			text = (await this.#objectStorage.readFile(this.#configFilePath(id))).toString('utf-8')
 		}
 
 		if ((await this.setConifg(id, text, viaInternet)) !== undefined) {
 			throw new Error(`invalid config file: ${id}`)
-		}
-	}
-
-	async init(): Promise<void> {
-		await fs.mkdir(`./config/custom-reply/${this.channelInstance.channel.id}/images`, {
-			recursive: true,
-		})
-
-		let json
-		try {
-			json = await fs.readFile(
-				`./config/custom-reply/${this.channelInstance.channel.id}/sources.json`,
-				'utf-8'
-			)
-		} catch (_) {
-			return
-		}
-
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-		const parsed = JSON.parse(json)
-		for (const [k, v] of parsed) {
-			this.configSources.set(k, v)
-		}
-
-		for (const id of this.configSources.keys()) {
-			try {
-				await this.updateConfig(id)
-			} catch (e) {
-				console.error(e)
-				continue
-			}
 		}
 	}
 
@@ -182,10 +179,7 @@ export class Config {
 	}
 
 	async writeSourcesJson(): Promise<void> {
-		await fs.writeFile(
-			`./config/custom-reply/${this.channelInstance.channel.id}/sources.json`,
-			JSON.stringify([...this.configSources])
-		)
+		await this.#objectStorage.writeFile('sources.json', JSON.stringify([...this.configSources]))
 	}
 
 	private async addCommand(args: string[], msg: discordjs.Message): Promise<void> {
