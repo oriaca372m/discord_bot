@@ -389,3 +389,11 @@ export async function readAll(rs: stream.Readable): Promise<Buffer> {
 
 	return Buffer.concat(buffers)
 }
+
+export function removePrefix(str: string, prefix: string): string {
+	if (str.startsWith(prefix)) {
+		return str.slice(prefix.length)
+	}
+
+	return str
+}
