@@ -261,6 +261,9 @@ export class FeaturePlayMusic extends CommonFeatureBase {
 		const conn = voice.joinVoiceChannel({
 			channelId: channel.id,
 			guildId: channel.guild.id,
+			// https://github.com/discordjs/discord.js/issues/7884
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
 			adapterCreator: channel.guild.voiceAdapterCreator,
 		})
 
