@@ -1,4 +1,3 @@
-import { promises as fs } from 'fs'
 import TOML from '@iarna/toml'
 
 import { isRight } from 'fp-ts/Either'
@@ -17,11 +16,10 @@ export class ConfigLoader {
 	token!: string
 	features!: Map<string, FeatureInterface>
 
-	constructor(private readonly _path: string) {}
+	constructor(private readonly _toml: string) {}
 
 	async load(): Promise<boolean> {
-		const toml = await fs.readFile(this._path, 'utf-8')
-		const parsed = await TOML.parse.async(toml)
+		const parsed = await TOML.parse.async(this._toml)
 
 		const result = Config.decode(parsed)
 		if (isRight(result)) {

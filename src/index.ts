@@ -6,7 +6,10 @@ import { FileSystemObjectStorage } from 'Src/object-storage'
 import { ConfigLoader } from 'Src/config'
 
 async function main() {
-	const config = new ConfigLoader('./config/features.toml')
+	const storage = new FileSystemObjectStorage(process.cwd())
+	const config = new ConfigLoader(
+		(await storage.readFile('config/features.toml')).toString('utf-8')
+	)
 
 	{
 		const ok = await config.load()
@@ -25,11 +28,7 @@ async function main() {
 	const featureManager = new FeatureManager(client)
 	featureManager.registerFeature(
 		'gc',
-		() =>
-			new FeatureGlobalConfig(new FileSystemObjectStorage(process.cwd()), [
-				'./config/config-default.toml',
-				'./config/config.toml',
-			])
+		() => new FeatureGlobalConfig(storage, ['config/config-default.toml', 'config/config.toml'])
 	)
 
 	let ready = false
