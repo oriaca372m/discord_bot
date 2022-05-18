@@ -4,6 +4,7 @@ import CommonFeatureBase from 'Src/features/common-feature-base'
 import { Command } from 'Src/features/command'
 import { StorageType } from 'Src/features/storage'
 import { FeatureGlobalConfig } from 'Src/features/global-config'
+import { ObjectStorage } from 'Src/object-storage'
 
 import * as utils from 'Src/utils'
 import { Images } from 'Src/features/custom-reply/images'
@@ -29,7 +30,7 @@ export class CustomReply {
 		public readonly channel: utils.LikeTextChannel
 	) {
 		this.gc = feature.gc
-		this.images = new Images(this, this.gc)
+		this.images = new Images(this.gc)
 		this.config = new Config(this, this.gc)
 
 		this._actions = {
@@ -42,8 +43,11 @@ export class CustomReply {
 	}
 
 	async init(): Promise<void> {
+		const storage = await this.gc.defaultObjectStorage.cd(
+			`test-storage/custom-reply/${this.channel.id}`
+		)
 		await this.config.init()
-		await this.images.init()
+		await this.images.init(await storage.cd('images'))
 		this.initialized = true
 	}
 

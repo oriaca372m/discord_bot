@@ -1,4 +1,5 @@
 assets/
+test-storage/
 config/*
 !config/config-default.toml
 !config/features-example.toml
