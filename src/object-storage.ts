@@ -4,6 +4,7 @@ import * as path from 'path'
 export interface ObjectStorage {
 	readFile(path: string): Promise<Buffer>
 	writeFile(path: string, content: Buffer | string): Promise<void>
+	unlink(path: string): Promise<void>
 	readDir(path?: string): Promise<string[]>
 	mkdir(path: string): Promise<void>
 
@@ -33,6 +34,10 @@ export class FileSystemObjectStorage implements ObjectStorage {
 
 	writeFile(path: string, content: Buffer | string): Promise<void> {
 		return fs.writeFile(this.#getPath(path), content)
+	}
+
+	unlink(path: string): Promise<void> {
+		return fs.unlink(this.#getPath(path))
 	}
 
 	readDir(path?: string): Promise<string[]> {
