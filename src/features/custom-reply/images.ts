@@ -34,8 +34,12 @@ export class Images {
 		return this._images
 	}
 
-	getImagePathById(id: string): string {
+	#getImagePathById(id: string): string {
 		return id
+	}
+
+	async getImageBufById(id: string): Promise<Buffer> {
+		return this.#objectStorage.readFile(this.#getImagePathById(id))
 	}
 
 	async uploadCommand(args: string[], msg: discordjs.Message): Promise<void> {
@@ -124,7 +128,7 @@ export class Images {
 		}
 
 		this._images.splice(index)
-		await this.#objectStorage.unlink(this.getImagePathById(args[0]))
+		await this.#objectStorage.unlink(this.#getImagePathById(args[0]))
 
 		await this.gc.send(msg, 'customReply.images.removingComplete')
 	}
@@ -145,13 +149,12 @@ export class Images {
 			return
 		}
 
-		const imgBuf = await this.#objectStorage.readFile(this.getImagePathById(args[0]))
 		await this.gc.send(
 			msg,
 			'customReply.images.sendPreview',
 			{},
 			{
-				files: [imgBuf],
+				files: [await this.getImageBufById(args[0])],
 			}
 		)
 	}
@@ -191,7 +194,7 @@ export class Images {
 			const imageName = this.imageName ?? utils.unreachable()
 
 			await this.#objectStorage.writeFile(
-				this.getImagePathById(imageName),
+				this.#getImagePathById(imageName),
 				Buffer.from(res.data)
 			)
 			if (!this._images.includes(imageName)) {

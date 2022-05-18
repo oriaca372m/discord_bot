@@ -4,7 +4,6 @@ import CommonFeatureBase from 'Src/features/common-feature-base'
 import { Command } from 'Src/features/command'
 import { StorageType } from 'Src/features/storage'
 import { FeatureGlobalConfig } from 'Src/features/global-config'
-import { ObjectStorage } from 'Src/object-storage'
 
 import * as utils from 'Src/utils'
 import { Images } from 'Src/features/custom-reply/images'

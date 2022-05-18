@@ -22,7 +22,7 @@ export class ActionGacha implements Action {
 
 		return {
 			text: res.text,
-			options: { files: [this._images.getImagePathById(utils.randomPick(list))] },
+			options: { files: [await this._images.getImageBufById(utils.randomPick(list))] },
 		}
 	}
 }
