@@ -1,6 +1,7 @@
 import discordjs from 'discord.js'
 
 import FeatureManager from 'Src/features/feature-manager'
+import { FeatureGlobalConfig } from 'Src/features/global-config'
 import { ConfigLoader } from 'Src/config'
 
 async function main() {
@@ -21,6 +22,10 @@ async function main() {
 		],
 	})
 	const featureManager = new FeatureManager(client)
+	featureManager.registerFeature(
+		'gc',
+		() => new FeatureGlobalConfig(['./config/config-default.toml', './config/config.toml'])
+	)
 
 	let ready = false
 
