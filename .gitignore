@@ -1,7 +1,7 @@
 assets/
 test-storage/
 config/*
-!config/config-default.toml
+!config/messages-default.toml
 !config/features-example.toml
 /run_docker.sh
 

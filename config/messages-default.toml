@@ -1,0 +1,145 @@
+[message.mondai]
+invalidCommand = '変なコマンドを指定していないかロボ?: <%= e %>'
+invalidCommandMode = '知らないモードロボねぇ…'
+lastCommandIsStillInProgress = '前回の問題がまだ進行中みたいロボ! `!<%= cmdname %> stop` で強制終了ロボ!'
+sendMondaiImage = '問題ロボ! 頑張ってロボ!'
+
+repeatResult = '''
+お疲れさまロボ。合計正解数は<%= correctCount %>回ロボよ!
+<% if (correctCount === 0) {
+%>0回とかありえないロボ… どうして始めたロボ?<%
+} else if (correctCount < 5) {
+%>もうちょっと頑張るロボ…<%
+} else if (correctCount < 10) {
+%>なかなかやるロボね<%
+} else if (correctCount < 20) {
+%>かなりスゴイロボね!<%
+} else if (correctCount < 50) {
+%>超スゴイロボ!<%
+} else if (correctCount < 100) {
+%>本当に人間ロボ? ロボットじゃないかロボ?!<%
+} else {
+%>へ、変態ロボ! 正解率98%以上を誇る変態ロボ! 怖いロボ…<% } %>'''
+
+incorrectImageMap = '''
+間違えた問題は左上から右、下の順にこれロボ:
+<% for (const a of answers) {
+%><%= a.title %>
+<% } %>'''
+
+onErrorExit = '''
+エラーが発生したので問題を強制終了するロボ…
+最後の問題の正解は**<%= title %>**で再生時間は<%= time %>ロボ
+'''
+
+[message.mondai.answer]
+reachedIncorrectLimit = '''
+:no_entry_sign: 間違えすぎロボよ… 正解は**<%= title %>**で再生時間は<%= time %>ロボ
+<% if (mosaic) {
+%>でもモザイクだからしょうがないロボね
+オリジナルの画像はこれだロボ<%
+} else {
+%>出直して来るロボ!<% } %>'''
+
+surrender = '''
+情けない子…ロボ! 正解は**<%= title %>**で再生時間は<%= time %>ロボよ
+<% if (mosaic) {
+%>モザイクは難しいロボね
+オリジナルの画像はこれだロボ<%
+} else {
+%>出直すロボ!<% } %>'''
+
+correct = '''
+:ok_hand: 正解ロボ! **<%= title %>** ちなみに再生時間は<%= time %>だロボよ<%
+if (mosaic) { %>オリジナルの画像はこれロボ。よく頑張ったロボ!<% } %>'''
+
+incorrect = ':no_entry_sign: 不正解。もうちょっと頑張るか降参するロボ'
+
+[message.customReply]
+invalidImageIdInResponse = '''
+どうにも無効な画像ID <%= imageId %> がレスポンスに含まれているようだロボ
+インジェクションを試みてないかロボ? 絶対にやめるロボよ…'''
+
+imageIdThatDoesNotExist = 'どうも使用できない画像 <%= imageId %> がレスポンスに含まれているようだロボ'
+gachaImageNotFound = 'ガチャに使用できる画像が一つもないロボ'
+
+[message.customReply.config]
+errorOnReloading = 'ID: <%= id %> のリロード中にエラーが発生したロボ…'
+localReloadingComplete = 'customReply のローカル設定をリロードしたロボ!'
+reloadingComplete = 'ID: <%= id %> の設定をリロードしたロボ!'
+addingComplete = 'ID: <%= id %> の設定を追加したロボ! メンテナンス頑張ってロボ!'
+removingComplete = 'ID: <%= id %> の設定を削除したロボ。いままでお疲れさまロボ。'
+haveToSpecifyId = 'ID を指定して欲しいだなも'
+haveToSpecifyValidId = 'まともな ID を指定して欲しいだなも'
+haveToSpecifyValidUrl = 'まともな URL を指定して欲しいだなも'
+haveToSpecifyIdAndUrl = 'ID と URL を指定して欲しいだなも'
+idThatDoesNotExist = 'そんな ID は存在しないんだなも!'
+list = "登録されている設定一覧ロボ:\n<%= sources %>"
+
+[message.customReply.images]
+haveToSpecifyId = 'ID を指定して欲しいだロボ'
+haveToSpecifyValidId = "まともな ID を指定して欲しいだなも"
+haveToSpecifyValidIdAndSorry = "マトモな ID を指定して欲しいロボ。申し訳ないロボ…\nあと拡張子は必須ロボよ"
+imageIdThatDoesNotExist = 'そんな ID は存在しないんだなも!'
+uploadingImageCancel = '画像のアップロードをキャンセルしたロボ'
+readyToUpload = '画像を送信するロボ'
+uploadingComplete = '画像のアップロードが完了したロボよー'
+list = "これが画像リストロボよー (<%= currentPage %>/<%= maxPage %>):\n<%= images %>"
+listInvalidCommand = '変なコマンドを指定していないかロボ?: <%= e %>'
+listImageNotFound = '画像が一つもないロボ'
+invalidPageId = '無効なページ番号ロボ。最大ページ数は<%= maxPage %>ロボよ'
+removingComplete = '画像を削除したロボ!'
+sendPreview = 'これがその画像ロボ!'
+localReloadingComplete = 'ローカルにある画像を再読込したロボ!'
+
+[message.playMusic]
+haveToJoinVoiceChannel = 'ボイスチャンネルに入ってから言うロボ'
+
+[message.playMusic.interactor]
+welcome = '''
+曲追加モードに入ったロボ
+操作方法は `help` で出るロボよ'''
+invalidCommand = '不明なコマンドロボ! ヘルプを表示するには `help` と、曲追加モードから抜けるには `quit` とタイプするロボ'
+help = '''
+`<>` は必須引数を、`[]` はオプション引数を表すロボ
+
+`search <キーワード>` キーワードで曲を検索するロボ
+`searchArtist <アーティスト名>` アーティストを検索するロボ
+`searchAlbum <アルバム名>` アルバムを検索するロボ
+`show [ページ番号]` 検索結果を表示するロボ
+
+`add [番号1] [番号2...]` 指定した番号の曲をプレイリストに追加するロボ
+`play [番号1] [番号2...]` 指定した番号の曲でプレイリストを上書きして再生するロボ
+`select [番号1] [番号2...]` 指定した番号の検索結果を選択するロボ
+	例えば検索結果にアーティストが表示されている時に実行すると、そのアーティストの曲が新しい検索結果になるロボ。
+	細かいことはいろいろ試してみて欲しいロボね
+`add` `play` `select` は番号を指定しないと検索結果の全てが対象になるロボ
+
+`playlist` プレイリストの内容を表示するロボ `show` で他のページも見れるロボよ
+	更に次の2つのコマンドも使えるようになるロボ
+	`sw <番号>` そのトラックに移動するロボ
+	`shuffle` プレイリストをシャッフルするロボ
+
+`help` このヘルプを表示するロボ
+`quit` 曲追加モードから抜けるロボ'''
+quit = '曲追加モードから抜けたロボよ'
+addedMusic = '''
+<% if (all) {
+%>全ての曲を追加したロボ!<%
+} else if (musics.length === 0) {
+%>曲は追加されなかったロボ。ちゃんと番号を確認することロボね<%
+} else {
+%>次の曲をプレイリストに追加したロボ:
+<% for (const m of musics) {
+%><%= m.metadata.title %>
+<% } %><% } %>
+'''
+selectInvalidState = '`select` はアーティスト/アルバムの検索結果がある時だけ使えるロボ'
+resultNotFound = '検索結果に表示するものが無いロボ'
+invalidPageId = '無効なページ番号ロボ。最大ページ数は<%= maxPage %>ロボよ'
+list = "検索結果ロボよー (<%= currentPage %>/<%= maxPage %>):\n<%= results %>"
+haveToSpecifyKeyword = '検索キーワードを指定するロボ'
+
+[message.sk.set]
+set = 'skを設定したロボ: <%= sk %>'
+invalidCommand = '変なコマンドロボね…'
