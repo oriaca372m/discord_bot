@@ -40,7 +40,7 @@ export class FileSystemObjectStorage implements ObjectStorage {
 	}
 
 	async mkdir(path: string): Promise<void> {
-		await fs.mkdir(path, { recursive: true })
+		await fs.mkdir(this.#getPath(path), { recursive: true })
 	}
 
 	cd(path: string): Promise<ObjectStorage> {
