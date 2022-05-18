@@ -34,7 +34,7 @@ async function main() {
 	const featureManager = new FeatureManager(client)
 	featureManager.registerFeature(
 		'gc',
-		() => new FeatureGlobalConfig(storage, ['config-default.toml', 'config.toml'])
+		() => new FeatureGlobalConfig(storage, ['messages-default.toml', 'messages.toml'])
 	)
 
 	let ready = false
