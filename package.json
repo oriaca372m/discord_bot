@@ -7,8 +7,8 @@
     "start": "webpack && node dist/main.js",
     "watch": "webpack --watch",
     "test": "jest",
-    "lint": "eslint src/**.{ts,js} && prettier --check src/**.{ts,js}",
-    "fix": "eslint --fix src/**.{ts,js} && prettier --write src/**.{ts,js}"
+    "lint": "eslint src/**/*.{ts,js} && prettier --check src/**/*.{ts,js}",
+    "fix": "eslint --fix src/**/*.{ts,js} && prettier --write src/**/*.{ts,js}"
   },
   "license": "Zlib",
   "private": true,
