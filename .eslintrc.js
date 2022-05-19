@@ -1,28 +1,27 @@
 module.exports = {
-	'env': {
-		'es6': true,
-		'node': true
+	env: {
+		es6: true,
+		node: true,
 	},
-	'extends': [
+	extends: [
 		'eslint:recommended',
 		'plugin:@typescript-eslint/recommended',
 		'plugin:@typescript-eslint/recommended-requiring-type-checking',
 		'plugin:jest/recommended',
 		'plugin:jest/style',
-		'prettier'
+		'prettier',
 	],
-	'globals': {
-		'Atomics': 'readonly',
-		'SharedArrayBuffer': 'readonly'
+	plugins: ['jest'],
+	globals: {
+		Atomics: 'readonly',
+		SharedArrayBuffer: 'readonly',
 	},
-	'parser': '@typescript-eslint/parser',
-	'parserOptions': {
-		'ecmaVersion': 2018,
-		'sourceType': 'module',
-		'project': './tsconfig.json'
+	parser: '@typescript-eslint/parser',
+	parserOptions: {
+		project: './tsconfig.eslint.json',
 	},
-	'rules': {
-		'@typescript-eslint/no-unused-vars': ['error', { 'argsIgnorePattern': '^_' }],
-		'@typescript-eslint/no-empty-interface': 'off'
-	}
+	rules: {
+		'@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+		'@typescript-eslint/no-empty-interface': 'off',
+	},
 }
