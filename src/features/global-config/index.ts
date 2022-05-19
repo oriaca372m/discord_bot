@@ -49,8 +49,7 @@ export class FeatureGlobalConfig extends FeatureBase {
 	async send(
 		msg: discordjs.Message,
 		key: string,
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		args: any = {},
+		args: object = {},
 		options: discordjs.MessageOptions = {}
 	): Promise<discordjs.Message | discordjs.Message[]> {
 		return await this.sendToChannel(msg.channel, key, args, options)
@@ -59,8 +58,7 @@ export class FeatureGlobalConfig extends FeatureBase {
 	async sendToChannel(
 		channel: utils.LikeTextChannel,
 		key: string,
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		args: any = {},
+		args: object = {},
 		options: discordjs.MessageOptions = {}
 	): Promise<discordjs.Message | discordjs.Message[]> {
 		let templateText = key

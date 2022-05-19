@@ -79,7 +79,7 @@ export class FeatureSk extends CommonFeatureBase {
 			const picked = new Map<number, string>()
 
 			await msg.reply(
-				msg.content.replace(this.skRegExp, (match, strnb) => {
+				msg.content.replace(this.skRegExp, (match, strnb: string) => {
 					const nb = parseInt(strnb, 10)
 					let res = picked.get(nb)
 					if (res === undefined) {

@@ -117,7 +117,7 @@ export class Play implements WebApiHandler {
 				continue
 			}
 
-			const vc = channel as discordjs.VoiceChannel
+			const vc = channel
 			const size = vc.members.size
 			if (0 < size) {
 				if (foundVoiceChannel !== undefined && size <= foundVoiceChannel.members.size) {

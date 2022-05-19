@@ -159,7 +159,7 @@ export class Images {
 		)
 	}
 
-	async reloadLocalCommand(args: string[], msg: discordjs.Message): Promise<void> {
+	async reloadLocalCommand(_args: string[], msg: discordjs.Message): Promise<void> {
 		await this.#reloadImages()
 		await this.gc.send(msg, 'customReply.images.localReloadingComplete')
 	}

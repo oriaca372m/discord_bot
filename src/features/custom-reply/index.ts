@@ -30,7 +30,7 @@ export class CustomReply {
 	) {
 		this.gc = feature.gc
 		this.images = new Images(this.gc)
-		this.config = new Config(this, this.gc)
+		this.config = new Config(this.gc)
 
 		this._actions = {
 			gacha: new ActionGacha(this.images, this.gc),
