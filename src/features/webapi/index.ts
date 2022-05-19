@@ -89,8 +89,7 @@ export class FeatureWebApi extends FeatureBase {
 			const tokenInfo = this._authorizer.getAdditionalAccessTokenInfo(token)
 			if (tokenInfo === undefined) {
 				return {
-					error:
-						'This token cannot invoke method call because it has not additional token info.',
+					error: 'This token cannot invoke method call because it has not additional token info.',
 				}
 			}
 
