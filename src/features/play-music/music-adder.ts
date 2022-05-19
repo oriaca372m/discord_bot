@@ -26,7 +26,6 @@ export class MusicAdder {
 		try {
 			;({ args, options } = utils.parseCommandArgs(rawArgs, []))
 		} catch (e) {
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 			await this.feature.gc.send(msg, 'playMusic.invalidCommand', { e })
 			return
 		}
@@ -36,7 +35,6 @@ export class MusicAdder {
 		const isAddToNext = utils.getOption(options, ['n', 'next']) as boolean
 
 		if (isAddToFirst && isAddToNext) {
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 			await this.feature.gc.send(msg, 'playMusic.invalidCommand', {
 				e: 'firstとnextを同時に指定することはできません',
 			})

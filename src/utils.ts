@@ -271,8 +271,7 @@ export async function forEachAsyncOf<T>(
 	arr: Iterable<T>,
 	doWithX: (x: T) => Promise<void>
 ): Promise<void> {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const errors: any[] = []
+	const errors: unknown[] = []
 
 	await Promise.all(
 		Array.from(arr, (x) => {
@@ -319,8 +318,7 @@ export function pagination<T>(
 }
 
 export class RetryError extends Error {
-	// eslint-disable-next-line
-	constructor(public cause: any) {
+	constructor(public cause: unknown) {
 		super()
 	}
 }
@@ -330,15 +328,13 @@ export async function retry<T>(
 	ntimes: number,
 	logging = false
 ): Promise<T> {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	let lastError: any
+	let lastError: unknown
 
 	for (let i = 0; i < ntimes; i++) {
 		try {
 			const a = await func()
 			return a
 		} catch (e) {
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 			lastError = e
 			if (logging) {
 				console.error(e)

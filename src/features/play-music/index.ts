@@ -32,7 +32,6 @@ class PlayMusicCommand implements Command {
 		try {
 			;({ args } = utils.parseCommandArgs(rawArgs, [], 0))
 		} catch (e) {
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 			await this.gc.send(msg, 'playMusic.invalidCommand', { e })
 			return
 		}

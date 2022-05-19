@@ -51,7 +51,6 @@ export class Mondai {
 		try {
 			;({ args, options } = utils.parseCommandArgs(rawArgs, ['life', 'l']))
 		} catch (e) {
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 			await this.gc.send(msg, 'mondai.invalidCommand', { e })
 			return
 		}
@@ -144,8 +143,7 @@ export class FeatureMondai extends CommonFeatureBase {
 		this.storageDriver.setChannelStorageConstructor(
 			(ch) =>
 				new StorageType(
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					new Map<string, any>([['mondai', new Mondai(this, ch, this.config)]])
+					new Map<string, unknown>([['mondai', new Mondai(this, ch, this.config)]])
 				)
 		)
 		this.featureCommand.registerCommand(new FeatureMondaiCommand(this, this.cmdname))

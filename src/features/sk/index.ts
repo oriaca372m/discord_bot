@@ -62,11 +62,7 @@ export class FeatureSk extends CommonFeatureBase {
 
 	initImpl(): Promise<void> {
 		this.storageDriver.setChannelStorageConstructor(
-			() =>
-				new StorageType(
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					new Map<string, any>([['sk', new Map<number, SkStore>()]])
-				)
+			() => new StorageType(new Map<string, unknown>([['sk', new Map<number, SkStore>()]]))
 		)
 		this.featureCommand.registerCommand(
 			new SetSkCommand(this.setCmdName, this.storageDriver, this.gc)
@@ -79,7 +75,7 @@ export class FeatureSk extends CommonFeatureBase {
 			const picked = new Map<number, string>()
 
 			await msg.reply(
-				msg.content.replace(this.skRegExp, (match, strnb) => {
+				msg.content.replace(this.skRegExp, (match, strnb: string) => {
 					const nb = parseInt(strnb, 10)
 					let res = picked.get(nb)
 					if (res === undefined) {

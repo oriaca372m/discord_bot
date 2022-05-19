@@ -6,7 +6,7 @@ import * as discordjs from 'discord.js'
 
 import { FeatureGlobalConfig } from 'Src/features/global-config'
 import * as utils from 'Src/utils'
-import { FeatureMondai, Mondai, MondaiConfig } from 'Src/features/mondai'
+import { Mondai, MondaiConfig } from 'Src/features/mondai'
 import { generateImageMap } from 'Src/features/mondai/image-map'
 
 export type GameOption = {
@@ -35,7 +35,7 @@ function generateMondaiImage(
 				reject(error)
 			}
 			try {
-				resolve(JSON.parse(stdout as string))
+				resolve(JSON.parse(stdout as string) as { [_: string]: string })
 			} catch (e) {
 				reject(e)
 			}

@@ -30,7 +30,7 @@ export class CustomReply {
 	) {
 		this.gc = feature.gc
 		this.images = new Images(this.gc)
-		this.config = new Config(this, this.gc)
+		this.config = new Config(this.gc)
 
 		this._actions = {
 			gacha: new ActionGacha(this.images, this.gc),
@@ -139,10 +139,7 @@ export class FeatureCustomReply extends CommonFeatureBase {
 		this.storageDriver.setChannelStorageConstructor((ch) => {
 			const client = new CustomReply(this, ch)
 			void client.init()
-			return new StorageType(
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				new Map<string, any>([['customReply', client]])
-			)
+			return new StorageType(new Map<string, unknown>([['customReply', client]]))
 		})
 		this.featureCommand.registerCommand(new CustomReplyCommand(this, this.cmdname))
 

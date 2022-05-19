@@ -1,9 +1,10 @@
 {
   "name": "discord_bot",
   "version": "1.0.0",
+  "type": "module",
   "main": "src/index.js",
   "scripts": {
-    "build": "tsc && tsc-alias",
+    "build": "tsc && tsc-alias -f",
     "start": "yarn run build && node dist/index.js",
     "test": "jest",
     "lint": "tsc --project tsconfig.eslint.json --noEmit && eslint src/**/*.{ts,js} && prettier --check src/**/*.{ts,js}",
@@ -17,7 +18,6 @@
     "@discordjs/voice": "^0.9.0",
     "@iarna/toml": "^2.2.5",
     "@msgpack/msgpack": "^2.7.2",
-    "axios": "^0.27.2",
     "canvas": "^2.9.1",
     "core-js": "^3.22.5",
     "discord.js": "^13.7.0",
@@ -28,6 +28,7 @@
     "jimp": "^0.16.1",
     "lodash": "^4.17.21",
     "music-metadata": "^7.12.3",
+    "node-fetch": "^3.2.4",
     "pako": "^2.0.4",
     "sodium": "^3.0.2",
     "uuid": "^8.3.2"

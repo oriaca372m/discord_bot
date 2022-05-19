@@ -30,7 +30,7 @@ async function loadMusicLists(dir: string): Promise<MusicLists> {
 	for (const file of files) {
 		const toml = await fs.readFile(path.join(dir, file), 'utf-8')
 		// TODO: バリデーション
-		const parsed = ((await TOML.parse.async(toml)) as unknown) as MusicListFormat
+		const parsed = (await TOML.parse.async(toml)) as unknown as MusicListFormat
 		const musicListName = parsed.name
 		musicLists.set(
 			musicListName,

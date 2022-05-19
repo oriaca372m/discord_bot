@@ -8,8 +8,7 @@ export interface FeatureEventResult {
 	context?: FeatureEventContext
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type FeatureEventContext = { [key: string]: any }
+export type FeatureEventContext = { [key: string]: unknown }
 
 export interface FeatureInterface {
 	preInit(manager: FeatureManager): void

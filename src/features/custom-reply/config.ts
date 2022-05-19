@@ -1,9 +1,8 @@
-import axios from 'axios'
+import fetch from 'node-fetch'
 import TOML from '@iarna/toml'
 import * as discordjs from 'discord.js'
 
 import { FeatureGlobalConfig } from 'Src/features/global-config'
-import { CustomReply } from 'src/features/custom-reply'
 import { ObjectStorage } from 'Src/object-storage'
 import * as utils from 'Src/utils'
 
@@ -43,10 +42,7 @@ export class Config {
 	private readonly configTexts = new Map<string, string>()
 	#objectStorage!: ObjectStorage
 
-	constructor(
-		private readonly channelInstance: CustomReply,
-		private readonly gc: FeatureGlobalConfig
-	) {}
+	constructor(private readonly gc: FeatureGlobalConfig) {}
 
 	async init(storage: ObjectStorage): Promise<void> {
 		this.#objectStorage = storage
@@ -59,8 +55,7 @@ export class Config {
 			return
 		}
 
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-		const parsed = JSON.parse(json)
+		const parsed = JSON.parse(json) as [string, ConfigSource][]
 		for (const [k, v] of parsed) {
 			this.configSources.set(k, v)
 		}
@@ -122,12 +117,8 @@ export class Config {
 
 		let text
 		if (viaInternet) {
-			const req = await axios(`${source.source}?${Math.random()}`)
-			const data = req.data as unknown
-			if (typeof data !== 'string') {
-				throw new Error(`invalid response type: ${id}`)
-			}
-			text = data
+			const req = await fetch(`${source.source}?${Math.random()}`)
+			text = await req.text()
 		} else {
 			text = (await this.#objectStorage.readFile(this.#configFilePath(id))).toString('utf-8')
 		}
@@ -137,7 +128,7 @@ export class Config {
 		}
 	}
 
-	private async reloadLocalCommand(args: string[], msg: discordjs.Message): Promise<void> {
+	private async reloadLocalCommand(_args: string[], msg: discordjs.Message): Promise<void> {
 		for (const id of this.configSources.keys()) {
 			try {
 				await this.updateConfig(id)
@@ -207,7 +198,7 @@ export class Config {
 		await this.gc.send(msg, 'customReply.config.addingComplete', { id })
 	}
 
-	private async listCommand(args: string[], msg: discordjs.Message): Promise<void> {
+	private async listCommand(_args: string[], msg: discordjs.Message): Promise<void> {
 		await this.gc.send(msg, 'customReply.config.list', {
 			sources: [...this.configSources].map(([k, v]) => `${k}: ${v.source}`).join('\n'),
 		})
