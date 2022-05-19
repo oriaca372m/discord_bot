@@ -69,7 +69,6 @@ export class Images {
 			;({ args, options } = utils.parseCommandArgs(rawArgs, ['s', 'search']))
 		} catch (e) {
 			await this.gc.send(msg, 'customReply.images.listInvalidCommand', {
-				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 				e,
 			})
 			return

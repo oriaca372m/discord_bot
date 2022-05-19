@@ -4,11 +4,9 @@ import { FeatureInterface, FeatureBase } from 'Src/features/feature'
 import * as utils from 'Src/utils'
 
 export class StorageType {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private storage: Map<string, any>
+	private storage: Map<string, unknown>
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	constructor(defaultValue = new Map<string, any>()) {
+	constructor(defaultValue = new Map<string, unknown>()) {
 		this.storage = defaultValue
 	}
 
@@ -16,8 +14,7 @@ export class StorageType {
 		return this.storage.has(key)
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
-	set(key: string, value: any): void {
+	set(key: string, value: unknown): void {
 		this.storage.set(key, value)
 	}
 
