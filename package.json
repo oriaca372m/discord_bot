@@ -3,11 +3,10 @@
   "version": "1.0.0",
   "main": "src/index.js",
   "scripts": {
-    "build": "webpack",
-    "start": "webpack && node dist/main.js",
-    "watch": "webpack --watch",
+    "build": "tsc && tsc-alias",
+    "start": "yarn run build && node dist/index.js",
     "test": "jest",
-    "lint": "eslint src/**/*.{ts,js} && prettier --check src/**/*.{ts,js}",
+    "lint": "tsc --project tsconfig.eslint.json --noEmit && eslint src/**/*.{ts,js} && prettier --check src/**/*.{ts,js}",
     "fix": "eslint --fix src/**/*.{ts,js} && prettier --write src/**/*.{ts,js}"
   },
   "license": "Zlib",
@@ -44,13 +43,10 @@
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-jest": "^26.2.2",
     "jest": "^28.1.0",
-    "nodemon-webpack-plugin": "^4.7.1",
     "prettier": "^2.6.2",
     "ts-jest": "^28.0.2",
     "ts-loader": "^9.3.0",
-    "typescript": "^4.6.4",
-    "webpack": "^5.72.1",
-    "webpack-cli": "^4.9.2",
-    "webpack-node-externals": "^3.0.0"
+    "tsc-alias": "^1.6.7",
+    "typescript": "^4.6.4"
   }
 }
