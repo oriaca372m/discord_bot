@@ -1,4 +1,4 @@
-import axios from 'axios'
+import fetch from 'node-fetch'
 import TOML from '@iarna/toml'
 import * as discordjs from 'discord.js'
 
@@ -117,12 +117,8 @@ export class Config {
 
 		let text
 		if (viaInternet) {
-			const req = await axios(`${source.source}?${Math.random()}`)
-			const data = req.data as unknown
-			if (typeof data !== 'string') {
-				throw new Error(`invalid response type: ${id}`)
-			}
-			text = data
+			const req = await fetch(`${source.source}?${Math.random()}`)
+			text = await req.text()
 		} else {
 			text = (await this.#objectStorage.readFile(this.#configFilePath(id))).toString('utf-8')
 		}

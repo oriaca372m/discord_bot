@@ -1,8 +1,8 @@
 import TOML from '@iarna/toml'
 
-import { isRight } from 'fp-ts/Either'
+import { isRight } from 'fp-ts/lib/Either.js'
 import * as t from 'io-ts'
-import { PathReporter } from 'io-ts/lib/PathReporter'
+import { PathReporter } from 'io-ts/lib/PathReporter.js'
 
 import { FeatureInterface } from 'Src/features/feature'
 import { FeatureConfigBase, FeatureLoader } from 'Src/config/feature-loader'

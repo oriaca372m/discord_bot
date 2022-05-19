@@ -1,4 +1,4 @@
-import axios from 'axios'
+import fetch from 'node-fetch'
 import * as discordjs from 'discord.js'
 
 import { FeatureGlobalConfig } from 'Src/features/global-config'
@@ -185,24 +185,20 @@ export class Images {
 				return
 			}
 
-			const res = await axios({
-				method: 'get',
-				url: firstAttachment.url,
-				responseType: 'arraybuffer',
-			})
-
 			const imageName = this.imageName ?? utils.unreachable()
 
+			const res = await fetch(firstAttachment.url)
 			await this.#objectStorage.writeFile(
 				this.#getImagePathById(imageName),
-				Buffer.from(res.data)
+				Buffer.from(await res.arrayBuffer())
 			)
+
 			if (!this._images.includes(imageName)) {
 				this._images.push(imageName)
 				this._images.sort()
 			}
-			await this.gc.send(msg, 'customReply.images.uploadingComplete')
 
+			await this.gc.send(msg, 'customReply.images.uploadingComplete')
 			this.state = 'free'
 		}
 	}

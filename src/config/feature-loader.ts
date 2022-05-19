@@ -1,6 +1,6 @@
-import { isLeft } from 'fp-ts/Either'
+import { isLeft } from 'fp-ts/lib/Either.js'
 import * as t from 'io-ts'
-import { PathReporter } from 'io-ts/lib/PathReporter'
+import { PathReporter } from 'io-ts/lib/PathReporter.js'
 
 import { FeatureInterface } from 'Src/features/feature'
 
