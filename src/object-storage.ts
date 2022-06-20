@@ -8,7 +8,7 @@ import {
 	S3Client,
 } from '@aws-sdk/client-s3'
 import * as u from 'Src/utils'
-import * as l from 'lodash'
+import l from 'lodash'
 import stream from 'stream'
 
 export interface ObjectStorage {
