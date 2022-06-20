@@ -108,7 +108,7 @@ export class FeaturePlayMusic extends CommonFeatureBase {
 	readonly playlist: Playlist = new Playlist()
 	currentPlayingTrack: number | undefined
 
-	constructor(public readonly cmdname: string) {
+	constructor(public readonly cmdname: string, readonly youtubeApiKey?: string) {
 		super()
 	}
 

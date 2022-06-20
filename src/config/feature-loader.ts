@@ -21,9 +21,9 @@ export type FeatureConfigBaseType = t.TypeOf<typeof FeatureConfigBase>
 
 type Loader = (entry: FeatureConfigBaseType) => FeatureInterface
 
-function makeLoader<P extends t.Props>(
-	ConfigType: t.TypeC<P>,
-	converter: (entry: t.TypeOf<t.TypeC<P>>) => FeatureInterface
+function makeLoader<A, O>(
+	ConfigType: t.Type<A, O, unknown>,
+	converter: (entry: t.TypeOf<t.Type<A, O, unknown>>) => FeatureInterface
 ): Loader {
 	return (entry: FeatureConfigBaseType) => {
 		const result = ConfigType.decode(entry)
@@ -62,10 +62,15 @@ const loaders: { [key: string]: Loader } = {
 	),
 
 	play_music: makeLoader(
-		t.type({
-			command_name: t.string,
-		}),
-		(cfg) => new FeaturePlayMusic(cfg.command_name)
+		t.intersection([
+			t.type({
+				command_name: t.string,
+			}),
+			t.partial({
+				youtube_api_key: t.string,
+			}),
+		]),
+		(cfg) => new FeaturePlayMusic(cfg.command_name, cfg.youtube_api_key)
 	),
 
 	sk: makeLoader(

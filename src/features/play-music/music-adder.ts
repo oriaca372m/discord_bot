@@ -1,6 +1,6 @@
 import * as discordjs from 'discord.js'
 import { Music } from 'Src/features/play-music/music'
-import { YouTubeMusic } from 'Src/features/play-music/youtube'
+import { YouTubeMusic, fetchPlaylistItems } from 'Src/features/play-music/youtube'
 import { FeaturePlayMusic } from 'Src/features/play-music'
 import * as utils from 'Src/utils'
 
@@ -49,15 +49,61 @@ export class MusicAdder {
 		}
 	}
 
+	async #resolveMusicKeyword(keyword: string, isYouTube: boolean): Promise<Music[]> {
+		let url: URL | undefined
+		try {
+			url = new URL(keyword)
+		} catch {
+			// pass
+		}
+
+		if (
+			url !== undefined &&
+			(url.hostname === 'youtube.com' || url.hostname === 'www.youtube.com')
+		) {
+			const params = url.searchParams
+			const listId = params.get('list')
+			if (listId !== null) {
+				const apiKey = this.feature.youtubeApiKey
+				if (apiKey === undefined) {
+					throw new Error('YouTubeのAPIキーが指定されていません')
+				}
+				try {
+					return await fetchPlaylistItems(apiKey, listId)
+				} catch (e) {
+					console.error('YouTubeのプレイリストの取得に失敗', e)
+					return []
+				}
+			}
+		}
+
+		if (url !== undefined || isYouTube) {
+			try {
+				const ytMusic = new YouTubeMusic(keyword)
+				await ytMusic.init()
+				return [ytMusic]
+			} catch (e) {
+				console.error('youtubeの曲の初期化中にエラー', e)
+			}
+		} else {
+			const music = this.feature.database.search(keyword)[0]
+			if (music !== undefined) {
+				return [music]
+			}
+		}
+
+		return []
+	}
+
 	private async getMusics(keywords: string[], isYouTube: boolean): Promise<Music[]> {
-		const musics = []
+		const musics: Music[] = []
 
 		const listMusics = this._listMusics
 		if (listMusics !== undefined) {
-			let indexes: number[] | undefined = undefined
+			let indexes: number[] | undefined
 			try {
 				indexes = utils.parseIndexes(keywords, 0, listMusics.length)
-			} catch (_) {
+			} catch {
 				// pass
 			}
 
@@ -67,20 +113,9 @@ export class MusicAdder {
 		}
 
 		for (const keyword of keywords) {
-			if (isYouTube) {
-				const ytMusic = new YouTubeMusic(keyword)
-				try {
-					await ytMusic.init()
-				} catch (e) {
-					console.error('youtubeの曲の初期化中にエラー', e)
-					continue
-				}
-				musics.push(ytMusic)
-			} else {
-				const music = this.feature.database.search(keyword)[0]
-				if (music !== undefined) {
-					musics.push(music)
-				}
+			const music = await this.#resolveMusicKeyword(keyword, isYouTube)
+			if (music !== undefined) {
+				musics.push(...music)
 			}
 		}
 
@@ -124,10 +159,16 @@ export class MusicAdder {
 
 		if (toAddMusics.length === 0) {
 			await msg.reply('そんな曲は無いロボ…')
-		} else {
+		} else if (toAddMusics.length <= 20) {
 			await msg.reply(
 				`プレイリストに追加したロボ!:\n${toAddMusics.map((x) => x.getTitle()).join('\n')}`
 			)
+		} else {
+			const musicNames = toAddMusics
+				.slice(0, 20)
+				.map((x) => x.getTitle())
+				.join('\n')
+			await msg.reply(`${toAddMusics.length}件追加したロボ!:\n${musicNames}\netc...`)
 		}
 
 		return toAddMusics

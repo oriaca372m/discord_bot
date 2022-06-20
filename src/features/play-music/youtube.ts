@@ -1,3 +1,4 @@
+import fetch from 'node-fetch'
 import * as voice from '@discordjs/voice'
 import { spawn, execFile } from 'child_process'
 import { Music } from './music'
@@ -42,23 +43,24 @@ function getTitle(url: string): Promise<string | undefined> {
 }
 
 export class YouTubeMusic implements Music {
-	private _title!: string
+	#title: string | undefined
 
-	constructor(private _url: string) {
+	constructor(private _url: string, title?: string) {
 		utils.mustValidUrl(_url)
+		this.#title = title
 	}
 
 	async init(): Promise<void> {
-		this._title = (await getTitle(this._url)) ?? '(タイトル取得失敗)'
+		this.#title = (await getTitle(this._url)) ?? '(タイトル取得失敗)'
 		return Promise.resolve()
 	}
 
 	getTitle(): string {
-		return this._title
+		return this.#title ?? '(タイトル未取得)'
 	}
 
 	serialize(): SerializedYouTubeMusic {
-		return { kind: 'youtube', url: this._url, title: this._title }
+		return { kind: 'youtube', url: this._url, title: this.getTitle() }
 	}
 
 	toListString(): string {
@@ -86,7 +88,70 @@ export class YouTubeMusic implements Music {
 
 	static deserialize(data: SerializedYouTubeMusic): YouTubeMusic {
 		const m = new YouTubeMusic(data.url)
-		m._title = data.title
+		m.#title = data.title
 		return m
 	}
+}
+
+interface PlaylistItemsRes {
+	nextPageToken?: string
+	items: Item[]
+}
+
+interface Item {
+	snippet: Snippet
+}
+
+interface Snippet {
+	title: string
+	resourceId: ResourceId & VideoResourceId
+}
+
+interface ResourceId {
+	kind: string
+}
+
+interface VideoResourceId {
+	kind: 'youtube#video'
+	videoId: string
+}
+
+export async function fetchPlaylistItems(
+	apiKey: string,
+	playlistId: string
+): Promise<YouTubeMusic[]> {
+	const musics: YouTubeMusic[] = []
+
+	let pageToken: string | undefined = undefined
+	do {
+		const url = new URL('https://youtube.googleapis.com/youtube/v3/playlistItems')
+		const params = url.searchParams
+		params.set('part', 'snippet')
+		params.set('key', apiKey)
+		params.set('playlistId', playlistId)
+		params.set('maxResults', '50')
+		if (pageToken !== undefined) {
+			params.set('pageToken', pageToken)
+		}
+
+		const res = await fetch(url.toString(), {
+			method: 'GET',
+			headers: {
+				Accept: 'application/json',
+			},
+		})
+		const json = (await res.json()) as PlaylistItemsRes
+
+		for (const item of json.items) {
+			if (item.snippet.resourceId.kind !== 'youtube#video') {
+				continue
+			}
+
+			const videoUrl = `https://youtu.be/${item.snippet.resourceId.videoId}`
+			musics.push(new YouTubeMusic(videoUrl, item.snippet.title))
+		}
+		pageToken = json.nextPageToken
+	} while (pageToken !== undefined)
+
+	return musics
 }
