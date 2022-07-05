@@ -14,7 +14,7 @@
   "private": true,
   "dependencies": {
     "@aws-sdk/client-s3": "^3.113.0",
-    "@discordjs/opus": "^0.7.0",
+    "@discordjs/opus": "^0.8.0",
     "@discordjs/voice": "^0.10.0",
     "@iarna/toml": "^2.2.5",
     "@msgpack/msgpack": "^2.7.2",
