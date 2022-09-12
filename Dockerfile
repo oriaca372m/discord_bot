@@ -22,7 +22,7 @@ RUN yarn install --frozen-lockfile --production
 
 FROM alpine:3
 
-RUN apk add --update --no-cache nodejs-current ruby ruby-json pixman cairo pango libpng jpeg giflib imagemagick python3
+RUN apk add --update --no-cache nodejs-current ruby ruby-json pixman cairo pango libpng jpeg giflib imagemagick python3 font-noto font-noto-cjk
 
 WORKDIR /usr/src/app
 
