@@ -4,6 +4,7 @@ import { WebApiHandler, AccessTokenInfo } from 'Src/features/webapi'
 
 import { FeaturePlayMusic } from 'Src/features/play-music'
 import { SerializedMusic, deserializeMusic } from 'Src/features/play-music/music'
+import { resolveUrl } from 'Src/features/play-music/music-adder'
 
 interface WebApiMusic {
 	readonly serialized: SerializedMusic
@@ -54,6 +55,39 @@ export class AddToPlaylist implements WebApiHandler {
 		}
 
 		return Promise.resolve({})
+	}
+}
+
+interface AddUrlToPlaylistReq {
+	url: string
+}
+
+interface AddUrlToPlaylistRes {
+	added: SerializedMusic[]
+}
+
+export class AddUrlToPlaylist implements WebApiHandler {
+	readonly methodName = 'play-music/add-url-to-playlist'
+
+	constructor(private readonly _feature: FeaturePlayMusic) {}
+
+	async handle(args: AddUrlToPlaylistReq): Promise<AddUrlToPlaylistRes> {
+		let url: URL | undefined
+		try {
+			url = new URL(args.url)
+		} catch {
+			// pass
+		}
+
+		if (url === undefined) {
+			return { error: 'url is not an url.' } as any
+		}
+
+		const musics = await resolveUrl(this._feature, url)
+		for (const music of musics)  {
+			this._feature.playlist.addMusic(music)
+		}
+		return {added: musics.map((x) => x.serialize())}
 	}
 }
 

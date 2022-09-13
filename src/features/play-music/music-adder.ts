@@ -11,6 +11,34 @@ interface CommandOptions {
 	isAddToNext: boolean
 }
 
+export async function resolveUrl(feature: FeaturePlayMusic, url: URL): Promise<Music[]> {
+	if (url.hostname === 'youtube.com' || url.hostname === 'www.youtube.com') {
+		const params = url.searchParams
+		const listId = params.get('list')
+		if (listId !== null && !params.has('v')) {
+			const apiKey = feature.youtubeApiKey
+			if (apiKey === undefined) {
+				throw new Error('YouTubeのAPIキーが指定されていません')
+			}
+			try {
+				return await fetchPlaylistItems(apiKey, listId)
+			} catch (e) {
+				console.error('YouTubeのプレイリストの取得に失敗', e)
+				return []
+			}
+		}
+	}
+
+	try {
+		const ytMusic = new YouTubeMusic(url.toString())
+		await ytMusic.init()
+		return [ytMusic]
+	} catch (e) {
+		console.error('youtubeの曲の初期化中にエラー', e)
+		return []
+	}
+}
+
 export class MusicAdder {
 	constructor(
 		private readonly feature: FeaturePlayMusic,
@@ -57,39 +85,17 @@ export class MusicAdder {
 			// pass
 		}
 
-		if (
-			url !== undefined &&
-			(url.hostname === 'youtube.com' || url.hostname === 'www.youtube.com')
-		) {
-			const params = url.searchParams
-			const listId = params.get('list')
-			if (listId !== null) {
-				const apiKey = this.feature.youtubeApiKey
-				if (apiKey === undefined) {
-					throw new Error('YouTubeのAPIキーが指定されていません')
-				}
-				try {
-					return await fetchPlaylistItems(apiKey, listId)
-				} catch (e) {
-					console.error('YouTubeのプレイリストの取得に失敗', e)
-					return []
-				}
-			}
+		if (url !== undefined) {
+			return resolveUrl(this.feature, url)
 		}
 
-		if (url !== undefined || isYouTube) {
-			try {
-				const ytMusic = new YouTubeMusic(keyword)
-				await ytMusic.init()
-				return [ytMusic]
-			} catch (e) {
-				console.error('youtubeの曲の初期化中にエラー', e)
-			}
-		} else {
-			const music = this.feature.database.search(keyword)[0]
-			if (music !== undefined) {
-				return [music]
-			}
+		if (isYouTube) {
+			throw new Error('YouTubeなのにurlじゃない')
+		}
+
+		const music = this.feature.database.search(keyword)[0]
+		if (music !== undefined) {
+			return [music]
 		}
 
 		return []

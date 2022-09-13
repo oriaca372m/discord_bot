@@ -20,7 +20,7 @@ function getTitle(url: string): Promise<string | undefined> {
 	return new Promise((resolve, reject) => {
 		execFile(
 			ytdlPath,
-			['--dump-json', '--', url],
+			['--no-playlist', '--dump-json', '--', url],
 			{ maxBuffer: 1024 * 1024 * 10 },
 			(error: Error | null, stdout: string | Buffer) => {
 				if (error) {
@@ -72,7 +72,7 @@ export class YouTubeMusic implements Music {
 	}
 
 	createResource(): [voice.AudioResource, (() => void) | undefined] {
-		const ytdl = spawn(ytdlPath, ['-f', 'bestaudio*', '-o', '-', '--', this._url])
+		const ytdl = spawn(ytdlPath, ['--no-playlist', '-f', 'bestaudio*', '-o', '-', '--', this._url])
 		ytdl.stdin.end()
 		ytdl.on('error', (err) => {
 			console.error('YouTubeの再生中にエラー', err)
@@ -121,6 +121,7 @@ export async function fetchPlaylistItems(
 	playlistId: string
 ): Promise<YouTubeMusic[]> {
 	const musics: YouTubeMusic[] = []
+	let pageCount = 0
 
 	let pageToken: string | undefined = undefined
 	do {
@@ -151,7 +152,9 @@ export async function fetchPlaylistItems(
 			musics.push(new YouTubeMusic(videoUrl, item.snippet.title))
 		}
 		pageToken = json.nextPageToken
-	} while (pageToken !== undefined)
+		++pageCount
+		console.log(pageCount)
+	} while (pageToken !== undefined && pageCount <= 20)
 
 	return musics
 }

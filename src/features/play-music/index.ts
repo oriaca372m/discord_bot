@@ -127,6 +127,7 @@ export class FeaturePlayMusic extends CommonFeatureBase {
 
 		webApi.registerHandler(new handlers.GetAllMusics(this))
 		webApi.registerHandler(new handlers.AddToPlaylist(this))
+		webApi.registerHandler(new handlers.AddUrlToPlaylist(this))
 		webApi.registerHandler(new handlers.GetPlaylist(this))
 		webApi.registerHandler(new handlers.SetPlaylist(this))
 		webApi.registerHandler(new handlers.Play(this))
