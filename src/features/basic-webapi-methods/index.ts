@@ -54,17 +54,13 @@ class CommandOpenWebUi implements Command {
 
 		const url = new URL(this._feature.webuiUrl)
 
+		let apiUrl =
+			this._feature.apiUrl ??
+			`http://${this._feature.globalIpAddr!}:${this._feature.featureWebApi.port}/`
 		if (utils.getOption(options, ['l', 'local', 'localhost'])) {
-			url.searchParams.append(
-				'server',
-				`http://127.0.0.1:${this._feature.featureWebApi.port}/`
-			)
-		} else {
-			url.searchParams.append(
-				'server',
-				`http://${this._feature.globalIpAddr}:${this._feature.featureWebApi.port}/`
-			)
+			apiUrl = `http://127.0.0.1:${this._feature.featureWebApi.port}/`
 		}
+		url.searchParams.append('server', apiUrl)
 		url.searchParams.append('accessToken', token)
 		url.searchParams.append('accessTokenSecret', secret)
 
@@ -93,9 +89,13 @@ async function getGlobalIpAddr(): Promise<string> {
 
 export class FeatureBasicWebApiMethods extends CommonFeatureBase {
 	featureWebApi!: FeatureWebApi
-	globalIpAddr!: string
+	globalIpAddr: string | undefined
 
-	constructor(public readonly webuiCmdName: string, public readonly webuiUrl: string) {
+	constructor(
+		public readonly webuiCmdName: string,
+		public readonly webuiUrl: string,
+		public readonly apiUrl: string | undefined
+	) {
 		super()
 	}
 
@@ -111,6 +111,8 @@ export class FeatureBasicWebApiMethods extends CommonFeatureBase {
 
 		this.featureCommand.registerCommand(new CommandOpenWebUi(this))
 
-		this.globalIpAddr = await getGlobalIpAddr()
+		if (this.apiUrl === undefined) {
+			this.globalIpAddr = await getGlobalIpAddr()
+		}
 	}
 }

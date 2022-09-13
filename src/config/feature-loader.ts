@@ -89,11 +89,16 @@ const loaders: { [key: string]: Loader } = {
 	),
 
 	basic_web_api_methods: makeLoader(
-		t.type({
-			webui_command_name: t.string,
-			webui_url: t.string,
-		}),
-		(cfg) => new FeatureBasicWebApiMethods(cfg.webui_command_name, cfg.webui_url)
+		t.intersection([
+			t.type({
+				webui_command_name: t.string,
+				webui_url: t.string,
+			}),
+			t.partial({
+				api_url: t.string,
+			}),
+		]),
+		(cfg) => new FeatureBasicWebApiMethods(cfg.webui_command_name, cfg.webui_url, cfg.api_url)
 	),
 }
 
