@@ -48,9 +48,10 @@ async function main() {
 
 	const client = new discordjs.Client({
 		intents: [
-			discordjs.Intents.FLAGS.GUILDS,
-			discordjs.Intents.FLAGS.GUILD_MESSAGES,
-			discordjs.Intents.FLAGS.GUILD_VOICE_STATES,
+			discordjs.GatewayIntentBits.Guilds,
+			discordjs.GatewayIntentBits.GuildMessages,
+			discordjs.GatewayIntentBits.MessageContent,
+			discordjs.GatewayIntentBits.GuildVoiceStates,
 		],
 	})
 	const featureManager = new FeatureManager(client)

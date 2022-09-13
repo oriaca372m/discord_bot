@@ -113,7 +113,7 @@ export class Play implements WebApiHandler {
 	async handle(args: PlayReq, tokenInfo: AccessTokenInfo): Promise<PlayRes> {
 		let foundVoiceChannel: discordjs.VoiceChannel | undefined
 		for (const [, channel] of tokenInfo.guild.channels.cache) {
-			if (channel.type !== 'GUILD_VOICE') {
+			if (channel.type !== discordjs.ChannelType.GuildVoice) {
 				continue
 			}
 
