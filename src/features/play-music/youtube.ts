@@ -72,7 +72,15 @@ export class YouTubeMusic implements Music {
 	}
 
 	createResource(): [voice.AudioResource, (() => void) | undefined] {
-		const ytdl = spawn(ytdlPath, ['--no-playlist', '-f', 'bestaudio*', '-o', '-', '--', this._url])
+		const ytdl = spawn(ytdlPath, [
+			'--no-playlist',
+			'-f',
+			'bestaudio*',
+			'-o',
+			'-',
+			'--',
+			this._url,
+		])
 		ytdl.stdin.end()
 		ytdl.on('error', (err) => {
 			console.error('YouTubeの再生中にエラー', err)

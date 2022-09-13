@@ -1,6 +1,6 @@
 import * as discordjs from 'discord.js'
 
-import { WebApiHandler, AccessTokenInfo } from 'Src/features/webapi'
+import { WebApiHandler, AccessTokenInfo, HandlerError } from 'Src/features/webapi'
 
 import { FeaturePlayMusic } from 'Src/features/play-music'
 import { SerializedMusic, deserializeMusic } from 'Src/features/play-music/music'
@@ -80,14 +80,14 @@ export class AddUrlToPlaylist implements WebApiHandler {
 		}
 
 		if (url === undefined) {
-			return { error: 'url is not an url.' } as any
+			throw new HandlerError('url is not an url.')
 		}
 
 		const musics = await resolveUrl(this._feature, url)
-		for (const music of musics)  {
+		for (const music of musics) {
 			this._feature.playlist.addMusic(music)
 		}
-		return {added: musics.map((x) => x.serialize())}
+		return { added: musics.map((x) => x.serialize()) }
 	}
 }
 
@@ -163,7 +163,7 @@ export class Play implements WebApiHandler {
 		}
 
 		if (foundVoiceChannel === undefined) {
-			return { error: 'Could not find a suitable voice channel to play musics.' }
+			throw new HandlerError('Could not find a suitable voice channel to play musics.')
 		}
 
 		await this._feature.makeConnection(foundVoiceChannel)
