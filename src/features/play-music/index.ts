@@ -101,6 +101,7 @@ export class FeaturePlayMusic extends CommonFeatureBase {
 	private readonly interactors: Set<AddInteractor> = new Set()
 	private connection: voice.VoiceConnection | undefined
 	private player: voice.AudioPlayer | undefined
+	#audioResource: voice.AudioResource | undefined
 	private musicFinalizer: (() => void) | undefined
 	private _database!: MusicDatabase
 	private _isPlaying = false
@@ -167,6 +168,7 @@ export class FeaturePlayMusic extends CommonFeatureBase {
 		this.finalizeMusic()
 
 		const [resource, finalizer] = music.createResource()
+		this.#audioResource = resource
 		this.musicFinalizer = finalizer
 		this._isPlaying = true
 		this.player.play(resource)
@@ -216,6 +218,11 @@ export class FeaturePlayMusic extends CommonFeatureBase {
 		if (this.musicFinalizer !== undefined) {
 			this.musicFinalizer()
 			this.musicFinalizer = undefined
+		}
+
+		if (this.#audioResource !== undefined) {
+			this.#audioResource.playStream.destroy()
+			this.#audioResource = undefined
 		}
 	}
 
