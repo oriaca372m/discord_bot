@@ -42,6 +42,10 @@ function getTitle(url: string): Promise<string | undefined> {
 	})
 }
 
+function youTubeVideoIdToUrl(id: string): string {
+	return `https://youtube.com/watch?v=${id}`
+}
+
 export class YouTubeMusic implements Music {
 	#title: string | undefined
 
@@ -50,9 +54,29 @@ export class YouTubeMusic implements Music {
 		this.#title = title
 	}
 
-	async init(): Promise<void> {
+	async init(youTubeApiKey: string | undefined): Promise<void> {
+		if (this.#title !== undefined) {
+			return
+		}
+
+		if (youTubeApiKey !== undefined) {
+			let vid: string | undefined
+			const url = new URL(this._url)
+			if (url.hostname === 'youtu.be') {
+				vid = url.pathname.slice(1)
+			} else if (['www.youtube.com', 'youtube.com'].includes(url.hostname)) {
+				vid = url.searchParams.get('v') ?? undefined
+			}
+
+			if (vid !== undefined) {
+				this._url = youTubeVideoIdToUrl(vid)
+				this.#title = await fetchYouTubeTitle(youTubeApiKey, vid)
+				return
+			}
+		}
+
 		this.#title = (await getTitle(this._url)) ?? '(タイトル取得失敗)'
-		return Promise.resolve()
+		return
 	}
 
 	getTitle(): string {
@@ -95,9 +119,7 @@ export class YouTubeMusic implements Music {
 	}
 
 	static deserialize(data: SerializedYouTubeMusic): YouTubeMusic {
-		const m = new YouTubeMusic(data.url)
-		m.#title = data.title
-		return m
+		return new YouTubeMusic(data.url, data.title)
 	}
 }
 
@@ -156,7 +178,7 @@ export async function fetchPlaylistItems(
 				continue
 			}
 
-			const videoUrl = `https://youtu.be/${item.snippet.resourceId.videoId}`
+			const videoUrl = youTubeVideoIdToUrl(item.snippet.resourceId.videoId)
 			musics.push(new YouTubeMusic(videoUrl, item.snippet.title))
 		}
 		pageToken = json.nextPageToken
@@ -165,4 +187,30 @@ export async function fetchPlaylistItems(
 	} while (pageToken !== undefined && pageCount <= 20)
 
 	return musics
+}
+
+interface VideoRes {
+	items: Item[]
+}
+
+export async function fetchYouTubeTitle(apiKey: string, videoId: string): Promise<string> {
+	const url = new URL('https://youtube.googleapis.com/youtube/v3/videos')
+	const params = url.searchParams
+	params.set('part', 'snippet')
+	params.set('key', apiKey)
+	params.set('id', videoId)
+
+	const res = await fetch(url.toString(), {
+		method: 'GET',
+		headers: {
+			Accept: 'application/json',
+		},
+	})
+	const json = (await res.json()) as VideoRes
+
+	if (json.items.length !== 1) {
+		utils.unreachable()
+	}
+
+	return json.items[0].snippet.title
 }

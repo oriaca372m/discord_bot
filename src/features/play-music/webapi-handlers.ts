@@ -3,7 +3,8 @@ import * as discordjs from 'discord.js'
 import { WebApiHandler, AccessTokenInfo, HandlerError } from 'Src/features/webapi'
 
 import { FeaturePlayMusic } from 'Src/features/play-music'
-import { SerializedMusic, deserializeMusic } from 'Src/features/play-music/music'
+import { SerializedMusic } from 'Src/features/play-music/music'
+import { deserializeMusic } from 'Src/features/play-music/music-deserialize'
 import { resolveUrl } from 'Src/features/play-music/music-adder'
 
 interface WebApiMusic {
@@ -48,7 +49,7 @@ export class AddToPlaylist implements WebApiHandler {
 
 	handle(args: AddToPlaylistReq): Promise<AddToPlaylistRes> {
 		try {
-			const music = deserializeMusic(args.music, this._feature.database)
+			const music = deserializeMusic(this._feature, args.music)
 			this._feature.playlist.addMusic(music)
 		} catch (e) {
 			return Promise.resolve({ error: 'Could not add the music.' })
@@ -122,7 +123,7 @@ export class SetPlaylist implements WebApiHandler {
 		this._feature.playlist.clear()
 		for (const serializedMusic of args.musics) {
 			try {
-				const music = deserializeMusic(serializedMusic, this._feature.database)
+				const music = deserializeMusic(this._feature, serializedMusic)
 				this._feature.playlist.addMusic(music)
 			} catch (_) {
 				// pass

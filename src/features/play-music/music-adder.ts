@@ -31,7 +31,7 @@ export async function resolveUrl(feature: FeaturePlayMusic, url: URL): Promise<M
 
 	try {
 		const ytMusic = new YouTubeMusic(url.toString())
-		await ytMusic.init()
+		await ytMusic.init(feature.youtubeApiKey)
 		return [ytMusic]
 	} catch (e) {
 		console.error('youtubeの曲の初期化中にエラー', e)

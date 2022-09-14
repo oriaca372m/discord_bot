@@ -1,7 +1,6 @@
 import * as voice from '@discordjs/voice'
 import { ListItem, Selectable } from 'Src/features/play-music/interactor/listview'
-import { MusicDatabase } from 'Src/features/play-music/music-database'
-import { YouTubeMusic, SerializedYouTubeMusic } from './youtube'
+import { SerializedYouTubeMusic } from './youtube'
 
 type FieldNames<T> = {
 	// eslint-disable-next-line @typescript-eslint/ban-types
@@ -112,19 +111,4 @@ export class Album implements Selectable {
 	select(): Music[] | undefined {
 		return this.musics
 	}
-}
-
-export function deserializeMusic(data: SerializedMusic, db: MusicDatabase): Music {
-	if (data.kind === 'file') {
-		const music = db.getByUuid(data.uuid)
-		if (music === undefined) {
-			throw '存在しないUUID'
-		}
-
-		return music
-	} else if (data.kind === 'youtube') {
-		return YouTubeMusic.deserialize(data)
-	}
-
-	throw '存在しないkind'
 }
