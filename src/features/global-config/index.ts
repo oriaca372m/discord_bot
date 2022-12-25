@@ -50,7 +50,7 @@ export class FeatureGlobalConfig extends FeatureBase {
 		msg: discordjs.Message,
 		key: string,
 		args: object = {},
-		options: discordjs.MessageOptions = {}
+		options: discordjs.MessageCreateOptions = {}
 	): Promise<discordjs.Message | discordjs.Message[]> {
 		return await this.sendToChannel(msg.channel, key, args, options)
 	}
@@ -59,7 +59,7 @@ export class FeatureGlobalConfig extends FeatureBase {
 		channel: utils.LikeTextChannel,
 		key: string,
 		args: object = {},
-		options: discordjs.MessageOptions = {}
+		options: discordjs.MessageCreateOptions = {}
 	): Promise<discordjs.Message | discordjs.Message[]> {
 		let templateText = key
 		if (this.config !== undefined) {

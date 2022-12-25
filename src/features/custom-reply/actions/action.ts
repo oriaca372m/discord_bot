@@ -7,5 +7,5 @@ export interface Action {
 
 export interface ActionResult {
 	text?: string
-	options?: discordjs.MessageOptions
+	options?: discordjs.MessageCreateOptions
 }

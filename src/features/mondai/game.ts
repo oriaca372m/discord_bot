@@ -156,7 +156,7 @@ export class Game {
 		ans: Answer,
 		title: string
 	): Promise<void> {
-		const options: discordjs.MessageOptions = {}
+		const options: discordjs.MessageCreateOptions = {}
 		if (this.isMosaicMode) {
 			options.files = [this.getTmpPath('original.jpg')]
 		}
