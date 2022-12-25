@@ -1,13 +1,13 @@
-const TOML = require('@iarna/toml')
-const fs = require('fs')
-const path = require('path')
-const mm = require('music-metadata')
-const { v4: uuidv4 } = require('uuid')
+import TOML from '@iarna/toml'
+import fs from 'fs'
+import path from 'path'
+import * as mm from 'music-metadata'
+import {v4 as uuidv4} from 'uuid'
 
 function getTitle(filepath) {
 	const filename = path.basename(filepath, path.extname(filepath))
 
-	const match = /^\d\d\. ?(.+)$/.exec(filename)
+	const match = /^\d+\.\s*(.+)$/.exec(filename)
 	if (match) {
 		return match[1]
 	}
@@ -29,7 +29,7 @@ async function main() {
 	}
 
 	const playlistName = process.argv[3]
-	if (playlistPath === undefined) {
+	if (playlistName === undefined) {
 		usage()
 	}
 
@@ -53,7 +53,7 @@ async function main() {
 	for (const line of stdinBuffer.split('\n')) {
 		if (line === '') { break }
 
-		cachedMusic = cache.get(line)
+		const cachedMusic = cache.get(line)
 		if (cachedMusic !== undefined) {
 			cachedMusic.used = true
 			continue
