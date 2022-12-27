@@ -1,4 +1,4 @@
-import Jimp from 'jimp'
+import { createCanvas, loadImage, Image, CanvasRenderingContext2D } from 'canvas'
 
 export function calcDivisionNumber(total: number): { x: number; y: number } {
 	if (total < 1) {
@@ -20,6 +20,30 @@ export function calcDivisionNumber(total: number): { x: number; y: number } {
 	}
 }
 
+function drawKeepAspectRatio(
+	ctx: CanvasRenderingContext2D,
+	image: Image,
+	x: number,
+	y: number,
+	w: number,
+	h: number
+) {
+	const scale = Math.min(w / image.width, h / image.height)
+	const sw = scale * image.width
+	const sh = scale * image.height
+	ctx.drawImage(
+		image,
+		0,
+		0,
+		image.width,
+		image.height,
+		x + (w - sw) / 2,
+		y + (h - sh) / 2,
+		sw,
+		sh
+	)
+}
+
 export async function generateImageMap(
 	width: number,
 	height: number,
@@ -27,27 +51,21 @@ export async function generateImageMap(
 ): Promise<Buffer> {
 	const { x, y } = calcDivisionNumber(files.length)
 
-	const promise: Promise<Jimp> = new Promise((resolve, reject) => {
-		new Jimp(width, height, '#FFFFFF', (err, image) => {
-			if (err) {
-				reject(err)
-			}
-			resolve(image)
-		})
-	})
+	const canvas = createCanvas(width, height)
+	const ctx = canvas.getContext('2d')
 
-	const mainImage = await promise
+	ctx.fillStyle = 'white'
+	ctx.fillRect(0, 0, width, height)
 
 	const singleX = width / x
 	const singleY = height / y
 
-	let nowX = 0,
-		nowY = 0
+	let nowX = 0
+	let nowY = 0
 
 	for (let i = 0; i < files.length; i++) {
-		const image = await Jimp.read(files[i])
-		image.contain(singleX, singleY)
-		mainImage.blit(image, nowX * singleX, nowY * singleY)
+		const image = await loadImage(files[i])
+		drawKeepAspectRatio(ctx, image, nowX * singleX, nowY * singleY, singleX, singleY)
 
 		nowX++
 		if (nowX === x) {
@@ -56,5 +74,5 @@ export async function generateImageMap(
 		}
 	}
 
-	return await mainImage.getBufferAsync(Jimp.MIME_JPEG)
+	return canvas.toBuffer('image/jpeg')
 }
