@@ -10,6 +10,7 @@ type State =
 	| 'preInitializing'
 	| 'preInitialized'
 	| 'initialized'
+	| 'finalizing'
 	| 'finalized'
 	| 'error'
 
@@ -64,9 +65,11 @@ export default class {
 	}
 
 	async finalize(): Promise<void> {
-		if (this.state !== 'initialized') {
+		if (this.state !== 'constructed' && this.state !== 'initialized') {
 			throw Error('駄目なタイミング')
 		}
+
+		this._state = 'finalizing'
 
 		// 初期化と逆順に処理
 		for (let i = this.sorteadFeatures.length; 0 <= --i; ) {

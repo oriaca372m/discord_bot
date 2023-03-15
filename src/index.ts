@@ -38,12 +38,8 @@ async function main() {
 	})()
 
 	const config = new ConfigLoader((await storage.readFile('features.toml')).toString('utf-8'))
-
-	{
-		const ok = await config.load()
-		if (!ok) {
-			process.exit(1)
-		}
+	if ((await config.load()) === false) {
+		process.exit(1)
 	}
 
 	const client = new discordjs.Client({
@@ -60,50 +56,45 @@ async function main() {
 		() => new FeatureGlobalConfig(storage, ['messages-default.toml', 'messages.toml'])
 	)
 
-	let ready = false
+	client.on('ready', async (client) => {
+		console.log(`Logged in as ${client.user.tag}!`)
 
-	client.on('ready', () => {
-		void (async (): Promise<void> => {
-			if (client.user) {
-				console.log(`Logged in as ${client.user.tag}!`)
+		try {
+			for (const [k, v] of config.features) {
+				featureManager.registerFeature(k, () => v)
 			}
 
-			try {
-				for (const [k, v] of config.features) {
-					featureManager.registerFeature(k, () => v)
-				}
+			await featureManager.init()
+		} catch (e) {
+			console.error(e)
+			process.exit(1)
+		}
 
-				await featureManager.init()
-			} catch (e) {
-				console.error(e)
-				process.exit(1)
-			}
-
-			ready = true
-		})()
-	})
-
-	client.on('messageCreate', (msg) => {
-		void (async (): Promise<void> => {
-			if (!ready) {
+		client.on('messageCreate', (msg) => {
+			if (msg.partial) {
 				return
 			}
 
-			if (!msg.partial) {
-				await featureManager.onMessage(msg)
-			}
-		})()
+			featureManager.onMessage(msg).catch((e) => {
+				console.log(e)
+			})
+		})
 	})
 
-	const shutdown = async () => {
-		client.destroy()
-		await featureManager.finalize()
-		console.log('discord bot was shut down.')
-		process.exit(0)
+	const shutdown = () => {
+		; (async () => {
+			client.destroy()
+			await featureManager.finalize()
+			console.log('discord bot was shut down.')
+			process.exit(0)
+		})().catch((e) => {
+			console.error(e)
+			process.exit(1)
+		})
 	}
 
-	process.on('SIGINT', () => void shutdown())
-	process.on('SIGTERM', () => void shutdown())
+	process.on('SIGINT', shutdown)
+	process.on('SIGTERM', shutdown)
 
 	await client.login(config.token)
 }
