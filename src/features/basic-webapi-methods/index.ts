@@ -56,7 +56,9 @@ class CommandOpenWebUi implements Command {
 
 		let apiUrl =
 			this._feature.apiUrl ??
-			`http://${this._feature.globalIpAddr!}:${this._feature.featureWebApi.port}/`
+			`http://${this._feature.globalIpAddr ?? utils.unreachable()}:${
+				this._feature.featureWebApi.port
+			}/`
 		if (utils.getOption(options, ['l', 'local', 'localhost'])) {
 			apiUrl = `http://127.0.0.1:${this._feature.featureWebApi.port}/`
 		}
