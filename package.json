@@ -4,7 +4,7 @@
   "type": "module",
   "main": "src/index.js",
   "scripts": {
-    "build": "tsc --project tsconfig.build.json && tsc-alias -p tsconfig.build.json",
+    "build": "tsc --project tsconfig.build.json && tsc-alias -f -p tsconfig.build.json",
     "start": "yarn run build && node dist/index.js",
     "test": "jest",
     "lint": "tsc --noEmit && eslint src/**/*.ts && prettier --check src/**/*.ts",
