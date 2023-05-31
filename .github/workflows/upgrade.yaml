@@ -21,6 +21,12 @@ jobs:
       - name: Upgrade packgaes
         run: yarn upgrade --latest
 
+      - uses: tibdex/github-app-token@v1
+        id: generate-token
+        with:
+          app_id: ${{ secrets.CP_APP_ID }}
+          private_key: ${{ secrets.CP_APP_PRIVATE_KEY }}
+
       - name: Create pull request
         uses: peter-evans/create-pull-request@v5
         with:
@@ -28,3 +34,4 @@ jobs:
           commit-message: '[自動] 依存関係の更新'
           branch: create-pull-request/upgrade-npm-packages
           delete-branch: true
+          token: ${{ steps.generate-token.outputs.token }}
