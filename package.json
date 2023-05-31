@@ -4,10 +4,10 @@
   "type": "module",
   "main": "src/index.js",
   "scripts": {
-    "build": "tsc && tsc-alias -f",
+    "build": "tsc --project tsconfig.build.json && tsc-alias -p tsconfig.build.json",
     "start": "yarn run build && node dist/index.js",
     "test": "jest",
-    "lint": "tsc --project tsconfig.eslint.json --noEmit && eslint src/**/*.{ts,js} && prettier --check src/**/*.{ts,js}",
+    "lint": "tsc --noEmit && eslint src/**/*.ts && prettier --check src/**/*.ts",
     "fix": "eslint --fix src/**/*.{ts,js} && prettier --write src/**/*.{ts,js}"
   },
   "license": "Zlib",

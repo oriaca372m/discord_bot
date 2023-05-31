@@ -18,7 +18,7 @@ module.exports = {
 	},
 	parser: '@typescript-eslint/parser',
 	parserOptions: {
-		project: './tsconfig.eslint.json',
+		project: './tsconfig.json',
 	},
 	rules: {
 		'@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
