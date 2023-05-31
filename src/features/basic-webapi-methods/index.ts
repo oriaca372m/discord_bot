@@ -1,5 +1,4 @@
 import * as discordjs from 'discord.js'
-import fetch from 'node-fetch'
 import * as utils from 'Src/utils'
 
 import CommonFeatureBase from 'Src/features/common-feature-base'

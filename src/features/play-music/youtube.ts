@@ -1,4 +1,3 @@
-import fetch from 'node-fetch'
 import * as voice from '@discordjs/voice'
 import { spawn, execFile } from 'child_process'
 import { Music } from './music'

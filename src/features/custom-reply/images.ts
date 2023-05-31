@@ -1,4 +1,3 @@
-import fetch from 'node-fetch'
 import * as discordjs from 'discord.js'
 
 import { FeatureGlobalConfig } from 'Src/features/global-config'

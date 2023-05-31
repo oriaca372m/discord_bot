@@ -1,4 +1,3 @@
-import fetch from 'node-fetch'
 import TOML from '@iarna/toml'
 import * as discordjs from 'discord.js'
 
