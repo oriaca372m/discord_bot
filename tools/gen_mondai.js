@@ -32,18 +32,20 @@ function normalizeAnswerMessage(message) {
 	return replaced.normalize('NFKC')
 }
 
-const stdinBuffer = fs.readFileSync(0, 'utf-8');
+const stdinBuffer = fs.readFileSync(0, 'utf-8')
 
 const episodes = []
 
 for (const line of stdinBuffer.split('\n')) {
 	const title = path.basename(line, path.extname(line))
-	if (line === '') { break }
+	if (line === '') {
+		break
+	}
 	episodes.push({
 		filename: line,
 		title,
-		pattern: escapeRegExp(normalizeAnswerMessage(title))
+		pattern: escapeRegExp(normalizeAnswerMessage(title)),
 	})
 }
 
-console.log(TOML.stringify({episodes}))
+console.log(TOML.stringify({ episodes }))

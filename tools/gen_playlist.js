@@ -2,7 +2,7 @@ import TOML from '@iarna/toml'
 import fs from 'fs'
 import path from 'path'
 import * as mm from 'music-metadata'
-import {v4 as uuidv4} from 'uuid'
+import { v4 as uuidv4 } from 'uuid'
 
 function getTitle(filepath) {
 	const filename = path.basename(filepath, path.extname(filepath))
@@ -51,7 +51,9 @@ async function main() {
 	}
 
 	for (const line of stdinBuffer.split('\n')) {
-		if (line === '') { break }
+		if (line === '') {
+			break
+		}
 
 		const cachedMusic = cache.get(line)
 		if (cachedMusic !== undefined) {
@@ -60,14 +62,14 @@ async function main() {
 		}
 
 		const metadata = {
-			title: getTitle(line)
+			title: getTitle(line),
 		}
 
 		const music = {
 			uuid: uuidv4(),
 			path: line,
 			used: true,
-			metadata
+			metadata,
 		}
 
 		console.log(`parsing metadata...: ${line}`)
@@ -98,7 +100,7 @@ async function main() {
 		}
 	}
 
-	fs.writeFileSync(playlistPath, TOML.stringify({name: playlistName, musics}))
+	fs.writeFileSync(playlistPath, TOML.stringify({ name: playlistName, musics }))
 }
 
 main()
