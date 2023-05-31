@@ -1,5 +1,5 @@
 import * as discordjs from 'discord.js'
-import https from 'https'
+import fetch from 'node-fetch'
 import * as utils from 'Src/utils'
 
 import CommonFeatureBase from 'Src/features/common-feature-base'
@@ -71,22 +71,12 @@ class CommandOpenWebUi implements Command {
 }
 
 async function getGlobalIpAddr(): Promise<string> {
-	return new Promise((resolve, reject) => {
-		https.get('https://ipinfo.io/ip', (res) => {
-			void (async () => {
-				if (res.statusCode !== 200) {
-					reject()
-				}
-
-				try {
-					const buf = await utils.readAll(res)
-					resolve(buf.toString())
-				} catch (e) {
-					reject(e)
-				}
-			})()
-		})
-	})
+	const res = await fetch('https://ipinfo.io/ip')
+	const text = await res.text()
+	if (!res.ok) {
+		throw new Error(`Failed to get ip address: ${text}`)
+	}
+	return text
 }
 
 export class FeatureBasicWebApiMethods extends CommonFeatureBase {
