@@ -1,6 +1,6 @@
 import * as voice from '@discordjs/voice'
 import { spawn, execFile } from 'child_process'
-import { Music } from './music'
+import { Music, MusicPlayResource } from './music'
 import * as utils from 'Src/utils'
 
 const ytdlPath = 'yt-dlp'
@@ -48,7 +48,10 @@ function youTubeVideoIdToUrl(id: string): string {
 export class YouTubeMusic implements Music {
 	#title: string | undefined
 
-	constructor(private _url: string, title?: string) {
+	constructor(
+		private _url: string,
+		title?: string
+	) {
 		utils.mustValidUrl(_url)
 		this.#title = title
 	}
@@ -94,7 +97,7 @@ export class YouTubeMusic implements Music {
 		return
 	}
 
-	createResource(): [voice.AudioResource, (() => void) | undefined] {
+	createResource(): MusicPlayResource {
 		const ytdl = spawn(ytdlPath, [
 			'--no-playlist',
 			'-f',
@@ -109,12 +112,12 @@ export class YouTubeMusic implements Music {
 			console.error('YouTubeの再生中にエラー', err)
 		})
 
-		return [
-			voice.createAudioResource(ytdl.stdout),
-			(): void => {
+		return {
+			audioResource: voice.createAudioResource(ytdl.stdout),
+			finalizer() {
 				ytdl.kill()
 			},
-		]
+		}
 	}
 
 	static deserialize(data: SerializedYouTubeMusic): YouTubeMusic {

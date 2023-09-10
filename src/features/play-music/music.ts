@@ -33,12 +33,16 @@ export interface SerializedMusicFile {
 	uuid: string
 }
 
+export interface MusicPlayResource {
+	audioResource: voice.AudioResource
+	finalizer?: () => void
+}
+
 export interface Music extends ListItem {
 	getTitle(): string
 	serialize(): SerializedMusic
 
-	// 戻り値の関数は再生終了後の後処理用
-	createResource(): [voice.AudioResource, (() => void) | undefined]
+	createResource(): MusicPlayResource
 }
 
 export class MusicFile implements Music {
@@ -74,15 +78,18 @@ export class MusicFile implements Music {
 		return
 	}
 
-	createResource(): [voice.AudioResource, (() => void) | undefined] {
-		return [voice.createAudioResource(this.path), undefined]
+	createResource(): MusicPlayResource {
+		return { audioResource: voice.createAudioResource(this.path) }
 	}
 }
 
 export type MusicObject = Fields<MusicFile> & { readonly metadata: MusicMetadataObject }
 
 export class Artist implements Selectable {
-	constructor(private readonly _name: string, private readonly musics: Music[]) {}
+	constructor(
+		private readonly _name: string,
+		private readonly musics: Music[]
+	) {}
 
 	get name(): string {
 		return this._name
@@ -98,7 +105,10 @@ export class Artist implements Selectable {
 }
 
 export class Album implements Selectable {
-	constructor(private readonly _name: string, private readonly musics: Music[]) {}
+	constructor(
+		private readonly _name: string,
+		private readonly musics: Music[]
+	) {}
 
 	get name(): string {
 		return this._name

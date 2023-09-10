@@ -31,7 +31,7 @@ class PlayMusicCommand implements Command {
 			{
 				play: async (a, m) => await guildInstance.playCommand(a, m),
 				add: async (a, m) => await guildInstance.addCommand(a, m),
-				stop: async () => await guildInstance.closeConnection(),
+				stop: async () => await guildInstance.stop(),
 				reload: async () => await this.feature.reload(),
 				next: async () => await guildInstance.next(),
 				edit: async (a, m) => await guildInstance.edit(a, m),

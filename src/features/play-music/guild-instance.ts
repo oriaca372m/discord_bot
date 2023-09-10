@@ -2,139 +2,29 @@ import * as discordjs from 'discord.js'
 import * as voice from '@discordjs/voice'
 
 import { FeatureGlobalConfig } from 'Src/features/global-config'
+import { TypedEvent } from 'Src/typed-event'
 import * as utils from 'Src/utils'
 
 import { FeaturePlayMusic } from 'Src/features/play-music/'
+import { MusicPlayResource } from 'Src/features/play-music/music'
 import { MusicAdder } from 'Src/features/play-music/music-adder'
 import { Playlist } from 'Src/features/play-music/playlist'
 import { AddInteractor } from 'Src/features/play-music/interactor/interactor'
 
-export class GuildInstance {
-	readonly playlist: Playlist = new Playlist()
-
+class ConnectionManager {
 	#connection: voice.VoiceConnection | undefined
 	#player: voice.AudioPlayer | undefined
-	#isPlaying = false
-	#audioResource: voice.AudioResource | undefined
-	#musicFinalizer: (() => void) | undefined
+	#musicPlayResource: MusicPlayResource | undefined
 
-	readonly #interactors: Set<AddInteractor> = new Set()
-	readonly #gc: FeatureGlobalConfig
+	readonly onMusicStopped = new TypedEvent<void>()
+	readonly onError = new TypedEvent<voice.AudioPlayerError>()
 
-	constructor(readonly feature: FeaturePlayMusic) {
-		this.#gc = feature.gc
-	}
-
-	#playCurrentMusic(): void {
-		if (this.#connection === undefined || this.#player === undefined) {
-			throw new Error('接続中のコネクションがない')
-		}
-
-		const music = this.playlist.currentMusic
-		if (!music) {
-			throw new Error('流すべき曲がない')
-		}
-
-		this.finalizeMusic()
-
-		const [resource, finalizer] = music.createResource()
-		this.#audioResource = resource
-		this.#musicFinalizer = finalizer
-		this.#isPlaying = true
-		this.#player.play(resource)
-	}
-
-	async next(): Promise<void> {
-		this.finalizeMusic()
-		if (this.#connection === undefined) {
-			return
-		}
-
-		if (this.playlist.isEmpty) {
-			await this.closeConnection()
-			return
-		}
-
-		this.playlist.next()
-		this.#playCurrentMusic()
-	}
-
-	async playMusicEditingPlaylist(
-		msg: discordjs.Message,
-		playlistEditor: (playlist: Playlist) => Promise<void>
-	): Promise<void> {
-		const member = msg.member
-		if (!member) {
-			return
-		}
-
-		if (!member.voice.channel) {
-			await this.#gc.send(msg, 'playMusic.haveToJoinVoiceChannel')
-			return
-		}
-
-		await playlistEditor(this.playlist)
-		await this.play(member.voice.channel)
-	}
-
-	private finalizeMusic(): void {
-		this.#player?.stop()
-
-		try {
-			if (this.#musicFinalizer !== undefined) {
-				this.#musicFinalizer()
-				this.#musicFinalizer = undefined
-			}
-
-			if (this.#audioResource !== undefined) {
-				this.#audioResource.playStream.destroy()
-				this.#audioResource = undefined
-			}
-		} finally {
-			this.#isPlaying = false
-		}
-	}
-
-	async closeConnection(): Promise<void> {
-		this.finalizeMusic()
-		if (this.#connection !== undefined) {
-			this.#connection.destroy()
-			this.#connection = undefined
-			this.#player = undefined
-			// 入れないと次のコネクションの作成がタイムアウトする
-			// 1秒で十分かどうかは知らない
-			await utils.delay(1000)
-		}
-	}
-
-	private createPlayer(): voice.AudioPlayer {
-		const player = voice.createAudioPlayer()
-
-		player.on(voice.AudioPlayerStatus.Idle, () => {
-			if (this.#isPlaying) {
-				void this.next()
-			}
-		})
-
-		player.on('error', (error) => {
-			console.error(error)
-			this.finalizeMusic()
-
-			// TODO: どうにかしてテキストチャンネルに通知を送りたい所
-		})
-
-		return player
-	}
-
-	async #makeConnection(channel: discordjs.BaseGuildVoiceChannel): Promise<void> {
-		if (
-			this.#connection !== undefined &&
-			channel.id === this.#connection.joinConfig.channelId
-		) {
-			this.finalizeMusic()
+	async connect(channel: discordjs.BaseGuildVoiceChannel): Promise<void> {
+		if (this.hasConnectionTo(channel)) {
+			this.stop()
 			return
 		} else {
-			await this.closeConnection()
+			await this.disconnect()
 		}
 
 		const conn = voice.joinVoiceChannel({
@@ -146,30 +36,137 @@ export class GuildInstance {
 		try {
 			await voice.entersState(conn, voice.VoiceConnectionStatus.Ready, 30e3)
 			this.#connection = conn
-			this.#player = this.createPlayer()
+			this.#player = this.#createPlayer()
 			this.#connection.subscribe(this.#player)
 		} catch (e) {
-			conn.destroy()
+			this.#destroyConnection()
 			throw e
 		}
+	}
+
+	play(res: MusicPlayResource): void {
+		if (this.#connection === undefined || this.#player === undefined) {
+			throw new Error('接続中のコネクションがない')
+		}
+
+		this.stop()
+
+		this.#musicPlayResource = res
+		this.#player.play(this.#musicPlayResource.audioResource)
+	}
+
+	stop(): void {
+		this.#player?.stop()
+
+		if (this.#musicPlayResource === undefined) {
+			return
+		}
+
+		// TODO: finalizerとdestoryの呼び出し順序がこれでいいのか調べる
+		if (this.#musicPlayResource.finalizer !== undefined) {
+			this.#musicPlayResource.finalizer()
+		}
+		this.#musicPlayResource.audioResource.playStream.destroy()
+	}
+
+	async disconnect(): Promise<void> {
+		this.stop()
+		if (this.#connection !== undefined) {
+			this.#destroyConnection()
+			// 入れないと次のコネクションの作成がタイムアウトする
+			// 1秒で十分かどうかは知らない
+			await utils.delay(1000)
+		}
+	}
+
+	get hasConnection(): boolean {
+		return this.#connection !== undefined
+	}
+
+	hasConnectionTo(channel: discordjs.BaseGuildVoiceChannel): boolean {
+		return (
+			this.#connection !== undefined && channel.id === this.#connection.joinConfig.channelId
+		)
+	}
+
+	#destroyConnection(): void {
+		this.#player?.stop()
+		this.#player = undefined
+
+		this.#connection?.destroy()
+		this.#connection = undefined
+	}
+
+	#createPlayer(): voice.AudioPlayer {
+		const player = voice.createAudioPlayer()
+
+		player.on(voice.AudioPlayerStatus.Idle, () => {
+			this.stop()
+			this.onMusicStopped.emit()
+		})
+
+		player.on('error', (error) => {
+			this.stop()
+			this.onError.emit(error)
+		})
+
+		return player
+	}
+}
+
+export class GuildInstance {
+	readonly #connectionManager = new ConnectionManager()
+	readonly playlist: Playlist = new Playlist()
+
+	readonly #interactors: Set<AddInteractor> = new Set()
+	readonly #gc: FeatureGlobalConfig
+
+	constructor(readonly feature: FeaturePlayMusic) {
+		this.#gc = feature.gc
+		this.#connectionManager.onMusicStopped.on(() => {
+			this.next().catch((e) => console.error(e))
+		})
+		this.#connectionManager.onError.on((e) => console.log(e))
 	}
 
 	async play(
 		channel: discordjs.BaseGuildVoiceChannel,
 		reuseCurrentConnection = true
 	): Promise<void> {
-		if (reuseCurrentConnection) {
-			await this.closeConnection()
-		}
-
-		if (this.#connection === undefined) {
-			await this.#makeConnection(channel)
+		if (!(reuseCurrentConnection && this.#connectionManager.hasConnectionTo(channel))) {
+			await this.#connectionManager.connect(channel)
 		}
 		this.#playCurrentMusic()
 	}
 
+	async next(): Promise<void> {
+		if (!this.#connectionManager.hasConnection) {
+			return
+		}
+
+		if (this.playlist.isEmpty) {
+			await this.#connectionManager.disconnect()
+			return
+		}
+
+		this.playlist.next()
+		this.#playCurrentMusic()
+	}
+
+	async stop(): Promise<void> {
+		await this.#connectionManager.disconnect()
+	}
+
+	#playCurrentMusic(): void {
+		if (this.playlist.currentMusic === undefined) {
+			throw new Error('再生するべき曲が無い')
+		}
+
+		this.#connectionManager.play(this.playlist.currentMusic.createResource())
+	}
+
 	async finalize(): Promise<void> {
-		await this.closeConnection()
+		await this.#connectionManager.disconnect()
 	}
 
 	get isInInteractionMode(): boolean {
