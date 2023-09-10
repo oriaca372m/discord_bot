@@ -1,8 +1,11 @@
 import * as discordjs from 'discord.js'
+
+import * as utils from 'Src/utils'
+
+import { FeaturePlayMusic } from 'Src/features/play-music'
 import { Music } from 'Src/features/play-music/music'
 import { YouTubeMusic, fetchPlaylistItems } from 'Src/features/play-music/youtube'
-import { FeaturePlayMusic } from 'Src/features/play-music'
-import * as utils from 'Src/utils'
+import { Playlist } from 'Src/features/play-music/playlist'
 
 interface CommandOptions {
 	args: string[]
@@ -42,6 +45,7 @@ export async function resolveUrl(feature: FeaturePlayMusic, url: URL): Promise<M
 export class MusicAdder {
 	constructor(
 		private readonly feature: FeaturePlayMusic,
+		private readonly playlist: Playlist,
 		private readonly _listMusics?: readonly Music[],
 		private readonly _resume: boolean = false
 	) {}
@@ -131,17 +135,17 @@ export class MusicAdder {
 	private addMusicsToPlaylist(musics: readonly Music[], parseResult: CommandOptions): void {
 		let counter = 0
 		if (parseResult.isAddToNext) {
-			const c = this.feature.playlist.currentTrack
+			const c = this.playlist.currentTrack
 			if (c !== undefined) {
 				counter = c + 1
 			}
 		}
 		for (const music of musics) {
 			if (parseResult.isAddToFirst || parseResult.isAddToNext) {
-				this.feature.playlist.addMusic(music, counter)
+				this.playlist.addMusic(music, counter)
 				counter++
 			} else {
-				this.feature.playlist.addMusic(music)
+				this.playlist.addMusic(music)
 			}
 		}
 	}
@@ -206,7 +210,7 @@ export class MusicAdder {
 		}
 
 		if (this._resume && parseResult.args.length === 0) {
-			if (this.feature.playlist.isEmpty) {
+			if (this.playlist.isEmpty) {
 				await msg.reply('今はプレイリストが空ロボ')
 				return
 			}
@@ -216,7 +220,7 @@ export class MusicAdder {
 			return
 		}
 
-		this.feature.playlist.clear()
+		this.playlist.clear()
 
 		const addedMusics = await this.addInternal(msg, parseResult)
 		if (addedMusics.length === 0) {
