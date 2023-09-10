@@ -10,21 +10,23 @@ import { Playlist } from 'Src/features/play-music/playlist'
 import { AddInteractor } from 'Src/features/play-music/interactor/interactor'
 
 export class GuildInstance {
-	private connection: voice.VoiceConnection | undefined
-	private player: voice.AudioPlayer | undefined
-	#audioResource: voice.AudioResource | undefined
-	private musicFinalizer: (() => void) | undefined
-	private _isPlaying = false
 	readonly playlist: Playlist = new Playlist()
-	private readonly interactors: Set<AddInteractor> = new Set()
-	private readonly gc: FeatureGlobalConfig
+
+	#connection: voice.VoiceConnection | undefined
+	#player: voice.AudioPlayer | undefined
+	#isPlaying = false
+	#audioResource: voice.AudioResource | undefined
+	#musicFinalizer: (() => void) | undefined
+
+	readonly #interactors: Set<AddInteractor> = new Set()
+	readonly #gc: FeatureGlobalConfig
 
 	constructor(readonly feature: FeaturePlayMusic) {
-		this.gc = feature.gc
+		this.#gc = feature.gc
 	}
 
 	#playCurrentMusic(): void {
-		if (this.connection === undefined || this.player === undefined) {
+		if (this.#connection === undefined || this.#player === undefined) {
 			throw new Error('接続中のコネクションがない')
 		}
 
@@ -37,14 +39,14 @@ export class GuildInstance {
 
 		const [resource, finalizer] = music.createResource()
 		this.#audioResource = resource
-		this.musicFinalizer = finalizer
-		this._isPlaying = true
-		this.player.play(resource)
+		this.#musicFinalizer = finalizer
+		this.#isPlaying = true
+		this.#player.play(resource)
 	}
 
 	async next(): Promise<void> {
 		this.finalizeMusic()
-		if (this.connection === undefined) {
+		if (this.#connection === undefined) {
 			return
 		}
 
@@ -67,7 +69,7 @@ export class GuildInstance {
 		}
 
 		if (!member.voice.channel) {
-			await this.gc.send(msg, 'playMusic.haveToJoinVoiceChannel')
+			await this.#gc.send(msg, 'playMusic.haveToJoinVoiceChannel')
 			return
 		}
 
@@ -76,26 +78,29 @@ export class GuildInstance {
 	}
 
 	private finalizeMusic(): void {
-		this._isPlaying = false
-		this.player?.stop()
+		this.#player?.stop()
 
-		if (this.musicFinalizer !== undefined) {
-			this.musicFinalizer()
-			this.musicFinalizer = undefined
-		}
+		try {
+			if (this.#musicFinalizer !== undefined) {
+				this.#musicFinalizer()
+				this.#musicFinalizer = undefined
+			}
 
-		if (this.#audioResource !== undefined) {
-			this.#audioResource.playStream.destroy()
-			this.#audioResource = undefined
+			if (this.#audioResource !== undefined) {
+				this.#audioResource.playStream.destroy()
+				this.#audioResource = undefined
+			}
+		} finally {
+			this.#isPlaying = false
 		}
 	}
 
 	async closeConnection(): Promise<void> {
 		this.finalizeMusic()
-		if (this.connection !== undefined) {
-			this.connection.destroy()
-			this.connection = undefined
-			this.player = undefined
+		if (this.#connection !== undefined) {
+			this.#connection.destroy()
+			this.#connection = undefined
+			this.#player = undefined
 			// 入れないと次のコネクションの作成がタイムアウトする
 			// 1秒で十分かどうかは知らない
 			await utils.delay(1000)
@@ -106,7 +111,7 @@ export class GuildInstance {
 		const player = voice.createAudioPlayer()
 
 		player.on(voice.AudioPlayerStatus.Idle, () => {
-			if (this._isPlaying) {
+			if (this.#isPlaying) {
 				void this.next()
 			}
 		})
@@ -122,7 +127,10 @@ export class GuildInstance {
 	}
 
 	async #makeConnection(channel: discordjs.BaseGuildVoiceChannel): Promise<void> {
-		if (this.connection !== undefined && channel.id === this.connection.joinConfig.channelId) {
+		if (
+			this.#connection !== undefined &&
+			channel.id === this.#connection.joinConfig.channelId
+		) {
 			this.finalizeMusic()
 			return
 		} else {
@@ -137,9 +145,9 @@ export class GuildInstance {
 
 		try {
 			await voice.entersState(conn, voice.VoiceConnectionStatus.Ready, 30e3)
-			this.connection = conn
-			this.player = this.createPlayer()
-			this.connection.subscribe(this.player)
+			this.#connection = conn
+			this.#player = this.createPlayer()
+			this.#connection.subscribe(this.#player)
 		} catch (e) {
 			conn.destroy()
 			throw e
@@ -154,7 +162,7 @@ export class GuildInstance {
 			await this.closeConnection()
 		}
 
-		if (this.connection === undefined) {
+		if (this.#connection === undefined) {
 			await this.#makeConnection(channel)
 		}
 		this.#playCurrentMusic()
@@ -165,20 +173,20 @@ export class GuildInstance {
 	}
 
 	get isInInteractionMode(): boolean {
-		return this.interactors.size !== 0
+		return this.#interactors.size !== 0
 	}
 
 	createInteractor(msg: discordjs.Message): AddInteractor {
 		const i = new AddInteractor(this, msg.channel, this.playlist, () => {
-			this.interactors.delete(i)
+			this.#interactors.delete(i)
 		})
-		this.interactors.add(i)
+		this.#interactors.add(i)
 
 		return i
 	}
 
 	async onMessage(msg: discordjs.Message): Promise<void> {
-		for (const i of this.interactors) {
+		for (const i of this.#interactors) {
 			await i.onMessage(msg)
 		}
 	}
@@ -188,7 +196,7 @@ export class GuildInstance {
 		try {
 			;({ args } = utils.parseCommandArgs(rawArgs, [], 0))
 		} catch (e) {
-			await this.gc.send(msg, 'playMusic.invalidCommand', { e })
+			await this.#gc.send(msg, 'playMusic.invalidCommand', { e })
 			return
 		}
 
