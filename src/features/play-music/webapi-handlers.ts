@@ -47,10 +47,12 @@ export class AddToPlaylist implements WebApiHandler {
 
 	constructor(private readonly _feature: FeaturePlayMusic) {}
 
-	handle(args: AddToPlaylistReq): Promise<AddToPlaylistRes> {
+	handle(args: AddToPlaylistReq, tokenInfo: AccessTokenInfo): Promise<AddToPlaylistRes> {
+		const guildInstance = this._feature.getGuildInstance(tokenInfo.guild)
+
 		try {
 			const music = deserializeMusic(this._feature, args.music)
-			this._feature.playlist.addMusic(music)
+			guildInstance.playlist.addMusic(music)
 		} catch (e) {
 			return Promise.resolve({ error: 'Could not add the music.' })
 		}
@@ -72,7 +74,11 @@ export class AddUrlToPlaylist implements WebApiHandler {
 
 	constructor(private readonly _feature: FeaturePlayMusic) {}
 
-	async handle(args: AddUrlToPlaylistReq): Promise<AddUrlToPlaylistRes> {
+	async handle(
+		args: AddUrlToPlaylistReq,
+		tokenInfo: AccessTokenInfo
+	): Promise<AddUrlToPlaylistRes> {
+		const guildInstance = this._feature.getGuildInstance(tokenInfo.guild)
 		let url: URL | undefined
 		try {
 			url = new URL(args.url)
@@ -86,7 +92,7 @@ export class AddUrlToPlaylist implements WebApiHandler {
 
 		const musics = await resolveUrl(this._feature, url)
 		for (const music of musics) {
-			this._feature.playlist.addMusic(music)
+			guildInstance.playlist.addMusic(music)
 		}
 		return { added: musics.map((x) => x.serialize()) }
 	}
@@ -101,9 +107,10 @@ export class GetPlaylist implements WebApiHandler {
 
 	constructor(private readonly _feature: FeaturePlayMusic) {}
 
-	handle(): Promise<GetPlaylistRes> {
+	handle(_args: unknown, tokenInfo: AccessTokenInfo): Promise<GetPlaylistRes> {
+		const guildInstance = this._feature.getGuildInstance(tokenInfo.guild)
 		return Promise.resolve({
-			musics: this._feature.playlist.musics.map((x) => x.serialize()),
+			musics: guildInstance.playlist.musics.map((x) => x.serialize()),
 		})
 	}
 }
@@ -119,12 +126,13 @@ export class SetPlaylist implements WebApiHandler {
 
 	constructor(private readonly _feature: FeaturePlayMusic) {}
 
-	handle(args: SetPlaylistReq): Promise<SetPlaylistRes> {
-		this._feature.playlist.clear()
+	handle(args: SetPlaylistReq, tokenInfo: AccessTokenInfo): Promise<SetPlaylistRes> {
+		const guildInstance = this._feature.getGuildInstance(tokenInfo.guild)
+		guildInstance.playlist.clear()
 		for (const serializedMusic of args.musics) {
 			try {
 				const music = deserializeMusic(this._feature, serializedMusic)
-				this._feature.playlist.addMusic(music)
+				guildInstance.playlist.addMusic(music)
 			} catch (_) {
 				// pass
 			}
@@ -146,6 +154,8 @@ export class Play implements WebApiHandler {
 	constructor(private readonly _feature: FeaturePlayMusic) {}
 
 	async handle(args: PlayReq, tokenInfo: AccessTokenInfo): Promise<PlayRes> {
+		const guildInstance = this._feature.getGuildInstance(tokenInfo.guild)
+
 		let foundVoiceChannel: discordjs.VoiceChannel | undefined
 		for (const [, channel] of tokenInfo.guild.channels.cache) {
 			if (channel.type !== discordjs.ChannelType.GuildVoice) {
@@ -167,9 +177,9 @@ export class Play implements WebApiHandler {
 			throw new HandlerError('Could not find a suitable voice channel to play musics.')
 		}
 
-		await this._feature.makeConnection(foundVoiceChannel)
-		this._feature.playlist.switch(args.index)
-		await this._feature.play()
+		await guildInstance.makeConnection(foundVoiceChannel)
+		guildInstance.playlist.switch(args.index)
+		await guildInstance.play()
 		return {}
 	}
 }
