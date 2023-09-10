@@ -177,9 +177,8 @@ export class Play implements WebApiHandler {
 			throw new HandlerError('Could not find a suitable voice channel to play musics.')
 		}
 
-		await guildInstance.makeConnection(foundVoiceChannel)
 		guildInstance.playlist.switch(args.index)
-		await guildInstance.play()
+		await guildInstance.play(foundVoiceChannel)
 		return {}
 	}
 }

@@ -23,14 +23,14 @@ export class GuildInstance {
 		this.gc = feature.gc
 	}
 
-	play(): Promise<void> {
+	#playCurrentMusic(): void {
 		if (this.connection === undefined || this.player === undefined) {
-			throw '接続中のコネクションがない'
+			throw new Error('接続中のコネクションがない')
 		}
 
 		const music = this.playlist.currentMusic
 		if (!music) {
-			throw '流すべき曲がない'
+			throw new Error('流すべき曲がない')
 		}
 
 		this.finalizeMusic()
@@ -40,8 +40,6 @@ export class GuildInstance {
 		this.musicFinalizer = finalizer
 		this._isPlaying = true
 		this.player.play(resource)
-
-		return Promise.resolve()
 	}
 
 	async next(): Promise<void> {
@@ -56,7 +54,7 @@ export class GuildInstance {
 		}
 
 		this.playlist.next()
-		await this.play()
+		this.#playCurrentMusic()
 	}
 
 	async playMusicEditingPlaylist(
@@ -74,9 +72,7 @@ export class GuildInstance {
 		}
 
 		await playlistEditor(this.playlist)
-
-		await this.makeConnection(member.voice.channel)
-		await this.play()
+		await this.play(member.voice.channel)
 	}
 
 	private finalizeMusic(): void {
@@ -125,7 +121,7 @@ export class GuildInstance {
 		return player
 	}
 
-	async makeConnection(channel: discordjs.BaseGuildVoiceChannel): Promise<void> {
+	async #makeConnection(channel: discordjs.BaseGuildVoiceChannel): Promise<void> {
 		if (this.connection !== undefined && channel.id === this.connection.joinConfig.channelId) {
 			this.finalizeMusic()
 			return
@@ -136,9 +132,6 @@ export class GuildInstance {
 		const conn = voice.joinVoiceChannel({
 			channelId: channel.id,
 			guildId: channel.guild.id,
-			// https://github.com/discordjs/discord.js/issues/7884
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
 			adapterCreator: channel.guild.voiceAdapterCreator,
 		})
 
@@ -151,6 +144,20 @@ export class GuildInstance {
 			conn.destroy()
 			throw e
 		}
+	}
+
+	async play(
+		channel: discordjs.BaseGuildVoiceChannel,
+		reuseCurrentConnection = true
+	): Promise<void> {
+		if (reuseCurrentConnection) {
+			await this.closeConnection()
+		}
+
+		if (this.connection === undefined) {
+			await this.#makeConnection(channel)
+		}
+		this.#playCurrentMusic()
 	}
 
 	async finalize(): Promise<void> {

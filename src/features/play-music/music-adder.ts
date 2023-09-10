@@ -223,8 +223,7 @@ export class MusicAdder {
 				return
 			}
 
-			await this.guildInstance.makeConnection(member.voice.channel)
-			await this.guildInstance.play()
+			await this.guildInstance.play(member.voice.channel)
 			return
 		}
 
@@ -235,8 +234,7 @@ export class MusicAdder {
 			return
 		}
 
-		await this.guildInstance.makeConnection(member.voice.channel)
-		await this.guildInstance.play()
+		await this.guildInstance.play(member.voice.channel)
 		return
 	}
 }

@@ -2,7 +2,6 @@ import * as discordjs from 'discord.js'
 
 import CommonFeatureBase from 'Src/features/common-feature-base'
 import { Command } from 'Src/features/command'
-import { FeatureGlobalConfig } from 'Src/features/global-config'
 import * as utils from 'Src/utils'
 
 import { MusicDatabase } from 'Src/features/play-music/music-database'
@@ -10,14 +9,10 @@ import { GuildInstance } from 'Src/features/play-music/guild-instance'
 import * as handlers from 'Src/features/play-music/webapi-handlers'
 
 class PlayMusicCommand implements Command {
-	private readonly gc: FeatureGlobalConfig
-
 	constructor(
 		private readonly cmdName: string,
 		private readonly feature: FeaturePlayMusic
-	) {
-		this.gc = this.feature.gc
-	}
+	) {}
 
 	name(): string {
 		return this.cmdName
@@ -65,7 +60,7 @@ export class FeaturePlayMusic extends CommonFeatureBase {
 		return this._database
 	}
 
-	protected async initImpl(): Promise<void> {
+	protected override async initImpl(): Promise<void> {
 		await this.reload()
 		this.featureCommand.registerCommand(new PlayMusicCommand(this.cmdname, this))
 
@@ -93,11 +88,15 @@ export class FeaturePlayMusic extends CommonFeatureBase {
 		return newInstance
 	}
 
-	async onMessageImpl(msg: discordjs.Message): Promise<void> {
+	protected override async onMessageImpl(msg: discordjs.Message): Promise<void> {
 		if (msg.guild === null) {
 			return
 		}
 		await this.getGuildInstance(msg.guild).onMessage(msg)
+	}
+
+	override async finalize(): Promise<void> {
+		await Promise.allSettled(Array.from(this.#guildInstances.values()).map((x) => x.finalize()))
 	}
 
 	async reload(): Promise<void> {
