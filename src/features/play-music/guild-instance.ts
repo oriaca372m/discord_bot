@@ -5,6 +5,7 @@ import { FeatureGlobalConfig } from 'Src/features/global-config'
 import * as utils from 'Src/utils'
 
 import { FeaturePlayMusic } from 'Src/features/play-music/'
+import { MusicAdder } from 'Src/features/play-music/music-adder'
 import { Playlist } from 'Src/features/play-music/playlist'
 import { AddInteractor } from 'Src/features/play-music/interactor/interactor'
 
@@ -18,7 +19,7 @@ export class GuildInstance {
 	private readonly interactors: Set<AddInteractor> = new Set()
 	private readonly gc: FeatureGlobalConfig
 
-	constructor(private readonly feature: FeaturePlayMusic) {
+	constructor(readonly feature: FeaturePlayMusic) {
 		this.gc = feature.gc
 	}
 
@@ -161,7 +162,7 @@ export class GuildInstance {
 	}
 
 	createInteractor(msg: discordjs.Message): AddInteractor {
-		const i = new AddInteractor(msg.channel, this.feature, this.playlist, () => {
+		const i = new AddInteractor(this, msg.channel, this.playlist, () => {
 			this.interactors.delete(i)
 		})
 		this.interactors.add(i)
@@ -210,5 +211,15 @@ export class GuildInstance {
 			const title = music.getTitle()
 			await msg.reply('今流れている曲はこれだよ！' + title)
 		}
+	}
+
+	async playCommand(rawArgs: string[], msg: discordjs.Message): Promise<void> {
+		const adder = new MusicAdder(this, this.playlist, undefined, true)
+		await adder.play(msg, rawArgs)
+	}
+
+	async addCommand(rawArgs: string[], msg: discordjs.Message): Promise<void> {
+		const adder = new MusicAdder(this, this.playlist)
+		await adder.add(msg, rawArgs)
 	}
 }

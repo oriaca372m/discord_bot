@@ -6,7 +6,6 @@ import { FeatureGlobalConfig } from 'Src/features/global-config'
 import * as utils from 'Src/utils'
 
 import { MusicDatabase } from 'Src/features/play-music/music-database'
-import { MusicAdder } from 'Src/features/play-music/music-adder'
 import { GuildInstance } from 'Src/features/play-music/guild-instance'
 import * as handlers from 'Src/features/play-music/webapi-handlers'
 
@@ -35,14 +34,8 @@ class PlayMusicCommand implements Command {
 		const guildInstance = this.feature.getGuildInstance(msg.guild)
 		await utils.subCommandProxy(
 			{
-				play: async (a, m) => {
-					const adder = new MusicAdder(this.feature, undefined, true)
-					await adder.play(m, a)
-				},
-				add: async (a, m) => {
-					const adder = new MusicAdder(this.feature)
-					await adder.add(m, a)
-				},
+				play: async (a, m) => await guildInstance.playCommand(a, m),
+				add: async (a, m) => await guildInstance.addCommand(a, m),
 				stop: async () => await guildInstance.closeConnection(),
 				reload: async () => await this.feature.reload(),
 				next: async () => await guildInstance.next(),

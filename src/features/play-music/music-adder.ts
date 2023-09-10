@@ -3,9 +3,11 @@ import * as discordjs from 'discord.js'
 import * as utils from 'Src/utils'
 
 import { FeaturePlayMusic } from 'Src/features/play-music'
+import { GuildInstance } from 'Src/features/play-music/guild-instance'
 import { Music } from 'Src/features/play-music/music'
 import { YouTubeMusic, fetchPlaylistItems } from 'Src/features/play-music/youtube'
 import { Playlist } from 'Src/features/play-music/playlist'
+import { MusicDatabase } from 'Src/features/play-music/music-database'
 
 interface CommandOptions {
 	args: string[]
@@ -37,18 +39,24 @@ export async function resolveUrl(feature: FeaturePlayMusic, url: URL): Promise<M
 		await ytMusic.init(feature.youtubeApiKey)
 		return [ytMusic]
 	} catch (e) {
-		console.error('youtubeの曲の初期化中にエラー', e)
+		console.error('YouTubeの曲の初期化中にエラー', e)
 		return []
 	}
 }
 
 export class MusicAdder {
+	readonly #feature: FeaturePlayMusic
+	readonly #database: MusicDatabase
+
 	constructor(
-		private readonly feature: FeaturePlayMusic,
+		private readonly guildInstance: GuildInstance,
 		private readonly playlist: Playlist,
 		private readonly _listMusics?: readonly Music[],
 		private readonly _resume: boolean = false
-	) {}
+	) {
+		this.#feature = guildInstance.feature
+		this.#database = this.#feature.database
+	}
 
 	private async parseOptions(
 		msg: discordjs.Message,
@@ -58,7 +66,7 @@ export class MusicAdder {
 		try {
 			;({ args, options } = utils.parseCommandArgs(rawArgs, []))
 		} catch (e) {
-			await this.feature.gc.send(msg, 'playMusic.invalidCommand', { e })
+			await this.#feature.gc.send(msg, 'playMusic.invalidCommand', { e })
 			return
 		}
 
@@ -67,7 +75,7 @@ export class MusicAdder {
 		const isAddToNext = utils.getOption(options, ['n', 'next']) as boolean
 
 		if (isAddToFirst && isAddToNext) {
-			await this.feature.gc.send(msg, 'playMusic.invalidCommand', {
+			await this.#feature.gc.send(msg, 'playMusic.invalidCommand', {
 				e: 'firstとnextを同時に指定することはできません',
 			})
 			return
@@ -90,14 +98,14 @@ export class MusicAdder {
 		}
 
 		if (url !== undefined) {
-			return resolveUrl(this.feature, url)
+			return resolveUrl(this.#feature, url)
 		}
 
 		if (isYouTube) {
 			throw new Error('YouTubeなのにurlじゃない')
 		}
 
-		const music = this.feature.database.search(keyword)[0]
+		const music = this.#database.search(keyword)[0]
 		if (music !== undefined) {
 			return [music]
 		}
@@ -156,7 +164,7 @@ export class MusicAdder {
 	): Promise<readonly Music[]> {
 		if (this._listMusics !== undefined && parseResult.args.length === 0) {
 			this.addMusicsToPlaylist(this._listMusics, parseResult)
-			await this.feature.gc.send(msg, 'playMusic.interactor.addedMusic', {
+			await this.#feature.gc.send(msg, 'playMusic.interactor.addedMusic', {
 				all: true,
 				musics: [],
 			})
@@ -205,7 +213,7 @@ export class MusicAdder {
 		}
 
 		if (!member.voice.channel) {
-			await this.feature.gc.send(msg, 'playMusic.haveToJoinVoiceChannel')
+			await this.#feature.gc.send(msg, 'playMusic.haveToJoinVoiceChannel')
 			return
 		}
 
@@ -215,8 +223,8 @@ export class MusicAdder {
 				return
 			}
 
-			await this.feature.makeConnection(member.voice.channel)
-			await this.feature.play()
+			await this.guildInstance.makeConnection(member.voice.channel)
+			await this.guildInstance.play()
 			return
 		}
 
@@ -227,8 +235,8 @@ export class MusicAdder {
 			return
 		}
 
-		await this.feature.makeConnection(member.voice.channel)
-		await this.feature.play()
+		await this.guildInstance.makeConnection(member.voice.channel)
+		await this.guildInstance.play()
 		return
 	}
 }

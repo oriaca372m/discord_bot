@@ -3,10 +3,11 @@ import * as discordjs from 'discord.js'
 import { FeatureGlobalConfig } from 'Src/features/global-config'
 import * as utils from 'Src/utils'
 
-import { FeaturePlayMusic } from 'Src/features/play-music'
+import { GuildInstance } from 'Src/features/play-music/guild-instance'
 import { Music } from 'Src/features/play-music/music'
 import { MusicAdder } from 'Src/features/play-music/music-adder'
 import { Playlist } from 'Src/features/play-music/playlist'
+import { MusicDatabase } from 'Src/features/play-music/music-database'
 import {
 	ListView,
 	MusicListView,
@@ -16,16 +17,18 @@ import {
 import { PlaylistListView } from 'Src/features/play-music/interactor/playlist-listview'
 
 export class AddInteractor {
+	readonly #database: MusicDatabase
 	readonly gc: FeatureGlobalConfig
 	private _listView: ListView | undefined
 
 	constructor(
-		public readonly channel: utils.LikeTextChannel,
-		public readonly feature: FeaturePlayMusic,
-		public readonly playlist: Playlist,
+		readonly guildInstance: GuildInstance,
+		readonly channel: utils.LikeTextChannel,
+		readonly playlist: Playlist,
 		private readonly done: () => void
 	) {
-		this.gc = this.feature.gc
+		this.#database = this.guildInstance.feature.database
+		this.gc = this.guildInstance.feature.gc
 	}
 
 	async welcome(): Promise<void> {
@@ -38,18 +41,18 @@ export class AddInteractor {
 	}
 
 	async search(keyword: string): Promise<void> {
-		await this.setListView(new MusicListView(this, this.feature.database.search(keyword)))
+		await this.setListView(new MusicListView(this, this.#database.search(keyword)))
 	}
 
 	async searchArtist(keyword: string): Promise<void> {
 		await this.setListView(
-			new SelectableListView(this, this.feature.database.searchArtistName(keyword))
+			new SelectableListView(this, this.#database.searchArtistName(keyword))
 		)
 	}
 
 	async searchAlbum(keyword: string): Promise<void> {
 		await this.setListView(
-			new SelectableListView(this, this.feature.database.searchAlbumName(keyword))
+			new SelectableListView(this, this.#database.searchAlbumName(keyword))
 		)
 	}
 
@@ -97,10 +100,22 @@ export class AddInteractor {
 		const [cmdname, ...rawArgs] = res
 
 		if (['play', 'add'].includes(cmdname)) {
-			let adder = new MusicAdder(this.feature, undefined, true)
-			if (this._listView instanceof MusicListView) {
-				adder = new MusicAdder(this.feature, this._listView.getItems())
-			}
+			const adder = (() => {
+				if (this._listView instanceof MusicListView) {
+					return new MusicAdder(
+						this.guildInstance,
+						this.guildInstance.playlist,
+						this._listView.getItems()
+					)
+				}
+
+				return new MusicAdder(
+					this.guildInstance,
+					this.guildInstance.playlist,
+					undefined,
+					true
+				)
+			})()
 
 			if (cmdname === 'play') {
 				await adder.play(msg, rawArgs)
