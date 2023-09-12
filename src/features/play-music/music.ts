@@ -1,3 +1,4 @@
+import { createReadStream } from 'node:fs'
 import * as voice from '@discordjs/voice'
 import { ListItem, Selectable } from 'Src/features/play-music/interactor/listview'
 import { SerializedYouTubeMusic } from './youtube'
@@ -79,7 +80,8 @@ export class MusicFile implements Music {
 	}
 
 	createResource(): MusicPlayResource {
-		return { audioResource: voice.createAudioResource(this.path) }
+		// HACK: パスを直接渡すと、以前にストリームを渡していた場合、再生できなくなる
+		return { audioResource: voice.createAudioResource(createReadStream(this.path)) }
 	}
 }
 
