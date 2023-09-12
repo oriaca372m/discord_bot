@@ -178,7 +178,7 @@ export class Play implements WebApiHandler {
 		}
 
 		guildInstance.playlist.switch(args.index)
-		await guildInstance.play(foundVoiceChannel)
-		return {}
+		guildInstance.playOn(foundVoiceChannel)
+		return Promise.resolve({})
 	}
 }

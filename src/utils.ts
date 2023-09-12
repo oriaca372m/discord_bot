@@ -9,6 +9,12 @@ export function unreachable(_?: unknown): never {
 	throw Error('This must never happen!')
 }
 
+export function mustExist<T>(v: T | undefined | null): asserts v is T {
+	if (v === undefined || v === null) {
+		throw Error('undefined or null')
+	}
+}
+
 export function parseShellLikeCommand(string: string): string[] | undefined {
 	let state: 'normal' | 'singlequote' | 'doublequote' | 'backslash' = 'normal'
 
@@ -326,7 +332,8 @@ export class RetryError extends Error {
 export async function retry<T>(
 	func: () => Promise<T>,
 	ntimes: number,
-	logging = false
+	logging = false,
+	waitMs = 0
 ): Promise<T> {
 	let lastError: unknown
 
@@ -340,6 +347,8 @@ export async function retry<T>(
 				console.error(e)
 			}
 		}
+
+		await delay(waitMs)
 	}
 
 	throw new RetryError(lastError ?? unreachable())

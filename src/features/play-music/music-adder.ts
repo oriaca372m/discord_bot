@@ -224,7 +224,7 @@ export class MusicAdder {
 				return
 			}
 
-			await this.guildInstance.play(member.voice.channel)
+			this.guildInstance.playOn(member.voice.channel)
 			return
 		}
 
@@ -235,7 +235,7 @@ export class MusicAdder {
 			return
 		}
 
-		await this.guildInstance.play(member.voice.channel)
+		this.guildInstance.playOn(member.voice.channel)
 		return
 	}
 }
