@@ -35,7 +35,7 @@ export interface SerializedMusicFile {
 
 export interface MusicPlayResource {
 	audioResource: voice.AudioResource
-	finalizer?: () => void
+	finalizer?(): void
 }
 
 export interface Music extends ListItem {

@@ -169,11 +169,11 @@ export class GuildInstance {
 		await this.#connectionManager.disconnect()
 	}
 
-	get isInInteractionMode(): boolean {
+	get #isInInteractionMode(): boolean {
 		return this.#interactors.size !== 0
 	}
 
-	createInteractor(msg: discordjs.Message): AddInteractor {
+	#createInteractor(msg: discordjs.Message): AddInteractor {
 		const i = new AddInteractor(this, msg.channel, this.playlist, () => {
 			this.#interactors.delete(i)
 		})
@@ -202,12 +202,12 @@ export class GuildInstance {
 			return
 		}
 
-		if (this.isInInteractionMode) {
+		if (this.#isInInteractionMode) {
 			await msg.reply('今まさにインタラクションモード')
 			return
 		}
 
-		const i = this.createInteractor(msg)
+		const i = this.#createInteractor(msg)
 		await i.welcome()
 		if (args.length === 1) {
 			await i.search(args[0])
