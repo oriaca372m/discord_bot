@@ -1,6 +1,4 @@
-import { isLeft } from 'fp-ts/lib/Either.js'
-import * as t from 'io-ts'
-import { PathReporter } from 'io-ts/lib/PathReporter.js'
+import { z } from 'zod'
 
 import { FeatureInterface } from 'Src/features/feature'
 
@@ -13,91 +11,79 @@ import { FeatureSk } from 'Src/features/sk'
 import { FeatureWebApi } from 'Src/features/webapi'
 import { FeatureBasicWebApiMethods } from 'Src/features/basic-webapi-methods'
 
-export const FeatureConfigBase = t.intersection([
-	t.type({ feature: t.string }),
-	t.partial({ id: t.string }),
-])
-export type FeatureConfigBaseType = t.TypeOf<typeof FeatureConfigBase>
+export const FeatureConfigBase = z
+	.object({
+		feature: z.string(),
+		id: z.string().optional(),
+	})
+	.passthrough()
+export type FeatureConfigBaseType = z.infer<typeof FeatureConfigBase>
 
 type Loader = (entry: FeatureConfigBaseType) => FeatureInterface
 
-function makeLoader<A, O>(
-	ConfigType: t.Type<A, O, unknown>,
-	converter: (entry: t.TypeOf<t.Type<A, O, unknown>>) => FeatureInterface
+function makeLoader<O>(
+	ConfigType: z.ZodType<O>,
+	converter: (entry: O) => FeatureInterface
 ): Loader {
-	return (entry: FeatureConfigBaseType) => {
-		const result = ConfigType.decode(entry)
-		if (isLeft(result)) {
-			throw PathReporter.report(result)
-		}
-		return converter(result.right)
-	}
+	return (entry: FeatureConfigBaseType) => converter(ConfigType.parse(entry))
 }
 
 const loaders: { [key: string]: Loader } = {
 	simple_reply: () => new FeatureSimpleReply(),
 
 	mondai: makeLoader(
-		t.type({
-			command_name: t.string,
-			config_path: t.string,
+		z.object({
+			command_name: z.string(),
+			config_path: z.string(),
 		}),
 		(cfg) => new FeatureMondai(cfg.command_name, cfg.config_path)
 	),
 
 	custom_reply: makeLoader(
-		t.type({
-			command_name: t.string,
+		z.object({
+			command_name: z.string(),
 		}),
 		(cfg) => new FeatureCustomReply(cfg.command_name)
 	),
 
 	command_alias: makeLoader(
-		t.type({
-			command_name: t.string,
-			to_name: t.string,
-			to_args: t.array(t.string),
+		z.object({
+			command_name: z.string(),
+			to_name: z.string(),
+			to_args: z.array(z.string()),
 		}),
 		(cfg) => new FeatureCommandAlias(cfg.command_name, cfg.to_name, cfg.to_args)
 	),
 
 	play_music: makeLoader(
-		t.intersection([
-			t.type({
-				command_name: t.string,
-			}),
-			t.partial({
-				youtube_api_key: t.string,
-			}),
-		]),
+		z.object({
+			command_name: z.string(),
+			youtube_api_key: z.string().optional(),
+		}),
 		(cfg) => new FeaturePlayMusic(cfg.command_name, cfg.youtube_api_key)
 	),
 
 	sk: makeLoader(
-		t.type({
-			sk_command_name: t.string,
-			set_command_name: t.string,
+		z.object({
+			sk_command_name: z.string(),
+			set_command_name: z.string(),
 		}),
 		(cfg) => new FeatureSk(cfg.sk_command_name, cfg.set_command_name)
 	),
 
 	web_api: makeLoader(
-		t.type({
-			port: t.number,
+		z.object({
+			port: z.number().int(),
 		}),
 		(cfg) => new FeatureWebApi(cfg.port)
 	),
 
 	basic_web_api_methods: makeLoader(
-		t.intersection([
-			t.type({
-				webui_command_name: t.string,
-				webui_url: t.string,
-			}),
-			t.partial({
-				api_url: t.string,
-			}),
-		]),
+		z.object({
+			webui_command_name: z.string(),
+			webui_url: z.string(),
+			api_url: z.string().optional(),
+		}),
 		(cfg) => new FeatureBasicWebApiMethods(cfg.webui_command_name, cfg.webui_url, cfg.api_url)
 	),
 }
@@ -128,8 +114,12 @@ export class FeatureLoader {
 			this._features.set(entry.id, feature)
 			return true
 		} catch (e) {
-			console.error(`an error occurred while loading the feature '${entry.feature}':`)
-			console.error(e)
+			console.error(`An error occurred while loading the feature '${entry.feature}':`)
+			if (e instanceof z.ZodError) {
+				console.error(e.toString())
+			} else {
+				console.error(e)
+			}
 			return false
 		}
 	}
