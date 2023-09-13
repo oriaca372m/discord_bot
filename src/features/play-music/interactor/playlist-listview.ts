@@ -29,6 +29,7 @@ class MoveAction implements ListAction {
 
 	async do(args: string[]): Promise<void> {
 		this.lv.playlist.switch(parseInt(args[0], 10))
+		this.lv.interactor.guildInstance.playIfHasConnection()
 		return Promise.resolve()
 	}
 }

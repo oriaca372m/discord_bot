@@ -146,6 +146,16 @@ export class GuildInstance {
 		this.#playCurrentMusic()
 	}
 
+	// 再生されたらtrue
+	playIfHasConnection(): boolean {
+		if (this.#connection === undefined) {
+			return false
+		}
+
+		this.#playCurrentMusic()
+		return true
+	}
+
 	next(): void {
 		if (this.#connection === undefined) {
 			return
