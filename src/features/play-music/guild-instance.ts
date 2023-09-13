@@ -99,11 +99,8 @@ class Connection {
 		}
 
 		try {
-			// TODO: finalizerとdestoryの呼び出し順序がこれでいいのか調べる
-			if (this.#musicPlayResource.finalizer !== undefined) {
-				this.#musicPlayResource.finalizer()
-			}
 			this.#musicPlayResource.audioResource.playStream.destroy()
+			this.#musicPlayResource.finalizer?.()
 		} finally {
 			this.#musicPlayResource = undefined
 		}
@@ -176,7 +173,7 @@ export class GuildInstance {
 	}
 
 	async finalize(): Promise<void> {
-		this.#connection?.finalize()
+		this.stop()
 		return Promise.resolve()
 	}
 
