@@ -1,20 +1,14 @@
-import { FeaturePlayMusic } from '.'
-import { YouTubeMusic } from './youtube'
-import { Music, SerializedMusic } from './music'
-import * as u from 'Src/utils'
+import { MusicDatabase } from 'Src/features/play-music/music-database'
+import { YouTubeMusic } from 'Src/features/play-music/youtube'
+import { Music, MusicFile, SerializedMusic } from 'Src/features/play-music/music'
 
-export function deserializeMusic(feature: FeaturePlayMusic, data: SerializedMusic): Music {
-	const kind = data.kind
+export function deserializeMusic(database: MusicDatabase, data: unknown): Music {
+	const { kind } = SerializedMusic.parse(data)
 	if (kind === 'file') {
-		const music = feature.database.getByUuid(data.uuid)
-		if (music === undefined) {
-			throw new Error('存在しないUUID')
-		}
-
-		return music
+		return MusicFile.deserialize(data, database)
 	} else if (kind === 'youtube') {
 		return YouTubeMusic.deserialize(data)
 	} else {
-		u.unreachable(kind)
+		throw new Error(`不明なkindの曲を読み込もうとしました: ${kind}`)
 	}
 }

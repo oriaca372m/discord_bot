@@ -1,15 +1,18 @@
-import * as voice from '@discordjs/voice'
 import { spawn, execFile } from 'child_process'
-import { Music, MusicPlayResource } from './music'
+import { z } from 'zod'
+import * as voice from '@discordjs/voice'
+
 import * as utils from 'Src/utils'
+
+import { Music, MusicPlayResource, SerializedMusic } from 'Src/features/play-music/music'
 
 const ytdlPath = 'yt-dlp'
 
-export interface SerializedYouTubeMusic {
-	kind: 'youtube'
-	url: string
-	title: string
-}
+const SerializedYouTubeMusic = z.object({
+	kind: z.literal('youtube'),
+	url: z.string(),
+	title: z.string(),
+})
 
 interface YtdlJson {
 	title?: unknown
@@ -85,8 +88,10 @@ export class YouTubeMusic implements Music {
 		return this.#title ?? '(タイトル未取得)'
 	}
 
-	serialize(): SerializedYouTubeMusic {
-		return { kind: 'youtube', url: this._url, title: this.getTitle() }
+	serialize(): z.infer<typeof SerializedMusic> {
+		return { kind: 'youtube', url: this._url, title: this.getTitle() } satisfies z.infer<
+			typeof SerializedYouTubeMusic
+		>
 	}
 
 	toListString(): string {
@@ -120,8 +125,9 @@ export class YouTubeMusic implements Music {
 		}
 	}
 
-	static deserialize(data: SerializedYouTubeMusic): YouTubeMusic {
-		return new YouTubeMusic(data.url, data.title)
+	static deserialize(data: unknown): YouTubeMusic {
+		const res = SerializedYouTubeMusic.parse(data)
+		return new YouTubeMusic(res.url, res.title)
 	}
 }
 

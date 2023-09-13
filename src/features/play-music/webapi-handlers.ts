@@ -1,3 +1,4 @@
+import { z } from 'zod'
 import * as discordjs from 'discord.js'
 
 import { WebApiHandler, AccessTokenInfo, HandlerError } from 'Src/features/webapi'
@@ -8,7 +9,7 @@ import { deserializeMusic } from 'Src/features/play-music/music-deserialize'
 import { resolveUrl } from 'Src/features/play-music/music-adder'
 
 interface WebApiMusic {
-	readonly serialized: SerializedMusic
+	readonly serialized: z.infer<typeof SerializedMusic>
 	readonly title: string
 	readonly album?: string
 	readonly artist?: string
@@ -37,7 +38,7 @@ export class GetAllMusics implements WebApiHandler {
 }
 
 interface AddToPlaylistReq {
-	music: SerializedMusic
+	music: z.infer<typeof SerializedMusic>
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface AddToPlaylistRes {}
@@ -51,7 +52,7 @@ export class AddToPlaylist implements WebApiHandler {
 		const guildInstance = this._feature.getGuildInstance(tokenInfo.guild)
 
 		try {
-			const music = deserializeMusic(this._feature, args.music)
+			const music = deserializeMusic(this._feature.database, args.music)
 			guildInstance.playlist.addMusic(music)
 		} catch (e) {
 			return Promise.resolve({ error: 'Could not add the music.' })
@@ -66,7 +67,7 @@ interface AddUrlToPlaylistReq {
 }
 
 interface AddUrlToPlaylistRes {
-	added: SerializedMusic[]
+	added: z.infer<typeof SerializedMusic>[]
 }
 
 export class AddUrlToPlaylist implements WebApiHandler {
@@ -99,7 +100,7 @@ export class AddUrlToPlaylist implements WebApiHandler {
 }
 
 interface GetPlaylistRes {
-	musics: SerializedMusic[]
+	musics: z.infer<typeof SerializedMusic>[]
 }
 
 export class GetPlaylist implements WebApiHandler {
@@ -116,7 +117,7 @@ export class GetPlaylist implements WebApiHandler {
 }
 
 interface SetPlaylistReq {
-	musics: SerializedMusic[]
+	musics: z.infer<typeof SerializedMusic>[]
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface SetPlaylistRes {}
@@ -131,7 +132,7 @@ export class SetPlaylist implements WebApiHandler {
 		guildInstance.playlist.clear()
 		for (const serializedMusic of args.musics) {
 			try {
-				const music = deserializeMusic(this._feature, serializedMusic)
+				const music = deserializeMusic(this._feature.database, serializedMusic)
 				guildInstance.playlist.addMusic(music)
 			} catch (_) {
 				// pass

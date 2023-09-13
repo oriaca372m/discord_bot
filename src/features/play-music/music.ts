@@ -1,7 +1,9 @@
 import { createReadStream } from 'node:fs'
+import { z } from 'zod'
 import * as voice from '@discordjs/voice'
+
 import { ListItem, Selectable } from 'Src/features/play-music/interactor/listview'
-import { SerializedYouTubeMusic } from './youtube'
+import { MusicDatabase } from 'Src/features/play-music/music-database'
 
 type FieldNames<T> = {
 	// eslint-disable-next-line @typescript-eslint/ban-types
@@ -27,12 +29,11 @@ export class MusicMetadata {
 
 export type MusicMetadataObject = Fields<MusicMetadata>
 
-export type SerializedMusic = SerializedMusicFile | SerializedYouTubeMusic
-
-export interface SerializedMusicFile {
-	kind: 'file'
-	uuid: string
-}
+export const SerializedMusic = z
+	.object({
+		kind: z.string(),
+	})
+	.passthrough()
 
 export interface MusicPlayResource {
 	audioResource: voice.AudioResource
@@ -41,10 +42,15 @@ export interface MusicPlayResource {
 
 export interface Music extends ListItem {
 	getTitle(): string
-	serialize(): SerializedMusic
+	serialize(): z.infer<typeof SerializedMusic>
 
 	createResource(): MusicPlayResource
 }
+
+const SerializedMusicFile = z.object({
+	kind: z.literal('file'),
+	uuid: z.string(),
+})
 
 export class MusicFile implements Music {
 	readonly uuid: string
@@ -63,8 +69,8 @@ export class MusicFile implements Music {
 		return this.metadata.title
 	}
 
-	serialize(): SerializedMusicFile {
-		return { kind: 'file', uuid: this.uuid }
+	serialize(): z.infer<typeof SerializedMusicFile> {
+		return { kind: 'file', uuid: this.uuid } satisfies z.infer<typeof SerializedMusicFile>
 	}
 
 	toListString(): string {
@@ -82,6 +88,16 @@ export class MusicFile implements Music {
 	createResource(): MusicPlayResource {
 		// HACK: パスを直接渡すと、以前にストリームを渡していた場合、再生できなくなる
 		return { audioResource: voice.createAudioResource(createReadStream(this.path)) }
+	}
+
+	static deserialize(data: unknown, database: MusicDatabase): Music {
+		const { uuid } = SerializedMusicFile.parse(data)
+		const music = database.getByUuid(uuid)
+		if (music === undefined) {
+			throw new Error(`UUIDが存在しない曲を読み込もうとしました: ${uuid}`)
+		}
+
+		return music
 	}
 }
 
