@@ -24,7 +24,10 @@ class Connection {
 	constructor(readonly channel: discordjs.BaseGuildVoiceChannel) {}
 
 	async init(): Promise<void> {
-		await utils.retry(() => this.#connectInternal(this.channel), 3, true, 1000)
+		await utils.retry(() => this.#connectInternal(this.channel), 3, {
+			logging: true,
+			waitMs: 1000,
+		})
 
 		if (this.#finalizeCalled) {
 			this.finalize()

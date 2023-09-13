@@ -332,8 +332,7 @@ export class RetryError extends Error {
 export async function retry<T>(
 	func: () => Promise<T>,
 	ntimes: number,
-	logging = false,
-	waitMs = 0
+	{ logging = false, waitMs = 0 } = {}
 ): Promise<T> {
 	let lastError: unknown
 

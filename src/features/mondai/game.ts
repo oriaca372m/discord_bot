@@ -132,7 +132,7 @@ export class Game {
 				}
 			},
 			5,
-			true
+			{ logging: true }
 		)
 
 		await this.gc.sendToChannel(
