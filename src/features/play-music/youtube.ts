@@ -4,7 +4,7 @@ import * as voice from '@discordjs/voice'
 
 import * as utils from 'Src/utils'
 
-import { Music, MusicPlayResource, SerializedMusic } from 'Src/features/play-music/music'
+import { Music, MusicPlayResource } from 'Src/features/play-music/music'
 
 const ytdlPath = 'yt-dlp'
 
@@ -84,10 +84,8 @@ export class YouTubeMusic implements Music {
 		return this.#title ?? '(タイトル未取得)'
 	}
 
-	serialize(): z.infer<typeof SerializedMusic> {
-		return { kind: 'youtube', url: this.url, title: this.getTitle() } satisfies z.infer<
-			typeof SerializedYouTubeMusic
-		>
+	serialize(): z.infer<typeof SerializedYouTubeMusic> {
+		return { kind: 'youtube', url: this.url, title: this.getTitle() }
 	}
 
 	toListString(): string {

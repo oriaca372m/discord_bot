@@ -54,7 +54,7 @@ export class MusicFile implements Music {
 	}
 
 	serialize(): z.infer<typeof SerializedMusicFile> {
-		return { kind: 'file', uuid: this.uuid } satisfies z.infer<typeof SerializedMusicFile>
+		return { kind: 'file', uuid: this.uuid }
 	}
 
 	toListString(): string {
