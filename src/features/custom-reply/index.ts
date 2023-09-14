@@ -112,7 +112,10 @@ export class CustomReply {
 }
 
 class CustomReplyCommand implements Command {
-	constructor(private readonly feature: FeatureCustomReply, private readonly cmdname: string) {}
+	constructor(
+		private readonly feature: FeatureCustomReply,
+		private readonly cmdname: string
+	) {}
 
 	name(): string {
 		return this.cmdname

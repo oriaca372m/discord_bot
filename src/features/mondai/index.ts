@@ -117,7 +117,10 @@ export class Mondai {
 }
 
 class FeatureMondaiCommand implements Command {
-	constructor(private readonly feature: FeatureMondai, private readonly cmdname: string) {}
+	constructor(
+		private readonly feature: FeatureMondai,
+		private readonly cmdname: string
+	) {}
 
 	name(): string {
 		return this.cmdname
@@ -135,7 +138,10 @@ class FeatureMondaiCommand implements Command {
 export class FeatureMondai extends CommonFeatureBase {
 	private config!: MondaiConfig
 
-	constructor(public readonly cmdname: string, private readonly configPath: string) {
+	constructor(
+		public readonly cmdname: string,
+		private readonly configPath: string
+	) {
 		super()
 	}
 

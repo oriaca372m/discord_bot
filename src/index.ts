@@ -83,7 +83,7 @@ async function main() {
 
 	const shutdown = () => {
 		;(async () => {
-			client.destroy()
+			await client.destroy()
 			await featureManager.finalize()
 			console.log('discord bot was shut down.')
 			process.exit(0)

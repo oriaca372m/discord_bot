@@ -22,7 +22,10 @@ export class FeatureGlobalConfig extends FeatureBase {
 	readonly priority = 50000
 	readonly #defaultObjectStorage: ObjectStorage
 
-	constructor(defaultObjectStorage: ObjectStorage, private paths: string[]) {
+	constructor(
+		defaultObjectStorage: ObjectStorage,
+		private paths: string[]
+	) {
 		super()
 		this.#defaultObjectStorage = defaultObjectStorage
 	}

@@ -5,7 +5,10 @@ import { Images, isValidImageId } from 'Src/features/custom-reply/images'
 import { FeatureGlobalConfig } from 'Src/features/global-config'
 
 export class ActionDefault implements Action {
-	constructor(private readonly _images: Images, private readonly _gc: FeatureGlobalConfig) {}
+	constructor(
+		private readonly _images: Images,
+		private readonly _gc: FeatureGlobalConfig
+	) {}
 
 	async handle(msg: discordjs.Message, res: Response): Promise<ActionResult | undefined> {
 		const imageId = res.image
