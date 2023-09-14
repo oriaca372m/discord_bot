@@ -28,8 +28,11 @@ function createHandlerConstructor<Req, Res>(
 
 		constructor(private readonly feature: FeaturePlayMusic) {}
 
-		async handle(args: unknown, tokenInfo: AccessTokenInfo): Promise<unknown> {
-			const req = ReqZodType.parse(args)
+		async handle(args: unknown, tokenInfo: AccessTokenInfo): Promise<Res> {
+			const req = ReqZodType.safeParse(args)
+			if (!req.success) {
+				throw new HandlerError(req.error.toString())
+			}
 
 			const ctx: Context = {
 				feature: this.feature,
@@ -37,9 +40,12 @@ function createHandlerConstructor<Req, Res>(
 				tokenInfo,
 			}
 
-			const ret = await func(req, ctx)
-			const res = ResZodType.parse(ret)
-			return res
+			const ret = await func(req.data, ctx)
+			const res = ResZodType.safeParse(ret)
+			if (!res.success) {
+				throw new HandlerError(res.error.toString())
+			}
+			return res.data
 		}
 	}
 }
