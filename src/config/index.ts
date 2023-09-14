@@ -30,7 +30,9 @@ export class ConfigLoader {
 		let allOk = true
 		const featureLoader = new FeatureLoader()
 		for (const entry of result.data.features) {
-			allOk &&= featureLoader.addEntry(entry)
+			// addEntryはエラーをなるべく多く表示するために、一度失敗しても続行する
+			// allOkが右に無いと一度失敗したあとにaddEntryが評価されなくなる(短絡評価)
+			allOk = featureLoader.addEntry(entry) && allOk
 		}
 
 		if (allOk) {
