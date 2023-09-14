@@ -1,8 +1,14 @@
 import * as discordjs from 'discord.js'
+
+import { FeatureGlobalConfig } from 'Src/features/global-config'
+import * as utils from 'Src/utils'
+
+import { FeaturePlayMusic } from 'Src/features/play-music'
+import { GuildInstance } from 'Src/features/play-music/guild-instance'
 import { Music } from 'Src/features/play-music/music'
 import { YouTubeMusic, fetchPlaylistItems } from 'Src/features/play-music/youtube'
-import { FeaturePlayMusic } from 'Src/features/play-music'
-import * as utils from 'Src/utils'
+import { Playlist } from 'Src/features/play-music/playlist'
+import { MusicDatabase } from 'Src/features/play-music/music-database'
 
 interface CommandOptions {
 	args: string[]
@@ -34,19 +40,26 @@ export async function resolveUrl(feature: FeaturePlayMusic, url: URL): Promise<M
 		await ytMusic.init(feature.youtubeApiKey)
 		return [ytMusic]
 	} catch (e) {
-		console.error('youtubeの曲の初期化中にエラー', e)
+		console.error('YouTubeの曲の初期化中にエラー', e)
 		return []
 	}
 }
 
 export class MusicAdder {
-	constructor(
-		private readonly feature: FeaturePlayMusic,
-		private readonly _listMusics?: readonly Music[],
-		private readonly _resume: boolean = false
-	) {}
+	readonly #gc: FeatureGlobalConfig
+	readonly #database: MusicDatabase
 
-	private async parseOptions(
+	constructor(
+		private readonly guildInstance: GuildInstance,
+		private readonly playlist: Playlist,
+		private readonly listMusics?: readonly Music[],
+		private readonly resume: boolean = false
+	) {
+		this.#gc = guildInstance.feature.gc
+		this.#database = guildInstance.feature.database
+	}
+
+	async #parseOptions(
 		msg: discordjs.Message,
 		rawArgs: string[]
 	): Promise<CommandOptions | undefined> {
@@ -54,7 +67,7 @@ export class MusicAdder {
 		try {
 			;({ args, options } = utils.parseCommandArgs(rawArgs, []))
 		} catch (e) {
-			await this.feature.gc.send(msg, 'playMusic.invalidCommand', { e })
+			await this.#gc.send(msg, 'playMusic.invalidCommand', { e })
 			return
 		}
 
@@ -63,7 +76,7 @@ export class MusicAdder {
 		const isAddToNext = utils.getOption(options, ['n', 'next']) as boolean
 
 		if (isAddToFirst && isAddToNext) {
-			await this.feature.gc.send(msg, 'playMusic.invalidCommand', {
+			await this.#gc.send(msg, 'playMusic.invalidCommand', {
 				e: 'firstとnextを同時に指定することはできません',
 			})
 			return
@@ -86,14 +99,14 @@ export class MusicAdder {
 		}
 
 		if (url !== undefined) {
-			return resolveUrl(this.feature, url)
+			return resolveUrl(this.guildInstance.feature, url)
 		}
 
 		if (isYouTube) {
 			throw new Error('YouTubeなのにurlじゃない')
 		}
 
-		const music = this.feature.database.search(keyword)[0]
+		const music = this.#database.search(keyword)[0]
 		if (music !== undefined) {
 			return [music]
 		}
@@ -101,10 +114,10 @@ export class MusicAdder {
 		return []
 	}
 
-	private async getMusics(keywords: string[], isYouTube: boolean): Promise<Music[]> {
+	async #getMusics(keywords: string[], isYouTube: boolean): Promise<Music[]> {
 		const musics: Music[] = []
 
-		const listMusics = this._listMusics
+		const listMusics = this.listMusics
 		if (listMusics !== undefined) {
 			let indexes: number[] | undefined
 			try {
@@ -128,40 +141,40 @@ export class MusicAdder {
 		return musics
 	}
 
-	private addMusicsToPlaylist(musics: readonly Music[], parseResult: CommandOptions): void {
+	#addMusicsToPlaylist(musics: readonly Music[], parseResult: CommandOptions): void {
 		let counter = 0
 		if (parseResult.isAddToNext) {
-			const c = this.feature.playlist.currentTrack
+			const c = this.playlist.currentTrack
 			if (c !== undefined) {
 				counter = c + 1
 			}
 		}
 		for (const music of musics) {
 			if (parseResult.isAddToFirst || parseResult.isAddToNext) {
-				this.feature.playlist.addMusic(music, counter)
+				this.playlist.addMusic(music, counter)
 				counter++
 			} else {
-				this.feature.playlist.addMusic(music)
+				this.playlist.addMusic(music)
 			}
 		}
 	}
 
-	private async addInternal(
+	async #addInternal(
 		msg: discordjs.Message,
 		parseResult: CommandOptions
 	): Promise<readonly Music[]> {
-		if (this._listMusics !== undefined && parseResult.args.length === 0) {
-			this.addMusicsToPlaylist(this._listMusics, parseResult)
-			await this.feature.gc.send(msg, 'playMusic.interactor.addedMusic', {
+		if (this.listMusics !== undefined && parseResult.args.length === 0) {
+			this.#addMusicsToPlaylist(this.listMusics, parseResult)
+			await this.#gc.send(msg, 'playMusic.interactor.addedMusic', {
 				all: true,
 				musics: [],
 			})
 
-			return this._listMusics
+			return this.listMusics
 		}
 
-		const toAddMusics = await this.getMusics(parseResult.args, parseResult.isYouTube)
-		this.addMusicsToPlaylist(toAddMusics, parseResult)
+		const toAddMusics = await this.#getMusics(parseResult.args, parseResult.isYouTube)
+		this.#addMusicsToPlaylist(toAddMusics, parseResult)
 
 		if (toAddMusics.length === 0) {
 			await msg.reply('そんな曲は無いロボ…')
@@ -181,16 +194,16 @@ export class MusicAdder {
 	}
 
 	async add(msg: discordjs.Message, rawArgs: string[]): Promise<void> {
-		const parseResult = await this.parseOptions(msg, rawArgs)
+		const parseResult = await this.#parseOptions(msg, rawArgs)
 		if (parseResult === undefined) {
 			return
 		}
 
-		await this.addInternal(msg, parseResult)
+		await this.#addInternal(msg, parseResult)
 	}
 
 	async play(msg: discordjs.Message, rawArgs: string[]): Promise<void> {
-		const parseResult = await this.parseOptions(msg, rawArgs)
+		const parseResult = await this.#parseOptions(msg, rawArgs)
 		if (parseResult === undefined) {
 			return
 		}
@@ -201,30 +214,28 @@ export class MusicAdder {
 		}
 
 		if (!member.voice.channel) {
-			await this.feature.gc.send(msg, 'playMusic.haveToJoinVoiceChannel')
+			await this.#gc.send(msg, 'playMusic.haveToJoinVoiceChannel')
 			return
 		}
 
-		if (this._resume && parseResult.args.length === 0) {
-			if (this.feature.playlist.isEmpty) {
-				await msg.reply('今はプレイリストが空ロボ')
+		if (this.resume && parseResult.args.length === 0) {
+			if (this.playlist.isEmpty) {
+				await this.#gc.send(msg, 'playMusic.playlistIsEmpty')
 				return
 			}
 
-			await this.feature.makeConnection(member.voice.channel)
-			await this.feature.play()
+			this.guildInstance.playOn(member.voice.channel)
 			return
 		}
 
-		this.feature.playlist.clear()
+		this.playlist.clear()
 
-		const addedMusics = await this.addInternal(msg, parseResult)
+		const addedMusics = await this.#addInternal(msg, parseResult)
 		if (addedMusics.length === 0) {
 			return
 		}
 
-		await this.feature.makeConnection(member.voice.channel)
-		await this.feature.play()
+		this.guildInstance.playOn(member.voice.channel)
 		return
 	}
 }

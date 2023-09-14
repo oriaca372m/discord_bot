@@ -1,130 +1,140 @@
+import { z } from 'zod'
 import * as discordjs from 'discord.js'
 
 import { WebApiHandler, AccessTokenInfo, HandlerError } from 'Src/features/webapi'
 
 import { FeaturePlayMusic } from 'Src/features/play-music'
+import { GuildInstance } from 'Src/features/play-music/guild-instance'
 import { SerializedMusic } from 'Src/features/play-music/music'
 import { deserializeMusic } from 'Src/features/play-music/music-deserialize'
 import { resolveUrl } from 'Src/features/play-music/music-adder'
 
-interface WebApiMusic {
-	readonly serialized: SerializedMusic
-	readonly title: string
-	readonly album?: string
-	readonly artist?: string
+interface Context {
+	feature: FeaturePlayMusic
+	guildInstance: GuildInstance
+	tokenInfo: AccessTokenInfo
 }
 
-// interface GetAllMusicsReq {}
-interface GetAllMusicsRes {
-	musics: WebApiMusic[]
-}
+type HandlerConstructor = new (feature: FeaturePlayMusic) => WebApiHandler
 
-export class GetAllMusics implements WebApiHandler {
-	readonly methodName = 'play-music/get-all-musics'
+function createHandlerConstructor<Req, Res>(
+	methodName: string,
+	ReqZodType: z.ZodType<Req>,
+	ResZodType: z.ZodType<Res>,
+	func: (req: Req, ctx: Context) => Promise<Res>
+): HandlerConstructor {
+	return class implements WebApiHandler {
+		readonly methodName = `play-music/${methodName}`
 
-	constructor(private readonly _feature: FeaturePlayMusic) {}
+		constructor(private readonly feature: FeaturePlayMusic) {}
 
-	handle(): Promise<GetAllMusicsRes> {
-		return Promise.resolve({
-			musics: this._feature.database.allMusics.map((x) => ({
-				serialized: x.serialize(),
-				title: x.metadata.title,
-				album: x.metadata.album,
-				artist: x.metadata.artist,
-			})),
-		})
+		async handle(args: unknown, tokenInfo: AccessTokenInfo): Promise<Res> {
+			const req = ReqZodType.safeParse(args)
+			if (!req.success) {
+				throw new HandlerError(req.error.toString())
+			}
+
+			const ctx: Context = {
+				feature: this.feature,
+				guildInstance: this.feature.getGuildInstance(tokenInfo.guild),
+				tokenInfo,
+			}
+
+			const ret = await func(req.data, ctx)
+			const res = ResZodType.safeParse(ret)
+			if (!res.success) {
+				throw new HandlerError(res.error.toString())
+			}
+			return res.data
+		}
 	}
 }
 
-interface AddToPlaylistReq {
-	music: SerializedMusic
-}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface AddToPlaylistRes {}
+const WebApiMusic = z.object({
+	serialized: SerializedMusic,
+	title: z.string(),
+	album: z.string().optional(),
+	artist: z.string().optional(),
+})
 
-export class AddToPlaylist implements WebApiHandler {
-	readonly methodName = 'play-music/add-to-playlist'
+export const GetAllMusics = createHandlerConstructor(
+	'get-all-musics',
+	z.object({}),
+	z.object({
+		musics: z.array(WebApiMusic),
+	}),
+	(_req, ctx) => {
+		const musics = ctx.feature.database.allMusics.map((x) => ({
+			serialized: x.serialize(),
+			title: x.metadata.title,
+			album: x.metadata.album,
+			artist: x.metadata.artist,
+		}))
+		return Promise.resolve({ musics })
+	}
+)
 
-	constructor(private readonly _feature: FeaturePlayMusic) {}
-
-	handle(args: AddToPlaylistReq): Promise<AddToPlaylistRes> {
+export const AddToPlaylist = createHandlerConstructor(
+	'add-to-playlist',
+	z.object({ music: SerializedMusic }),
+	z.object({}),
+	(req, ctx) => {
+		let music
 		try {
-			const music = deserializeMusic(this._feature, args.music)
-			this._feature.playlist.addMusic(music)
+			music = deserializeMusic(ctx.feature.database, req.music)
 		} catch (e) {
-			return Promise.resolve({ error: 'Could not add the music.' })
+			throw new HandlerError(`Could not deserialize the music: ${String(e)}`)
 		}
+
+		ctx.guildInstance.playlist.addMusic(music)
 
 		return Promise.resolve({})
 	}
-}
+)
 
-interface AddUrlToPlaylistReq {
-	url: string
-}
-
-interface AddUrlToPlaylistRes {
-	added: SerializedMusic[]
-}
-
-export class AddUrlToPlaylist implements WebApiHandler {
-	readonly methodName = 'play-music/add-url-to-playlist'
-
-	constructor(private readonly _feature: FeaturePlayMusic) {}
-
-	async handle(args: AddUrlToPlaylistReq): Promise<AddUrlToPlaylistRes> {
-		let url: URL | undefined
+export const AddUrlToPlaylist = createHandlerConstructor(
+	'add-url-to-playlist',
+	z.object({ url: z.string() }),
+	z.object({ added: z.array(SerializedMusic) }),
+	async (req, ctx) => {
+		let url
 		try {
-			url = new URL(args.url)
+			url = new URL(req.url)
 		} catch {
-			// pass
-		}
-
-		if (url === undefined) {
 			throw new HandlerError('url is not an url.')
 		}
 
-		const musics = await resolveUrl(this._feature, url)
+		const musics = await resolveUrl(ctx.feature, url)
 		for (const music of musics) {
-			this._feature.playlist.addMusic(music)
+			ctx.guildInstance.playlist.addMusic(music)
 		}
 		return { added: musics.map((x) => x.serialize()) }
 	}
-}
+)
 
-interface GetPlaylistRes {
-	musics: SerializedMusic[]
-}
-
-export class GetPlaylist implements WebApiHandler {
-	readonly methodName = 'play-music/get-playlist'
-
-	constructor(private readonly _feature: FeaturePlayMusic) {}
-
-	handle(): Promise<GetPlaylistRes> {
+export const GetPlaylist = createHandlerConstructor(
+	'get-playlist',
+	z.object({}),
+	z.object({
+		musics: z.array(SerializedMusic),
+	}),
+	(_req, ctx) => {
 		return Promise.resolve({
-			musics: this._feature.playlist.musics.map((x) => x.serialize()),
+			musics: ctx.guildInstance.playlist.musics.map((x) => x.serialize()),
 		})
 	}
-}
+)
 
-interface SetPlaylistReq {
-	musics: SerializedMusic[]
-}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface SetPlaylistRes {}
-
-export class SetPlaylist implements WebApiHandler {
-	readonly methodName = 'play-music/set-playlist'
-
-	constructor(private readonly _feature: FeaturePlayMusic) {}
-
-	handle(args: SetPlaylistReq): Promise<SetPlaylistRes> {
-		this._feature.playlist.clear()
-		for (const serializedMusic of args.musics) {
+export const SetPlaylist = createHandlerConstructor(
+	'set-playlist',
+	z.object({ musics: z.array(SerializedMusic) }),
+	z.object({}),
+	(req, ctx) => {
+		ctx.guildInstance.playlist.clear()
+		for (const serializedMusic of req.musics) {
 			try {
-				const music = deserializeMusic(this._feature, serializedMusic)
-				this._feature.playlist.addMusic(music)
+				const music = deserializeMusic(ctx.feature.database, serializedMusic)
+				ctx.guildInstance.playlist.addMusic(music)
 			} catch (_) {
 				// pass
 			}
@@ -132,22 +142,15 @@ export class SetPlaylist implements WebApiHandler {
 
 		return Promise.resolve({})
 	}
-}
+)
 
-interface PlayReq {
-	index: number
-}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface PlayRes {}
-
-export class Play implements WebApiHandler {
-	readonly methodName = 'play-music/play'
-
-	constructor(private readonly _feature: FeaturePlayMusic) {}
-
-	async handle(args: PlayReq, tokenInfo: AccessTokenInfo): Promise<PlayRes> {
+export const Play = createHandlerConstructor(
+	'play',
+	z.object({ index: z.number() }),
+	z.object({}),
+	(req, ctx) => {
 		let foundVoiceChannel: discordjs.VoiceChannel | undefined
-		for (const [, channel] of tokenInfo.guild.channels.cache) {
+		for (const [, channel] of ctx.tokenInfo.guild.channels.cache) {
 			if (channel.type !== discordjs.ChannelType.GuildVoice) {
 				continue
 			}
@@ -167,9 +170,17 @@ export class Play implements WebApiHandler {
 			throw new HandlerError('Could not find a suitable voice channel to play musics.')
 		}
 
-		await this._feature.makeConnection(foundVoiceChannel)
-		this._feature.playlist.switch(args.index)
-		await this._feature.play()
-		return {}
+		ctx.guildInstance.playlist.switch(req.index)
+		ctx.guildInstance.playOn(foundVoiceChannel)
+		return Promise.resolve({})
 	}
-}
+)
+
+export const allHandlers: HandlerConstructor[] = [
+	GetAllMusics,
+	AddToPlaylist,
+	AddUrlToPlaylist,
+	GetPlaylist,
+	SetPlaylist,
+	Play,
+]

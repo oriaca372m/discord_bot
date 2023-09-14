@@ -1,19 +1,22 @@
-import * as voice from '@discordjs/voice'
 import { spawn, execFile } from 'child_process'
-import { Music } from './music'
+import { z } from 'zod'
+import * as voice from '@discordjs/voice'
+
 import * as utils from 'Src/utils'
+
+import { Music, MusicPlayResource } from 'Src/features/play-music/music'
 
 const ytdlPath = 'yt-dlp'
 
-export interface SerializedYouTubeMusic {
-	kind: 'youtube'
-	url: string
-	title: string
-}
+const SerializedYouTubeMusic = z.object({
+	kind: z.literal('youtube'),
+	url: z.string(),
+	title: z.string(),
+})
 
-interface YtdlJson {
-	title?: unknown
-}
+const YtdlJson = z.object({
+	title: z.string(),
+})
 
 function getTitle(url: string): Promise<string | undefined> {
 	return new Promise((resolve, reject) => {
@@ -25,17 +28,13 @@ function getTitle(url: string): Promise<string | undefined> {
 				if (error) {
 					reject(error)
 				}
-				try {
-					const json = JSON.parse(stdout as string) as YtdlJson
-					const title = json.title
-					if (typeof title === 'string') {
-						resolve(title)
-					}
-				} catch (e) {
-					reject(e)
-				}
 
-				resolve(undefined)
+				try {
+					utils.mustString(stdout)
+					resolve(YtdlJson.parse(JSON.parse(stdout)).title)
+				} catch (e) {
+					resolve(undefined)
+				}
 			}
 		)
 	})
@@ -49,10 +48,10 @@ export class YouTubeMusic implements Music {
 	#title: string | undefined
 
 	constructor(
-		private _url: string,
+		private url: string,
 		title?: string
 	) {
-		utils.mustValidUrl(_url)
+		utils.mustValidUrl(url)
 		this.#title = title
 	}
 
@@ -63,7 +62,7 @@ export class YouTubeMusic implements Music {
 
 		if (youTubeApiKey !== undefined) {
 			let vid: string | undefined
-			const url = new URL(this._url)
+			const url = new URL(this.url)
 			if (url.hostname === 'youtu.be') {
 				vid = url.pathname.slice(1)
 			} else if (['www.youtube.com', 'youtube.com'].includes(url.hostname)) {
@@ -71,13 +70,13 @@ export class YouTubeMusic implements Music {
 			}
 
 			if (vid !== undefined) {
-				this._url = youTubeVideoIdToUrl(vid)
+				this.url = youTubeVideoIdToUrl(vid)
 				this.#title = await fetchYouTubeTitle(youTubeApiKey, vid)
 				return
 			}
 		}
 
-		this.#title = (await getTitle(this._url)) ?? '(タイトル取得失敗)'
+		this.#title = (await getTitle(this.url)) ?? '(タイトル取得失敗)'
 		return
 	}
 
@@ -85,19 +84,19 @@ export class YouTubeMusic implements Music {
 		return this.#title ?? '(タイトル未取得)'
 	}
 
-	serialize(): SerializedYouTubeMusic {
-		return { kind: 'youtube', url: this._url, title: this.getTitle() }
+	serialize(): z.infer<typeof SerializedYouTubeMusic> {
+		return { kind: 'youtube', url: this.url, title: this.getTitle() }
 	}
 
 	toListString(): string {
-		return `(youtube ${this._url}) ${this.getTitle()}`
+		return `(youtube ${this.url}) ${this.getTitle()}`
 	}
 
 	select(): Music[] | undefined {
 		return
 	}
 
-	createResource(): [voice.AudioResource, (() => void) | undefined] {
+	createResource(): MusicPlayResource {
 		const ytdl = spawn(ytdlPath, [
 			'--no-playlist',
 			'-f',
@@ -105,48 +104,50 @@ export class YouTubeMusic implements Music {
 			'-o',
 			'-',
 			'--',
-			this._url,
+			this.url,
 		])
 		ytdl.stdin.end()
 		ytdl.on('error', (err) => {
 			console.error('YouTubeの再生中にエラー', err)
 		})
 
-		return [
-			voice.createAudioResource(ytdl.stdout),
-			(): void => {
+		return {
+			audioResource: voice.createAudioResource(ytdl.stdout),
+			finalizer() {
 				ytdl.kill()
 			},
-		]
+		}
 	}
 
-	static deserialize(data: SerializedYouTubeMusic): YouTubeMusic {
-		return new YouTubeMusic(data.url, data.title)
+	static deserialize(data: unknown): YouTubeMusic {
+		const res = SerializedYouTubeMusic.parse(data)
+		return new YouTubeMusic(res.url, res.title)
 	}
 }
 
-interface PlaylistItemsRes {
-	nextPageToken?: string
-	items: Item[]
-}
+const ResourceId = z
+	.object({
+		kind: z.string(),
+	})
+	.passthrough()
 
-interface Item {
-	snippet: Snippet
-}
+const VideoResourceId = z.object({
+	kind: z.literal('youtube#video'),
+	videoId: z.string(),
+})
 
-interface Snippet {
-	title: string
-	resourceId: ResourceId & VideoResourceId
-}
-
-interface ResourceId {
-	kind: string
-}
-
-interface VideoResourceId {
-	kind: 'youtube#video'
-	videoId: string
-}
+const PlaylistItemsRes = z.object({
+	nextPageToken: z.string().optional(),
+	items: z.array(
+		z.object({
+			kind: z.literal('youtube#playlistItem'),
+			snippet: z.object({
+				title: z.string(),
+				resourceId: ResourceId,
+			}),
+		})
+	),
+})
 
 export async function fetchPlaylistItems(
 	apiKey: string,
@@ -173,15 +174,16 @@ export async function fetchPlaylistItems(
 				Accept: 'application/json',
 			},
 		})
-		const json = (await res.json()) as PlaylistItemsRes
+		const json = PlaylistItemsRes.parse(await res.json())
 
 		for (const item of json.items) {
-			if (item.snippet.resourceId.kind !== 'youtube#video') {
-				continue
+			const res = VideoResourceId.safeParse(item.snippet.resourceId)
+			if (res.success) {
+				const videoUrl = youTubeVideoIdToUrl(res.data.videoId)
+				musics.push(new YouTubeMusic(videoUrl, item.snippet.title))
+			} else {
+				console.log(res.error)
 			}
-
-			const videoUrl = youTubeVideoIdToUrl(item.snippet.resourceId.videoId)
-			musics.push(new YouTubeMusic(videoUrl, item.snippet.title))
 		}
 		pageToken = json.nextPageToken
 		++pageCount
@@ -191,11 +193,18 @@ export async function fetchPlaylistItems(
 	return musics
 }
 
-interface VideoRes {
-	items: Item[]
-}
+const VideoRes = z.object({
+	items: z.tuple([
+		z.object({
+			kind: z.literal('youtube#video'),
+			snippet: z.object({
+				title: z.string(),
+			}),
+		}),
+	]),
+})
 
-export async function fetchYouTubeTitle(apiKey: string, videoId: string): Promise<string> {
+async function fetchYouTubeTitle(apiKey: string, videoId: string): Promise<string> {
 	const url = new URL('https://youtube.googleapis.com/youtube/v3/videos')
 	const params = url.searchParams
 	params.set('part', 'snippet')
@@ -208,11 +217,6 @@ export async function fetchYouTubeTitle(apiKey: string, videoId: string): Promis
 			Accept: 'application/json',
 		},
 	})
-	const json = (await res.json()) as VideoRes
-
-	if (json.items.length !== 1) {
-		utils.unreachable()
-	}
-
+	const json = VideoRes.parse(await res.json())
 	return json.items[0].snippet.title
 }

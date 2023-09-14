@@ -1,26 +1,18 @@
 import * as discordjs from 'discord.js'
-import * as voice from '@discordjs/voice'
 
 import CommonFeatureBase from 'Src/features/common-feature-base'
 import { Command } from 'Src/features/command'
-import { FeatureGlobalConfig } from 'Src/features/global-config'
 import * as utils from 'Src/utils'
 
-import { Playlist } from 'Src/features/play-music/playlist'
 import { MusicDatabase } from 'Src/features/play-music/music-database'
-import { MusicAdder } from 'Src/features/play-music/music-adder'
-import { AddInteractor } from 'Src/features/play-music/interactor/interactor'
-import * as handlers from 'Src/features/play-music/webapi-handlers'
+import { GuildInstance } from 'Src/features/play-music/guild-instance'
+import { allHandlers } from 'Src/features/play-music/webapi-handlers'
 
 class PlayMusicCommand implements Command {
-	private readonly gc: FeatureGlobalConfig
-
 	constructor(
 		private readonly cmdName: string,
 		private readonly feature: FeaturePlayMusic
-	) {
-		this.gc = this.feature.gc
-	}
+	) {}
 
 	name(): string {
 		return this.cmdName
@@ -30,69 +22,23 @@ class PlayMusicCommand implements Command {
 		return '音楽再生'
 	}
 
-	async edit(rawArgs: string[], msg: discordjs.Message): Promise<void> {
-		let args
-		try {
-			;({ args } = utils.parseCommandArgs(rawArgs, [], 0))
-		} catch (e) {
-			await this.gc.send(msg, 'playMusic.invalidCommand', { e })
-			return
-		}
-
-		if (1 < args.length) {
-			await msg.reply('駄目なメッセージの引数の数')
-			return
-		}
-
-		if (this.feature.isInInteractionMode) {
-			await msg.reply('今まさにインタラクションモード')
-			return
-		}
-
-		const i = this.feature.createInteractor(msg)
-		await i.welcome()
-		if (args.length === 1) {
-			await i.search(args[0])
-		}
-		return
-	}
-
-	async now(_rawArgs: string[], msg: discordjs.Message): Promise<void> {
-		const music = this.feature.playlist.currentMusic
-		if (music === undefined) {
-			await msg.reply('今流れている曲は無いよ…')
-		} else {
-			const title = music.getTitle()
-			await msg.reply('今流れている曲はこれだよ！' + title)
-		}
-	}
-
 	async command(msg: discordjs.Message, args: string[]): Promise<void> {
+		if (msg.guild === null) {
+			return
+		}
+		const guildInstance = this.feature.getGuildInstance(msg.guild)
 		await utils.subCommandProxy(
 			{
-				play: async (a, m) => {
-					const adder = new MusicAdder(this.feature, undefined, true)
-					await adder.play(m, a)
+				play: async (a, m) => await guildInstance.playCommand(a, m),
+				add: async (a, m) => await guildInstance.addCommand(a, m),
+				stop: () => {
+					guildInstance.stop()
+					return Promise.resolve()
 				},
-				add: async (a, m) => {
-					const adder = new MusicAdder(this.feature)
-					await adder.add(m, a)
-				},
-				stop: async () => {
-					await this.feature.closeConnection()
-				},
-				reload: async () => {
-					await this.feature.reload()
-				},
-				next: async () => {
-					await this.feature.next()
-				},
-				edit: async (a, m) => {
-					await this.edit(a, m)
-				},
-				now: async (a, m) => {
-					await this.now(a, m)
-				},
+				reload: async () => await this.feature.reload(),
+				next: async (a, m) => await guildInstance.nextCommand(a, m),
+				edit: async (a, m) => await guildInstance.edit(a, m),
+				now: async (a, m) => await guildInstance.nowPlaying(a, m),
 			},
 			args,
 			msg
@@ -101,15 +47,9 @@ class PlayMusicCommand implements Command {
 }
 
 export class FeaturePlayMusic extends CommonFeatureBase {
-	private readonly interactors: Set<AddInteractor> = new Set()
-	private connection: voice.VoiceConnection | undefined
-	private player: voice.AudioPlayer | undefined
-	#audioResource: voice.AudioResource | undefined
-	private musicFinalizer: (() => void) | undefined
-	private _database!: MusicDatabase
-	private _isPlaying = false
+	#database: MusicDatabase | undefined
+	#guildInstances: Map<string, GuildInstance> = new Map()
 
-	readonly playlist: Playlist = new Playlist()
 	currentPlayingTrack: number | undefined
 
 	constructor(
@@ -120,10 +60,11 @@ export class FeaturePlayMusic extends CommonFeatureBase {
 	}
 
 	get database(): MusicDatabase {
-		return this._database
+		utils.mustExist(this.#database)
+		return this.#database
 	}
 
-	protected async initImpl(): Promise<void> {
+	protected override async initImpl(): Promise<void> {
 		await this.reload()
 		this.featureCommand.registerCommand(new PlayMusicCommand(this.cmdname, this))
 
@@ -132,170 +73,36 @@ export class FeaturePlayMusic extends CommonFeatureBase {
 			return
 		}
 
-		webApi.registerHandler(new handlers.GetAllMusics(this))
-		webApi.registerHandler(new handlers.AddToPlaylist(this))
-		webApi.registerHandler(new handlers.AddUrlToPlaylist(this))
-		webApi.registerHandler(new handlers.GetPlaylist(this))
-		webApi.registerHandler(new handlers.SetPlaylist(this))
-		webApi.registerHandler(new handlers.Play(this))
-	}
-
-	async onMessageImpl(msg: discordjs.Message): Promise<void> {
-		for (const i of this.interactors) {
-			await i.onMessage(msg)
+		for (const handler of allHandlers) {
+			webApi.registerHandler(new handler(this))
 		}
 	}
 
-	createInteractor(msg: discordjs.Message): AddInteractor {
-		const i = new AddInteractor(msg.channel, this, this.playlist, () => {
-			this.interactors.delete(i)
-		})
-		this.interactors.add(i)
+	getGuildInstance(guild: discordjs.Guild): GuildInstance {
+		const instance = this.#guildInstances.get(guild.id)
+		if (instance !== undefined) {
+			return instance
+		}
 
-		return i
+		const newInstance = new GuildInstance(this)
+		this.#guildInstances.set(guild.id, newInstance)
+		return newInstance
+	}
+
+	protected override async onMessageImpl(msg: discordjs.Message): Promise<void> {
+		if (msg.guild === null) {
+			return
+		}
+		await this.getGuildInstance(msg.guild).onMessage(msg)
+	}
+
+	override async finalize(): Promise<void> {
+		await Promise.allSettled(Array.from(this.#guildInstances.values()).map((x) => x.finalize()))
 	}
 
 	async reload(): Promise<void> {
 		const database = new MusicDatabase('./config/playlists')
 		await database.init()
-		this._database = database
-	}
-
-	play(): Promise<void> {
-		if (this.connection === undefined || this.player === undefined) {
-			throw '接続中のコネクションがない'
-		}
-
-		const music = this.playlist.currentMusic
-		if (!music) {
-			throw '流すべき曲がない'
-		}
-
-		this.finalizeMusic()
-
-		const [resource, finalizer] = music.createResource()
-		this.#audioResource = resource
-		this.musicFinalizer = finalizer
-		this._isPlaying = true
-		this.player.play(resource)
-
-		return Promise.resolve()
-	}
-
-	async next(): Promise<void> {
-		this.finalizeMusic()
-		if (this.connection === undefined) {
-			return
-		}
-
-		if (this.playlist.isEmpty) {
-			await this.closeConnection()
-			return
-		}
-
-		this.playlist.next()
-		await this.play()
-	}
-
-	async playMusicEditingPlaylist(
-		msg: discordjs.Message,
-		playlistEditor: (playlist: Playlist) => Promise<void>
-	): Promise<void> {
-		const member = msg.member
-		if (!member) {
-			return
-		}
-
-		if (!member.voice.channel) {
-			await this.gc.send(msg, 'playMusic.haveToJoinVoiceChannel')
-			return
-		}
-
-		await playlistEditor(this.playlist)
-
-		await this.makeConnection(member.voice.channel)
-		await this.play()
-	}
-
-	private finalizeMusic(): void {
-		this._isPlaying = false
-		this.player?.stop()
-
-		if (this.musicFinalizer !== undefined) {
-			this.musicFinalizer()
-			this.musicFinalizer = undefined
-		}
-
-		if (this.#audioResource !== undefined) {
-			this.#audioResource.playStream.destroy()
-			this.#audioResource = undefined
-		}
-	}
-
-	async closeConnection(): Promise<void> {
-		this.finalizeMusic()
-		if (this.connection !== undefined) {
-			this.connection.destroy()
-			this.connection = undefined
-			this.player = undefined
-			// 入れないと次のコネクションの作成がタイムアウトする
-			// 1秒で十分かどうかは知らない
-			await utils.delay(1000)
-		}
-	}
-
-	private createPlayer(): voice.AudioPlayer {
-		const player = voice.createAudioPlayer()
-
-		player.on(voice.AudioPlayerStatus.Idle, () => {
-			if (this._isPlaying) {
-				void this.next()
-			}
-		})
-
-		player.on('error', (error) => {
-			console.error(error)
-			this.finalizeMusic()
-
-			// TODO: どうにかしてテキストチャンネルに通知を送りたい所
-		})
-
-		return player
-	}
-
-	async makeConnection(channel: discordjs.BaseGuildVoiceChannel): Promise<void> {
-		if (this.connection !== undefined && channel.id === this.connection.joinConfig.channelId) {
-			this.finalizeMusic()
-			return
-		} else {
-			await this.closeConnection()
-		}
-
-		const conn = voice.joinVoiceChannel({
-			channelId: channel.id,
-			guildId: channel.guild.id,
-			// https://github.com/discordjs/discord.js/issues/7884
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
-			adapterCreator: channel.guild.voiceAdapterCreator,
-		})
-
-		try {
-			await voice.entersState(conn, voice.VoiceConnectionStatus.Ready, 30e3)
-			this.connection = conn
-			this.player = this.createPlayer()
-			this.connection.subscribe(this.player)
-		} catch (e) {
-			conn.destroy()
-			throw e
-		}
-	}
-
-	async finalize(): Promise<void> {
-		await this.closeConnection()
-	}
-
-	get isInInteractionMode(): boolean {
-		return this.interactors.size !== 0
+		this.#database = database
 	}
 }

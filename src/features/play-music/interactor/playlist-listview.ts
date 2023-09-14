@@ -10,7 +10,7 @@ export class PlaylistListView implements ListView {
 
 	constructor(
 		readonly interactor: AddInteractor,
-		public readonly playlist: Playlist
+		readonly playlist: Playlist
 	) {
 		this.gc = interactor.gc
 	}
@@ -29,7 +29,8 @@ class MoveAction implements ListAction {
 
 	async do(args: string[]): Promise<void> {
 		this.lv.playlist.switch(parseInt(args[0], 10))
-		await this.lv.interactor.feature.play()
+		this.lv.interactor.guildInstance.playIfHasConnection()
+		return Promise.resolve()
 	}
 }
 
@@ -40,6 +41,6 @@ class ShuffleAction implements ListAction {
 
 	async do(): Promise<void> {
 		this.lv.playlist.shuffle()
-		await this.lv.interactor.feature.play()
+		return Promise.resolve()
 	}
 }
