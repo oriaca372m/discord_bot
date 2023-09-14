@@ -15,6 +15,12 @@ export function mustExist<T>(v: T | undefined | null): asserts v is T {
 	}
 }
 
+export function mustString(v: unknown): asserts v is string {
+	if (typeof v !== 'string') {
+		throw Error('not string')
+	}
+}
+
 export function parseShellLikeCommand(string: string): string[] | undefined {
 	let state: 'normal' | 'singlequote' | 'doublequote' | 'backslash' = 'normal'
 

@@ -14,9 +14,9 @@ const SerializedYouTubeMusic = z.object({
 	title: z.string(),
 })
 
-interface YtdlJson {
-	title?: unknown
-}
+const YtdlJson = z.object({
+	title: z.string(),
+})
 
 function getTitle(url: string): Promise<string | undefined> {
 	return new Promise((resolve, reject) => {
@@ -28,17 +28,13 @@ function getTitle(url: string): Promise<string | undefined> {
 				if (error) {
 					reject(error)
 				}
-				try {
-					const json = JSON.parse(stdout as string) as YtdlJson
-					const title = json.title
-					if (typeof title === 'string') {
-						resolve(title)
-					}
-				} catch (e) {
-					reject(e)
-				}
 
-				resolve(undefined)
+				try {
+					utils.mustString(stdout)
+					resolve(YtdlJson.parse(JSON.parse(stdout)).title)
+				} catch (e) {
+					resolve(undefined)
+				}
 			}
 		)
 	})
@@ -131,28 +127,31 @@ export class YouTubeMusic implements Music {
 	}
 }
 
-interface PlaylistItemsRes {
-	nextPageToken?: string
-	items: Item[]
-}
+const ResourceId = z
+	.object({
+		kind: z.string(),
+	})
+	.passthrough()
 
-interface Item {
-	snippet: Snippet
-}
+const VideoResourceId = z.object({
+	kind: z.literal('youtube#video'),
+	videoId: z.string(),
+})
 
-interface Snippet {
-	title: string
-	resourceId: ResourceId & VideoResourceId
-}
+const Snippet = z.object({
+	title: z.string(),
+	resourceId: ResourceId,
+})
 
-interface ResourceId {
-	kind: string
-}
+const Item = z.object({
+	kind: z.literal('youtube#playlistItem'),
+	snippet: Snippet,
+})
 
-interface VideoResourceId {
-	kind: 'youtube#video'
-	videoId: string
-}
+const PlaylistItemsRes = z.object({
+	nextPageToken: z.string().optional(),
+	items: z.array(Item),
+})
 
 export async function fetchPlaylistItems(
 	apiKey: string,
@@ -179,15 +178,16 @@ export async function fetchPlaylistItems(
 				Accept: 'application/json',
 			},
 		})
-		const json = (await res.json()) as PlaylistItemsRes
+		const json = PlaylistItemsRes.parse(await res.json())
 
 		for (const item of json.items) {
-			if (item.snippet.resourceId.kind !== 'youtube#video') {
-				continue
+			const res = VideoResourceId.safeParse(item.snippet.resourceId)
+			if (res.success) {
+				const videoUrl = youTubeVideoIdToUrl(res.data.videoId)
+				musics.push(new YouTubeMusic(videoUrl, item.snippet.title))
+			} else {
+				console.log(res.error)
 			}
-
-			const videoUrl = youTubeVideoIdToUrl(item.snippet.resourceId.videoId)
-			musics.push(new YouTubeMusic(videoUrl, item.snippet.title))
 		}
 		pageToken = json.nextPageToken
 		++pageCount
@@ -197,11 +197,18 @@ export async function fetchPlaylistItems(
 	return musics
 }
 
-interface VideoRes {
-	items: Item[]
-}
+const VideoRes = z.object({
+	items: z.tuple([
+		z.object({
+			kind: z.literal('youtube#video'),
+			snippet: z.object({
+				title: z.string(),
+			}),
+		}),
+	]),
+})
 
-export async function fetchYouTubeTitle(apiKey: string, videoId: string): Promise<string> {
+async function fetchYouTubeTitle(apiKey: string, videoId: string): Promise<string> {
 	const url = new URL('https://youtube.googleapis.com/youtube/v3/videos')
 	const params = url.searchParams
 	params.set('part', 'snippet')
@@ -214,11 +221,6 @@ export async function fetchYouTubeTitle(apiKey: string, videoId: string): Promis
 			Accept: 'application/json',
 		},
 	})
-	const json = (await res.json()) as VideoRes
-
-	if (json.items.length !== 1) {
-		utils.unreachable()
-	}
-
+	const json = VideoRes.parse(await res.json())
 	return json.items[0].snippet.title
 }
