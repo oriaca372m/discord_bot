@@ -6,7 +6,7 @@ import * as utils from 'Src/utils'
 
 import { MusicDatabase } from 'Src/features/play-music/music-database'
 import { GuildInstance } from 'Src/features/play-music/guild-instance'
-import * as handlers from 'Src/features/play-music/webapi-handlers'
+import { allHandlers } from 'Src/features/play-music/webapi-handlers'
 
 class PlayMusicCommand implements Command {
 	constructor(
@@ -69,12 +69,9 @@ export class FeaturePlayMusic extends CommonFeatureBase {
 			return
 		}
 
-		webApi.registerHandler(new handlers.GetAllMusics(this))
-		webApi.registerHandler(new handlers.AddToPlaylist(this))
-		webApi.registerHandler(new handlers.AddUrlToPlaylist(this))
-		webApi.registerHandler(new handlers.GetPlaylist(this))
-		webApi.registerHandler(new handlers.SetPlaylist(this))
-		webApi.registerHandler(new handlers.Play(this))
+		for (const handler of allHandlers) {
+			webApi.registerHandler(new handler(this))
+		}
 	}
 
 	getGuildInstance(guild: discordjs.Guild): GuildInstance {

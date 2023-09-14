@@ -171,3 +171,12 @@ export const Play = createHandlerConstructor(
 		return Promise.resolve({})
 	}
 )
+
+export const allHandlers: HandlerConstructor[] = [
+	GetAllMusics,
+	AddToPlaylist,
+	AddUrlToPlaylist,
+	GetPlaylist,
+	SetPlaylist,
+	Play,
+]
