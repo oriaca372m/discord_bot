@@ -19,7 +19,6 @@
     "@iarna/toml": "^2.2.5",
     "@msgpack/msgpack": "^3.0.0-beta2",
     "canvas": "^2.11.2",
-    "core-js": "^3.32.1",
     "discord.js": "^14.13.0",
     "fuse.js": "^6.6.2",
     "lodash": "^4.17.21",
