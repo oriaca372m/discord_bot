@@ -220,7 +220,7 @@ export class MusicAdder {
 
 		if (this._resume && parseResult.args.length === 0) {
 			if (this.playlist.isEmpty) {
-				await msg.reply('今はプレイリストが空ロボ')
+				await this.#gc.send(msg, 'playMusic.playlistIsEmpty')
 				return
 			}
 

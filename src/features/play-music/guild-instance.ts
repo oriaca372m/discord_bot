@@ -130,7 +130,7 @@ export class GuildInstance {
 			this.stop()
 		})
 
-		this.#connection.onMusicStopped.on(() => this.next())
+		this.#connection.onMusicStopped.on(() => this.#next())
 		this.#connection.onError.on(console.error)
 	}
 
@@ -159,7 +159,7 @@ export class GuildInstance {
 		return true
 	}
 
-	next(): void {
+	#next(): void {
 		if (this.#connection === undefined) {
 			return
 		}
@@ -254,5 +254,28 @@ export class GuildInstance {
 	async addCommand(rawArgs: string[], msg: discordjs.Message): Promise<void> {
 		const adder = new MusicAdder(this, this.playlist)
 		await adder.add(msg, rawArgs)
+	}
+
+	findSuitableVoiceChannel(msg: discordjs.Message): discordjs.BaseGuildVoiceChannel | undefined {
+		return msg.member?.voice.channel ?? undefined
+	}
+
+	async nextCommand(_rawArgs: string[], msg: discordjs.Message): Promise<void> {
+		if (this.playlist.isEmpty) {
+			await this.#gc.send(msg, 'playMusic.playlistIsEmpty')
+			return
+		}
+
+		if (this.#connection === undefined) {
+			const channel = this.findSuitableVoiceChannel(msg)
+			if (channel === undefined) {
+				await this.#gc.send(msg, 'playMusic.haveToJoinVoiceChannel')
+				return
+			}
+
+			this.#connect(channel)
+		}
+
+		this.#next()
 	}
 }

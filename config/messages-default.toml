@@ -94,6 +94,7 @@ localReloadingComplete = 'ローカルにある画像を再読込したロボ!'
 
 [message.playMusic]
 haveToJoinVoiceChannel = 'ボイスチャンネルに入ってから言うロボ'
+playlistIsEmpty = 'プレイリストに何もないロボ'
 
 [message.playMusic.interactor]
 welcome = '''
