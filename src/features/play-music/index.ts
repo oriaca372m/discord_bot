@@ -15,7 +15,10 @@ import * as handlers from 'Src/features/play-music/webapi-handlers'
 class PlayMusicCommand implements Command {
 	private readonly gc: FeatureGlobalConfig
 
-	constructor(private readonly cmdName: string, private readonly feature: FeaturePlayMusic) {
+	constructor(
+		private readonly cmdName: string,
+		private readonly feature: FeaturePlayMusic
+	) {
 		this.gc = this.feature.gc
 	}
 
@@ -109,7 +112,10 @@ export class FeaturePlayMusic extends CommonFeatureBase {
 	readonly playlist: Playlist = new Playlist()
 	currentPlayingTrack: number | undefined
 
-	constructor(public readonly cmdname: string, readonly youtubeApiKey?: string) {
+	constructor(
+		public readonly cmdname: string,
+		readonly youtubeApiKey?: string
+	) {
 		super()
 	}
 

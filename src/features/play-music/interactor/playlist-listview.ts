@@ -8,7 +8,10 @@ import { ListView, ListAction } from 'Src/features/play-music/interactor/listvie
 export class PlaylistListView implements ListView {
 	readonly actions = [new MoveAction(this), new ShuffleAction(this)] as const
 
-	constructor(readonly interactor: AddInteractor, public readonly playlist: Playlist) {
+	constructor(
+		readonly interactor: AddInteractor,
+		public readonly playlist: Playlist
+	) {
 		this.gc = interactor.gc
 	}
 

@@ -82,7 +82,10 @@ export class MusicFile implements Music {
 export type MusicObject = Fields<MusicFile> & { readonly metadata: MusicMetadataObject }
 
 export class Artist implements Selectable {
-	constructor(private readonly _name: string, private readonly musics: Music[]) {}
+	constructor(
+		private readonly _name: string,
+		private readonly musics: Music[]
+	) {}
 
 	get name(): string {
 		return this._name
@@ -98,7 +101,10 @@ export class Artist implements Selectable {
 }
 
 export class Album implements Selectable {
-	constructor(private readonly _name: string, private readonly musics: Music[]) {}
+	constructor(
+		private readonly _name: string,
+		private readonly musics: Music[]
+	) {}
 
 	get name(): string {
 		return this._name

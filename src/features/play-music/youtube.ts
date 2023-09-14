@@ -48,7 +48,10 @@ function youTubeVideoIdToUrl(id: string): string {
 export class YouTubeMusic implements Music {
 	#title: string | undefined
 
-	constructor(private _url: string, title?: string) {
+	constructor(
+		private _url: string,
+		title?: string
+	) {
 		utils.mustValidUrl(_url)
 		this.#title = title
 	}

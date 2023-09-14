@@ -7,8 +7,8 @@
     "build": "tsc --project tsconfig.build.json && tsc-alias -f -p tsconfig.build.json",
     "start": "yarn run build && node dist/index.js",
     "test": "jest",
-    "lint": "tsc --noEmit && eslint src/**/*.ts && prettier --check src/**/*.ts",
-    "fix": "eslint --fix src/**/*.{ts,js} && prettier --write src/**/*.{ts,js}"
+    "lint": "tsc --noEmit && eslint src && prettier --check src",
+    "fix": "eslint --fix src && prettier --write src"
   },
   "license": "Zlib",
   "private": true,

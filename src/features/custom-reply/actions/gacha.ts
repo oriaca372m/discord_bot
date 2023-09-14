@@ -6,7 +6,10 @@ import { FeatureGlobalConfig } from 'Src/features/global-config'
 import * as utils from 'Src/utils'
 
 export class ActionGacha implements Action {
-	constructor(private readonly _images: Images, private readonly _gc: FeatureGlobalConfig) {}
+	constructor(
+		private readonly _images: Images,
+		private readonly _gc: FeatureGlobalConfig
+	) {}
 
 	async handle(msg: discordjs.Message, res: Response): Promise<ActionResult | undefined> {
 		let list = this._images.images

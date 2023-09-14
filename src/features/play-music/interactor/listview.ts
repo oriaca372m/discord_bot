@@ -28,7 +28,10 @@ export interface Selectable extends ListItem {
 export class MusicListView implements ListView {
 	readonly actions = [] as const
 
-	constructor(readonly interactor: AddInteractor, private readonly _musics: Music[]) {
+	constructor(
+		readonly interactor: AddInteractor,
+		private readonly _musics: Music[]
+	) {
 		this.gc = interactor.gc
 	}
 
@@ -42,7 +45,10 @@ export class MusicListView implements ListView {
 export class SelectableListView implements ListView {
 	readonly actions = [new SelectAction(this)] as const
 
-	constructor(readonly interactor: AddInteractor, public readonly selectable: Selectable[]) {
+	constructor(
+		readonly interactor: AddInteractor,
+		public readonly selectable: Selectable[]
+	) {
 		this.gc = interactor.gc
 	}
 

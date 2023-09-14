@@ -55,7 +55,10 @@ class SetSkCommand implements Command {
 export class FeatureSk extends CommonFeatureBase {
 	private skRegExp: RegExp
 
-	constructor(private readonly skCmdName: string, private readonly setCmdName: string) {
+	constructor(
+		private readonly skCmdName: string,
+		private readonly setCmdName: string
+	) {
 		super()
 		this.skRegExp = new RegExp(`${skCmdName}(\\d+)`, 'g')
 	}
