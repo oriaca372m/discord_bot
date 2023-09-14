@@ -52,14 +52,14 @@ export class MusicAdder {
 	constructor(
 		private readonly guildInstance: GuildInstance,
 		private readonly playlist: Playlist,
-		private readonly _listMusics?: readonly Music[],
-		private readonly _resume: boolean = false
+		private readonly listMusics?: readonly Music[],
+		private readonly resume: boolean = false
 	) {
 		this.#gc = guildInstance.feature.gc
 		this.#database = guildInstance.feature.database
 	}
 
-	private async parseOptions(
+	async #parseOptions(
 		msg: discordjs.Message,
 		rawArgs: string[]
 	): Promise<CommandOptions | undefined> {
@@ -114,10 +114,10 @@ export class MusicAdder {
 		return []
 	}
 
-	private async getMusics(keywords: string[], isYouTube: boolean): Promise<Music[]> {
+	async #getMusics(keywords: string[], isYouTube: boolean): Promise<Music[]> {
 		const musics: Music[] = []
 
-		const listMusics = this._listMusics
+		const listMusics = this.listMusics
 		if (listMusics !== undefined) {
 			let indexes: number[] | undefined
 			try {
@@ -141,7 +141,7 @@ export class MusicAdder {
 		return musics
 	}
 
-	private addMusicsToPlaylist(musics: readonly Music[], parseResult: CommandOptions): void {
+	#addMusicsToPlaylist(musics: readonly Music[], parseResult: CommandOptions): void {
 		let counter = 0
 		if (parseResult.isAddToNext) {
 			const c = this.playlist.currentTrack
@@ -159,22 +159,22 @@ export class MusicAdder {
 		}
 	}
 
-	private async addInternal(
+	async #addInternal(
 		msg: discordjs.Message,
 		parseResult: CommandOptions
 	): Promise<readonly Music[]> {
-		if (this._listMusics !== undefined && parseResult.args.length === 0) {
-			this.addMusicsToPlaylist(this._listMusics, parseResult)
+		if (this.listMusics !== undefined && parseResult.args.length === 0) {
+			this.#addMusicsToPlaylist(this.listMusics, parseResult)
 			await this.#gc.send(msg, 'playMusic.interactor.addedMusic', {
 				all: true,
 				musics: [],
 			})
 
-			return this._listMusics
+			return this.listMusics
 		}
 
-		const toAddMusics = await this.getMusics(parseResult.args, parseResult.isYouTube)
-		this.addMusicsToPlaylist(toAddMusics, parseResult)
+		const toAddMusics = await this.#getMusics(parseResult.args, parseResult.isYouTube)
+		this.#addMusicsToPlaylist(toAddMusics, parseResult)
 
 		if (toAddMusics.length === 0) {
 			await msg.reply('そんな曲は無いロボ…')
@@ -194,16 +194,16 @@ export class MusicAdder {
 	}
 
 	async add(msg: discordjs.Message, rawArgs: string[]): Promise<void> {
-		const parseResult = await this.parseOptions(msg, rawArgs)
+		const parseResult = await this.#parseOptions(msg, rawArgs)
 		if (parseResult === undefined) {
 			return
 		}
 
-		await this.addInternal(msg, parseResult)
+		await this.#addInternal(msg, parseResult)
 	}
 
 	async play(msg: discordjs.Message, rawArgs: string[]): Promise<void> {
-		const parseResult = await this.parseOptions(msg, rawArgs)
+		const parseResult = await this.#parseOptions(msg, rawArgs)
 		if (parseResult === undefined) {
 			return
 		}
@@ -218,7 +218,7 @@ export class MusicAdder {
 			return
 		}
 
-		if (this._resume && parseResult.args.length === 0) {
+		if (this.resume && parseResult.args.length === 0) {
 			if (this.playlist.isEmpty) {
 				await this.#gc.send(msg, 'playMusic.playlistIsEmpty')
 				return
@@ -230,7 +230,7 @@ export class MusicAdder {
 
 		this.playlist.clear()
 
-		const addedMusics = await this.addInternal(msg, parseResult)
+		const addedMusics = await this.#addInternal(msg, parseResult)
 		if (addedMusics.length === 0) {
 			return
 		}

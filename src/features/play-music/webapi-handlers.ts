@@ -26,14 +26,14 @@ function createHandlerConstructor<Req, Res>(
 	return class implements WebApiHandler {
 		readonly methodName = `play-music/${methodName}`
 
-		constructor(private readonly _feature: FeaturePlayMusic) {}
+		constructor(private readonly feature: FeaturePlayMusic) {}
 
 		async handle(args: unknown, tokenInfo: AccessTokenInfo): Promise<unknown> {
 			const req = ReqZodType.parse(args)
 
 			const ctx: Context = {
-				feature: this._feature,
-				guildInstance: this._feature.getGuildInstance(tokenInfo.guild),
+				feature: this.feature,
+				guildInstance: this.feature.getGuildInstance(tokenInfo.guild),
 				tokenInfo,
 			}
 

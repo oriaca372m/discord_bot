@@ -47,7 +47,7 @@ class PlayMusicCommand implements Command {
 }
 
 export class FeaturePlayMusic extends CommonFeatureBase {
-	private _database!: MusicDatabase
+	#database: MusicDatabase | undefined
 	#guildInstances: Map<string, GuildInstance> = new Map()
 
 	currentPlayingTrack: number | undefined
@@ -60,7 +60,8 @@ export class FeaturePlayMusic extends CommonFeatureBase {
 	}
 
 	get database(): MusicDatabase {
-		return this._database
+		utils.mustExist(this.#database)
+		return this.#database
 	}
 
 	protected override async initImpl(): Promise<void> {
@@ -102,6 +103,6 @@ export class FeaturePlayMusic extends CommonFeatureBase {
 	async reload(): Promise<void> {
 		const database = new MusicDatabase('./config/playlists')
 		await database.init()
-		this._database = database
+		this.#database = database
 	}
 }

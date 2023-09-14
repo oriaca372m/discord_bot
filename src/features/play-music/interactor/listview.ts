@@ -30,7 +30,7 @@ export class MusicListView implements ListView {
 
 	constructor(
 		readonly interactor: AddInteractor,
-		private readonly _musics: Music[]
+		private readonly musics: Music[]
 	) {
 		this.gc = interactor.gc
 	}
@@ -38,7 +38,7 @@ export class MusicListView implements ListView {
 	readonly gc: FeatureGlobalConfig
 
 	getItems(): readonly Music[] {
-		return this._musics
+		return this.musics
 	}
 }
 

@@ -48,10 +48,10 @@ export class YouTubeMusic implements Music {
 	#title: string | undefined
 
 	constructor(
-		private _url: string,
+		private url: string,
 		title?: string
 	) {
-		utils.mustValidUrl(_url)
+		utils.mustValidUrl(url)
 		this.#title = title
 	}
 
@@ -62,7 +62,7 @@ export class YouTubeMusic implements Music {
 
 		if (youTubeApiKey !== undefined) {
 			let vid: string | undefined
-			const url = new URL(this._url)
+			const url = new URL(this.url)
 			if (url.hostname === 'youtu.be') {
 				vid = url.pathname.slice(1)
 			} else if (['www.youtube.com', 'youtube.com'].includes(url.hostname)) {
@@ -70,13 +70,13 @@ export class YouTubeMusic implements Music {
 			}
 
 			if (vid !== undefined) {
-				this._url = youTubeVideoIdToUrl(vid)
+				this.url = youTubeVideoIdToUrl(vid)
 				this.#title = await fetchYouTubeTitle(youTubeApiKey, vid)
 				return
 			}
 		}
 
-		this.#title = (await getTitle(this._url)) ?? '(タイトル取得失敗)'
+		this.#title = (await getTitle(this.url)) ?? '(タイトル取得失敗)'
 		return
 	}
 
@@ -85,13 +85,13 @@ export class YouTubeMusic implements Music {
 	}
 
 	serialize(): z.infer<typeof SerializedMusic> {
-		return { kind: 'youtube', url: this._url, title: this.getTitle() } satisfies z.infer<
+		return { kind: 'youtube', url: this.url, title: this.getTitle() } satisfies z.infer<
 			typeof SerializedYouTubeMusic
 		>
 	}
 
 	toListString(): string {
-		return `(youtube ${this._url}) ${this.getTitle()}`
+		return `(youtube ${this.url}) ${this.getTitle()}`
 	}
 
 	select(): Music[] | undefined {
@@ -106,7 +106,7 @@ export class YouTubeMusic implements Music {
 			'-o',
 			'-',
 			'--',
-			this._url,
+			this.url,
 		])
 		ytdl.stdin.end()
 		ytdl.on('error', (err) => {

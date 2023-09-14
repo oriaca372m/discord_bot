@@ -19,7 +19,7 @@ import { PlaylistListView } from 'Src/features/play-music/interactor/playlist-li
 export class AddInteractor {
 	readonly #database: MusicDatabase
 	readonly gc: FeatureGlobalConfig
-	private _listView: ListView | undefined
+	#listView: ListView | undefined
 
 	constructor(
 		readonly guildInstance: GuildInstance,
@@ -36,7 +36,7 @@ export class AddInteractor {
 	}
 
 	async setListView(lv: ListView): Promise<void> {
-		this._listView = lv
+		this.#listView = lv
 		await this.show(1)
 	}
 
@@ -57,12 +57,12 @@ export class AddInteractor {
 	}
 
 	async show(pageNumber: number): Promise<void> {
-		if (this._listView === undefined) {
+		if (this.#listView === undefined) {
 			await this.gc.sendToChannel(this.channel, 'playMusic.interactor.resultNotFound')
 			return
 		}
 
-		const val = this._listView.getItems()
+		const val = this.#listView.getItems()
 		const res = utils.pagination(val, pageNumber)
 
 		if (res.kind === 'empty') {
@@ -101,11 +101,11 @@ export class AddInteractor {
 
 		if (['play', 'add'].includes(cmdname)) {
 			const adder = (() => {
-				if (this._listView instanceof MusicListView) {
+				if (this.#listView instanceof MusicListView) {
 					return new MusicAdder(
 						this.guildInstance,
 						this.guildInstance.playlist,
-						this._listView.getItems()
+						this.#listView.getItems()
 					)
 				}
 
@@ -128,8 +128,8 @@ export class AddInteractor {
 			return
 		}
 
-		if (this._listView !== undefined) {
-			const action = this._listView.actions.find((x) => x.name === cmdname)
+		if (this.#listView !== undefined) {
+			const action = this.#listView.actions.find((x) => x.name === cmdname)
 			if (action !== undefined) {
 				await action.do(rawArgs, msg)
 				return

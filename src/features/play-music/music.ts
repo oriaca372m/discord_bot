@@ -105,13 +105,9 @@ export type MusicObject = Fields<MusicFile> & { readonly metadata: MusicMetadata
 
 export class Artist implements Selectable {
 	constructor(
-		private readonly _name: string,
+		readonly name: string,
 		private readonly musics: Music[]
 	) {}
-
-	get name(): string {
-		return this._name
-	}
 
 	toListString(): string {
 		return this.name
@@ -124,13 +120,9 @@ export class Artist implements Selectable {
 
 export class Album implements Selectable {
 	constructor(
-		private readonly _name: string,
+		readonly name: string,
 		private readonly musics: Music[]
 	) {}
-
-	get name(): string {
-		return this._name
-	}
 
 	toListString(): string {
 		return this.name
