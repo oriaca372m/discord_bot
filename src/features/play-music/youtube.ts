@@ -136,19 +136,17 @@ const VideoResourceId = z.object({
 	videoId: z.string(),
 })
 
-const Snippet = z.object({
-	title: z.string(),
-	resourceId: ResourceId,
-})
-
-const Item = z.object({
-	kind: z.literal('youtube#playlistItem'),
-	snippet: Snippet,
-})
-
 const PlaylistItemsRes = z.object({
 	nextPageToken: z.string().optional(),
-	items: z.array(Item),
+	items: z.array(
+		z.object({
+			kind: z.literal('youtube#playlistItem'),
+			snippet: z.object({
+				title: z.string(),
+				resourceId: ResourceId,
+			}),
+		})
+	),
 })
 
 export async function fetchPlaylistItems(
