@@ -6,7 +6,8 @@ import Fuse from 'fuse.js'
 
 import * as utils from 'Src/utils'
 
-import { Music, MusicFile, MusicObject, Artist, Album } from 'Src/features/play-music/music'
+import { Music, MusicCollection } from 'Src/features/play-music/music'
+import { MusicFile, MusicObject } from 'Src/features/play-music/music-file'
 
 type MusicList = MusicFile[]
 type MusicLists = Map<string, MusicList>
@@ -99,11 +100,7 @@ export class MusicDatabase {
 		return this.#allMusicsFuse.search(keyword).map((x) => x.item)
 	}
 
-	#searchName<T, M>(
-		names: Map<string, M>,
-		keyword: string,
-		map: (name: string, musics: M) => T
-	): T[] {
+	#searchName(names: Map<string, MusicFile[]>, keyword: string): MusicCollection[] {
 		const fuse = new Fuse(
 			Array.from(names.keys(), (name) => ({ name })),
 			{ keys: ['name'] }
@@ -111,14 +108,17 @@ export class MusicDatabase {
 
 		return fuse
 			.search(keyword)
-			.map((x) => map(x.item.name, names.get(x.item.name) ?? utils.unreachable()))
+			.map(
+				(x) =>
+					new MusicCollection(x.item.name, names.get(x.item.name) ?? utils.unreachable())
+			)
 	}
 
-	searchArtistName(keyword: string): Artist[] {
-		return this.#searchName(this.#artists, keyword, (x, m) => new Artist(x, m))
+	searchArtistName(keyword: string): MusicCollection[] {
+		return this.#searchName(this.#artists, keyword)
 	}
 
-	searchAlbumName(keyword: string): Album[] {
-		return this.#searchName(this.#albums, keyword, (x, m) => new Album(x, m))
+	searchAlbumName(keyword: string): MusicCollection[] {
+		return this.#searchName(this.#albums, keyword)
 	}
 }
