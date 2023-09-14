@@ -79,12 +79,14 @@ export const AddToPlaylist = createHandlerConstructor(
 	z.object({ music: SerializedMusic }),
 	z.object({}),
 	(req, ctx) => {
+		let music
 		try {
-			const music = deserializeMusic(ctx.feature.database, req.music)
-			ctx.guildInstance.playlist.addMusic(music)
+			music = deserializeMusic(ctx.feature.database, req.music)
 		} catch (e) {
-			return Promise.resolve({ error: 'Could not add the music.' })
+			throw new HandlerError(`Could not deserialize the music: ${String(e)}`)
 		}
+
+		ctx.guildInstance.playlist.addMusic(music)
 
 		return Promise.resolve({})
 	}
@@ -95,14 +97,10 @@ export const AddUrlToPlaylist = createHandlerConstructor(
 	z.object({ url: z.string() }),
 	z.object({ added: z.array(SerializedMusic) }),
 	async (req, ctx) => {
-		let url: URL | undefined
+		let url
 		try {
 			url = new URL(req.url)
 		} catch {
-			// pass
-		}
-
-		if (url === undefined) {
 			throw new HandlerError('url is not an url.')
 		}
 
