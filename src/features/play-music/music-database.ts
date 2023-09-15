@@ -1,3 +1,4 @@
+import { z } from 'zod'
 import { promises as fs } from 'fs'
 import TOML from '@iarna/toml'
 import lodash from 'lodash'
@@ -6,16 +7,22 @@ import Fuse from 'fuse.js'
 
 import * as utils from 'Src/utils'
 
-import { Music, MusicCollection } from 'Src/features/play-music/music'
-import { MusicFile, MusicObject } from 'Src/features/play-music/music-file'
+import { Music, MusicTag, MusicCollection } from 'Src/features/play-music/music'
+import { MusicFile } from 'Src/features/play-music/music-file'
 
 type MusicList = MusicFile[]
 type MusicLists = Map<string, MusicList>
 
-export type MusicListFormat = {
-	readonly name: string
-	readonly musics: MusicObject[]
-}
+const MusicListFormat = z.object({
+	name: z.string(),
+	musics: z.array(
+		z.object({
+			uuid: z.string().uuid(),
+			path: z.string(),
+			metadata: MusicTag,
+		})
+	),
+})
 
 async function loadMusicLists(dir: string): Promise<MusicLists> {
 	const musicLists = new Map<string, MusicList>()
@@ -30,12 +37,12 @@ async function loadMusicLists(dir: string): Promise<MusicLists> {
 
 	for (const file of files) {
 		const toml = await fs.readFile(path.join(dir, file), 'utf-8')
-		// TODO: バリデーション
-		const parsed = (await TOML.parse.async(toml)) as unknown as MusicListFormat
-		const musicListName = parsed.name
+		const json = await TOML.parse.async(toml)
+		const musicList = MusicListFormat.parse(json)
+		const musicListName = musicList.name
 		musicLists.set(
 			musicListName,
-			parsed.musics.map((x) => new MusicFile({ ...x, memberMusicList: musicListName }))
+			musicList.musics.map((x) => new MusicFile(x.uuid, x.path, x.metadata, musicListName))
 		)
 	}
 
@@ -80,14 +87,14 @@ export class MusicDatabase {
 	async init(): Promise<void> {
 		this.#musicLists = await loadMusicLists(this.musicListsDir)
 		this.#allMusics = getAllMusics(this.#musicLists)
-		this.#artists = createMap(this.allMusics, (v) => v.metadata.artist)
-		this.#albums = createMap(this.allMusics, (v) => v.metadata.album)
+		this.#artists = createMap(this.allMusics, (v) => v.tag.artist)
+		this.#albums = createMap(this.allMusics, (v) => v.tag.album)
 
 		this.#allMusicsFuse = new Fuse(this.allMusics, {
 			keys: [
-				{ name: 'metadata.title', weight: 0.6 },
-				{ name: 'metadata.album', weight: 0.3 },
-				{ name: 'metadata.artist', weight: 0.1 },
+				{ name: 'tag.title', weight: 0.6 },
+				{ name: 'tag.album', weight: 0.3 },
+				{ name: 'tag.artist', weight: 0.1 },
 			],
 		})
 	}

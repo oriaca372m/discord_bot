@@ -20,6 +20,10 @@ function usage() {
 	process.exit(1)
 }
 
+function emptyObjectToUndefined(obj) {
+	return Object.values(obj).some((x) => x !== null && x !== undefined) ? obj : undefined
+}
+
 async function main() {
 	const stdinBuffer = fs.readFileSync(0, 'utf-8')
 
@@ -82,8 +86,8 @@ async function main() {
 
 			metadata.album = common.album
 			metadata.artist = common.artist
-			metadata.track = common.track
-			metadata.disk = common.disk
+			metadata.track = emptyObjectToUndefined(common.track)
+			metadata.disk = emptyObjectToUndefined(common.disk)
 		} catch (e) {
 			console.error(`failed to parse metadata: ${line}`)
 			continue

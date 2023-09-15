@@ -2,34 +2,8 @@ import { createReadStream } from 'node:fs'
 import { z } from 'zod'
 import * as voice from '@discordjs/voice'
 
-import { Music, MusicPlayResource } from 'Src/features/play-music/music'
+import { Music, MusicTag, MusicPlayResource } from 'Src/features/play-music/music'
 import { MusicDatabase } from 'Src/features/play-music/music-database'
-
-export class MusicMetadata {
-	readonly title: string
-	readonly album?: string
-	readonly artist?: string
-	readonly track: { no: number | null; of: number | null }
-	readonly disk: { no: number | null; of: number | null }
-
-	constructor(obj: MusicMetadataObject) {
-		this.title = obj.title
-		this.album = obj.album
-		this.artist = obj.artist
-		this.track = obj.track
-		this.disk = obj.disk
-	}
-}
-
-type FieldNames<T> = {
-	// eslint-disable-next-line @typescript-eslint/ban-types
-	[P in keyof T]: T[P] extends Function ? never : P
-}[keyof T]
-type Fields<T> = { [P in FieldNames<T>]: T[P] }
-
-export type MusicMetadataObject = Fields<MusicMetadata>
-
-export type MusicObject = Fields<MusicFile> & { readonly metadata: MusicMetadataObject }
 
 const SerializedMusicFile = z.object({
 	kind: z.literal('file'),
@@ -37,20 +11,15 @@ const SerializedMusicFile = z.object({
 })
 
 export class MusicFile implements Music {
-	readonly uuid: string
-	readonly path: string
-	readonly metadata: MusicMetadata
-	readonly memberMusicList?: string
-
-	constructor(obj: MusicObject) {
-		this.uuid = obj.uuid
-		this.path = obj.path
-		this.metadata = new MusicMetadata(obj.metadata)
-		this.memberMusicList = obj.memberMusicList
-	}
+	constructor(
+		readonly uuid: string,
+		readonly path: string,
+		readonly tag: z.infer<typeof MusicTag>,
+		readonly memberMusicList?: string
+	) {}
 
 	getTitle(): string {
-		return this.metadata.title
+		return this.tag.title
 	}
 
 	serialize(): z.infer<typeof SerializedMusicFile> {
@@ -59,9 +28,9 @@ export class MusicFile implements Music {
 
 	toListString(): string {
 		if (this.memberMusicList !== undefined) {
-			return `${this.metadata.title} (from: ${this.memberMusicList})`
+			return `${this.tag.title} (from: ${this.memberMusicList})`
 		} else {
-			return this.metadata.title
+			return this.tag.title
 		}
 	}
 
