@@ -21,6 +21,12 @@ export function mustString(v: unknown): asserts v is string {
 	}
 }
 
+export function expects(v: unknown): asserts v {
+	if (!v) {
+		throw Error('Pre-condition is not met.')
+	}
+}
+
 export function parseShellLikeCommand(string: string): string[] | undefined {
 	let state: 'normal' | 'singlequote' | 'doublequote' | 'backslash' = 'normal'
 
