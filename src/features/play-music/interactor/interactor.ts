@@ -31,8 +31,16 @@ export class AddInteractor {
 		this.gc = this.guildInstance.feature.gc
 	}
 
+	async send(
+		key: string,
+		args: object = {},
+		options: discordjs.MessageCreateOptions = {}
+	): Promise<void> {
+		await this.gc.sendToChannel(this.channel, key, args, options)
+	}
+
 	async welcome(): Promise<void> {
-		await this.gc.sendToChannel(this.channel, 'playMusic.interactor.welcome')
+		await this.send('playMusic.interactor.welcome')
 	}
 
 	async setListView(lv: ListView): Promise<void> {
@@ -58,7 +66,7 @@ export class AddInteractor {
 
 	async show(pageNumber: number): Promise<void> {
 		if (this.#listView === undefined) {
-			await this.gc.sendToChannel(this.channel, 'playMusic.interactor.resultNotFound')
+			await this.send('playMusic.interactor.resultNotFound')
 			return
 		}
 
@@ -66,9 +74,9 @@ export class AddInteractor {
 		const res = utils.pagination(val, pageNumber)
 
 		if (res.kind === 'empty') {
-			await this.gc.sendToChannel(this.channel, 'playMusic.interactor.resultNotFound')
+			await this.send('playMusic.interactor.resultNotFound')
 		} else if (res.kind === 'invalidPageId') {
-			await this.gc.sendToChannel(this.channel, 'playMusic.interactor.invalidPageId', {
+			await this.send('playMusic.interactor.invalidPageId', {
 				maxPage: res.maxPage,
 			})
 		} else if (res.kind === 'ok') {
@@ -76,7 +84,7 @@ export class AddInteractor {
 				.map((v, i) => `${res.firstIndex + i}: ${v.toListString()}`)
 				.join('\n')
 
-			await this.gc.sendToChannel(this.channel, 'playMusic.interactor.list', {
+			await this.send('playMusic.interactor.list', {
 				currentPage: pageNumber,
 				maxPage: res.maxPage,
 				results: text,
