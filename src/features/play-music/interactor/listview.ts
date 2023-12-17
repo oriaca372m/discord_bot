@@ -1,4 +1,3 @@
-import lodash from 'lodash'
 import * as discordjs from 'discord.js'
 
 import { FeatureGlobalConfig } from 'Src/features/global-config'
@@ -65,16 +64,15 @@ class SelectAction implements ListAction {
 	constructor(private readonly lv: SelectableListView) {}
 
 	async do(indexes: string[]): Promise<void> {
-		const res = lodash.flatten(
-			utils
-				.parseIndexes(indexes, 0, this.lv.selectable.length)
-				.map((i) => this.lv.selectable[i].select())
-		)
+		const res = utils
+			.parseIndexes(indexes, 0, this.lv.selectable.length)
+			.flatMap((i) => this.lv.selectable[i].select() ?? [])
 
-		if (res.every((x) => x !== undefined)) {
-			await this.lv.interactor.setListView(
-				new MusicListView(this.lv.interactor, res as Music[])
-			)
+		if (res.length === 0) {
+			await this.lv.interactor.send('playMusic.interactor.nothingToSelect')
+			return
 		}
+
+		await this.lv.interactor.setListView(new MusicListView(this.lv.interactor, res))
 	}
 }

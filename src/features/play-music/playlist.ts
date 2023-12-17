@@ -1,5 +1,7 @@
-import { Music } from 'Src/features/play-music/music'
 import lodash from 'lodash'
+
+import { Music } from 'Src/features/play-music/music'
+import * as utils from 'Src/utils'
 
 export class Playlist {
 	#musics: Music[] = []
@@ -47,9 +49,7 @@ export class Playlist {
 	}
 
 	next(): void {
-		if (this.#playingTrack === undefined) {
-			throw new Error('駄目なタイミング')
-		}
+		utils.expects(this.#playingTrack !== undefined)
 
 		this.#playingTrack += 1
 		if (this.musics.length <= this.#playingTrack) {
@@ -58,9 +58,7 @@ export class Playlist {
 	}
 
 	prev(): void {
-		if (this.#playingTrack === undefined) {
-			throw new Error('駄目なタイミング')
-		}
+		utils.expects(this.#playingTrack !== undefined)
 
 		this.#playingTrack -= 1
 		if (this.#playingTrack < 0) {
@@ -69,21 +67,14 @@ export class Playlist {
 	}
 
 	switch(to: number): void {
-		if (this.#playingTrack === undefined) {
-			throw new Error('駄目なタイミング')
-		}
-
-		if (to < 0 || this.musics.length <= to) {
-			throw new Error('そんなに曲数が無い')
-		}
+		utils.expects(!this.isEmpty)
+		utils.expects(Number.isInteger(to) && 0 <= to && to < this.musics.length)
 
 		this.#playingTrack = to
 	}
 
 	shuffle(): void {
-		if (this.#playingTrack === undefined) {
-			throw new Error('駄目なタイミング')
-		}
+		utils.expects(!this.isEmpty)
 
 		this.#musics = lodash.shuffle(this.musics)
 		this.#playingTrack = 0

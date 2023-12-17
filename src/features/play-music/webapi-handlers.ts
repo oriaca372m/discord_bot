@@ -66,9 +66,9 @@ export const GetAllMusics = createHandlerConstructor(
 	(_req, ctx) => {
 		const musics = ctx.feature.database.allMusics.map((x) => ({
 			serialized: x.serialize(),
-			title: x.metadata.title,
-			album: x.metadata.album,
-			artist: x.metadata.artist,
+			title: x.tag.title,
+			album: x.tag.album,
+			artist: x.tag.artist,
 		}))
 		return Promise.resolve({ musics })
 	}
