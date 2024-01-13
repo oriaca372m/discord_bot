@@ -33,7 +33,7 @@ export class FeatureGlobalConfig extends FeatureBase {
 	protected async initImpl(): Promise<void> {
 		let config = {}
 		for (const path of this.paths) {
-			let toml
+			let toml: string | undefined
 			try {
 				toml = (await this.defaultObjectStorage.readFile(path)).toString('utf-8')
 			} catch (_) {
@@ -69,7 +69,7 @@ export class FeatureGlobalConfig extends FeatureBase {
 			const value: Message | Messages | undefined = lodash.get(this.config.message, key)
 			if (typeof value === 'string') {
 				templateText = value
-			} else if (value instanceof Array) {
+			} else if (Array.isArray(value)) {
 				const picked = utils.randomPick<string | { text: string }>(value)
 
 				if (typeof picked === 'string') {

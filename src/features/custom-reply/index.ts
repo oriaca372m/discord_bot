@@ -35,8 +35,8 @@ export class CustomReply {
 		this._actions = {
 			gacha: new ActionGacha(this.images, this.gc),
 			senko: new ActionSenko(),
-			['do-nothing']: new ActionDoNothing(),
-			['jakurai-clock']: new ActionJakuraiClock(),
+			'do-nothing': new ActionDoNothing(),
+			'jakurai-clock': new ActionJakuraiClock(),
 			default: new ActionDefault(this.images, this.gc),
 		}
 	}

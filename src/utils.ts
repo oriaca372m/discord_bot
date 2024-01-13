@@ -201,9 +201,8 @@ export function getOption<T>(
 
 	if (defaultValue === undefined) {
 		return false
-	} else {
-		return defaultValue
 	}
+	return defaultValue
 }
 
 export function delay(ms: number): Promise<void> {
@@ -215,7 +214,7 @@ export function delay(ms: number): Promise<void> {
 }
 
 export function weightedRandom(weights: number[]): number {
-	if (weights.length == 0) {
+	if (weights.length === 0) {
 		throw new TypeError('invalid argument')
 	}
 
@@ -377,7 +376,7 @@ export function parseIndexes(strings: string[], min: number, max: number): numbe
 		}
 
 		const index = parseInt(str, 10)
-		if (isNaN(index)) {
+		if (Number.isNaN(index)) {
 			throw new Error(`failed to parse ${str} as int`)
 		}
 

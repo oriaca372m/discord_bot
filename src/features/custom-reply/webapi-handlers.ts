@@ -2,7 +2,7 @@ import { WebApiHandler, AccessTokenInfo, HandlerError } from 'Src/features/webap
 
 import { FeatureCustomReply } from 'Src/features/custom-reply'
 
-interface GetConifgListReq {}
+type GetConifgListReq = object
 interface GetConfigListRes {
 	configIds: string[]
 }

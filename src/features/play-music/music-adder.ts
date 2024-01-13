@@ -63,7 +63,8 @@ export class MusicAdder {
 		msg: discordjs.Message,
 		rawArgs: string[]
 	): Promise<CommandOptions | undefined> {
-		let args: string[], options
+		let args: string[]
+		let options
 		try {
 			;({ args, options } = utils.parseCommandArgs(rawArgs, []))
 		} catch (e) {

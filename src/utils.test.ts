@@ -170,7 +170,7 @@ describe('retry', () => {
 		let count = 0
 		await utils.retry(() => {
 			count++
-			if (count == 3) {
+			if (count === 3) {
 				return Promise.resolve()
 			}
 			return Promise.reject()

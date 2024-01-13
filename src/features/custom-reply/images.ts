@@ -63,7 +63,9 @@ export class Images {
 	}
 
 	async listCommand(rawArgs: string[], msg: discordjs.Message): Promise<void> {
-		let args, options: { [_: string]: string | boolean }
+		let args
+		let options: { [_: string]: string | boolean }
+
 		try {
 			;({ args, options } = utils.parseCommandArgs(rawArgs, ['s', 'search']))
 		} catch (e) {

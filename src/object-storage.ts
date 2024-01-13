@@ -1,5 +1,5 @@
 import { promises as fs } from 'fs'
-import * as path from 'path'
+import { join, normalize } from 'path'
 import {
 	DeleteObjectCommand,
 	GetObjectCommand,
@@ -26,8 +26,8 @@ function joinPathSafe(base: string, user_input: string) {
 	if (user_input.indexOf('\0') !== -1) {
 		throw new Error('invalid string')
 	}
-	const safe_input = path.normalize(user_input).replace(/^(\.\.(\/|\\|$))+/, '')
-	const path_string = path.join(base, safe_input)
+	const safe_input = normalize(user_input).replace(/^(\.\.(\/|\\|$))+/, '')
+	const path_string = join(base, safe_input)
 	return path_string
 }
 
@@ -133,9 +133,9 @@ export class S3ObjectStorage implements ObjectStorage {
 		)
 	}
 
-	async readDir(inPath?: string): Promise<string[]> {
-		inPath = this.#getPath(inPath)
-		const prefix = inPath === '' ? '' : path.join(inPath, '/')
+	async readDir(path?: string): Promise<string[]> {
+		const absPath = this.#getPath(path)
+		const prefix = absPath === '' ? '' : join(absPath, '/')
 		const data = await this.#client.send(
 			new ListObjectsCommand({
 				Bucket: this.#bucket,

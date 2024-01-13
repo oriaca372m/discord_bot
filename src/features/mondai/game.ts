@@ -163,7 +163,7 @@ export class Game {
 
 		await this.gc.send(
 			msg,
-			'mondai.answer.' + key,
+			`mondai.answer.${key}`,
 			{ title, time: ans.time, mosaic: this.isMosaicMode },
 			options
 		)
@@ -201,7 +201,7 @@ export class Game {
 			this.incorrectCount++
 			await this.pushIncorrectImageLog()
 
-			if (this.isRepeat && this.incorrectCount == this.incorrectLimit) {
+			if (this.isRepeat && this.incorrectCount === this.incorrectLimit) {
 				await this._postResultMessage(msg, 'reachedIncorrectLimit', ans, title)
 				return false
 			}
@@ -222,7 +222,7 @@ export class Game {
 			if (incorrectMatch && incorrectMatch[0] === text) {
 				this.incorrectCount++
 
-				if (this.incorrectCount == this.incorrectLimit) {
+				if (this.incorrectCount === this.incorrectLimit) {
 					await this.pushIncorrectImageLog()
 					await this._postResultMessage(msg, 'reachedIncorrectLimit', ans, title)
 					return false
