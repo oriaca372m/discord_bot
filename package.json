@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "build": "tsc --project tsconfig.build.json && tsc-alias -f -p tsconfig.build.json",
-    "start": "yarn run build && node dist/index.js",
+    "start": "pnpm run build && node dist/index.js",
     "test": "jest",
     "lint": "tsc --noEmit && eslint src && prettier --check src",
     "fix": "eslint --fix src && prettier --write src"
@@ -24,7 +24,7 @@
     "lodash": "^4.17.21",
     "music-metadata": "^7.14.0",
     "pako": "^2.1.0",
-    "sodium": "^3.0.2",
+    "sodium-native": "^4.0.5",
     "uuid": "^9.0.1",
     "zod": "^3.22.4"
   },

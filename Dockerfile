@@ -1,9 +1,9 @@
 FROM alpine:3 AS builder
 
 RUN apk add --update --no-cache nodejs-current pixman cairo pango libpng jpeg giflib \
-	yarn build-base pkgconfig pixman-dev cairo-dev pango-dev libpng-dev jpeg-dev giflib-dev libtool autoconf automake curl
+	build-base pkgconfig pixman-dev cairo-dev pango-dev libpng-dev jpeg-dev giflib-dev libtool autoconf automake curl
 
-RUN yarn global add node-gyp
+RUN corepack enable pnpm
 
 RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp
 RUN chmod a+rx /usr/local/bin/yt-dlp
@@ -11,14 +11,14 @@ RUN chmod a+rx /usr/local/bin/yt-dlp
 WORKDIR /usr/src/app
 
 COPY package.json .
-COPY yarn.lock .
-RUN yarn install --frozen-lockfile
+COPY pnpm-lock.yaml .
+RUN pnpm install --frozen-lockfile
 
 COPY . .
-RUN yarn lint
-RUN yarn run build
+RUN pnpm run lint
+RUN pnpm run build
 
-RUN yarn install --frozen-lockfile --production
+RUN pnpm install --frozen-lockfile --prod
 
 FROM alpine:3
 
