@@ -57,7 +57,6 @@ function createMap<K, V>(array: V[], keyFunc: (val: V) => K | undefined): Map<K,
 		if (!res.has(key)) {
 			res.set(key, [])
 		}
-
 		;(res.get(key) ?? utils.unreachable()).push(i)
 	}
 	return res
