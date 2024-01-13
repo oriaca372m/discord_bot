@@ -16,13 +16,10 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 'current'
-          cache: 'yarn'
-
-      - name: Install node-gyp
-        run: npm install -g node-gyp
+          cache: 'pnpm'
 
       - name: Upgrade packgaes
-        run: yarn upgrade --latest
+        run: pnpm up --latest
 
       - uses: tibdex/github-app-token@v1
         id: generate-token

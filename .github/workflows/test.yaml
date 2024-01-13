@@ -17,16 +17,13 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 'current'
-          cache: 'yarn'
-
-      - name: Install node-gyp
-        run: npm install -g node-gyp
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: yarn --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Lint
-        run: yarn run lint
+        run: pnpm run lint
 
       - name: Run tests
-        run: yarn run test
+        run: pnpm run test
