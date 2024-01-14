@@ -218,15 +218,28 @@ export function weightedRandom(weights: number[]): number {
 		throw new TypeError('invalid argument')
 	}
 
-	const list = weights.reduce((a, c) => [...a, a[a.length - 1] + c], [0])
-	const random = Math.floor(Math.random() * list[list.length - 1])
-	for (let i = 1; i < list.length; i++) {
-		if (list[i - 1] <= random && random < list[i]) {
-			return i - 1
+	let sum = 0
+	const cumulative_sum = [0]
+
+	for (const weight of weights) {
+		sum += weight
+		cumulative_sum.push(sum)
+	}
+
+	const random = Math.floor(Math.random() * sum)
+	let ok = cumulative_sum.length - 1
+	let ng = 0
+
+	while (ok - ng > 1) {
+		const mid = ok + Math.floor((ng - ok) / 2)
+		if (random < cumulative_sum[mid]) {
+			ok = mid
+		} else {
+			ng = mid
 		}
 	}
 
-	unreachable()
+	return ok - 1
 }
 
 export function randomPick<T>(array: T | T[]): T {
