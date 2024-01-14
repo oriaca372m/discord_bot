@@ -419,3 +419,42 @@ export function removePrefix(str: string, prefix: string): string {
 
 	return str
 }
+
+export class ResultOk<T> {
+	constructor(readonly value: T) {}
+	isOk(): this is ResultOk<T> {
+		return true
+	}
+	isErr(): this is never {
+		return false
+	}
+	okOrThrow(_f: unknown): T {
+		return this.value
+	}
+}
+
+export class ResultErr<T> {
+	constructor(readonly value: T) {}
+	isOk(): this is never {
+		return false
+	}
+	isErr(): this is ResultErr<T> {
+		return true
+	}
+	okOrThrow(f: Error | ((err: T) => Error)): never {
+		if (typeof f === 'function') {
+			throw f(this.value)
+		}
+		throw f
+	}
+}
+
+export type Result<T, E> = ResultOk<T> | ResultErr<E>
+
+export function tryEither<T>(f: () => T): Result<T, unknown> {
+	try {
+		return new ResultOk(f())
+	} catch (e) {
+		return new ResultErr(e)
+	}
+}

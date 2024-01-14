@@ -178,3 +178,74 @@ describe('retry', () => {
 		expect(count).toBe(3)
 	})
 })
+
+describe('ResultOk', () => {
+	const ok = new utils.ResultOk('hoge')
+
+	test('valueが正しい値を持つこと', () => {
+		expect(ok.value).toBe('hoge')
+	})
+
+	test('isOkがtrueを返すこと', () => {
+		expect(ok.isOk()).toBe(true)
+	})
+
+	test('isErrがfalseを返すこと', () => {
+		expect(ok.isErr()).toBe(false)
+	})
+
+	test('okOrThrowが正しい値を返すこと', () => {
+		expect(ok.okOrThrow(undefined)).toBe('hoge')
+	})
+})
+
+describe('ResultErr', () => {
+	const err = new utils.ResultErr('hoge')
+
+	test('valueが正しい値を持つこと', () => {
+		expect(err.value).toBe('hoge')
+	})
+
+	test('isOkがfalseを返すこと', () => {
+		expect(err.isOk()).toBe(false)
+	})
+
+	test('isErrがtrueを返すこと', () => {
+		expect(err.isErr()).toBe(true)
+	})
+
+	test('okOrThrowにエラーオブジェクトを渡した時例外を投げること', () => {
+		expect(() => err.okOrThrow(new Error('err'))).toThrow('err')
+	})
+
+	test('okOrThrowに関数を渡した時例外を投げること', () => {
+		expect(() => err.okOrThrow(() => new Error('err'))).toThrow('err')
+	})
+
+	test('okOrThrowの引数に正しい値が渡されること', () => {
+		let value: string | undefined
+		try {
+			err.okOrThrow((x) => {
+				value = x
+				return new Error('err')
+			})
+		} catch {
+			// pass
+		}
+		expect(value).toBe('hoge')
+	})
+})
+
+describe('tryEither', () => {
+	test('正しい値が返ってくること', () => {
+		const res = utils.tryEither(() => 'hoge')
+		expect(res.value).toBe('hoge')
+	})
+
+	test('正しい例外が返ってくること', () => {
+		const res = utils.tryEither(() => {
+			throw new Error('hoge')
+		})
+		expect(res.value).toHaveProperty('message', 'hoge')
+	})
+})
