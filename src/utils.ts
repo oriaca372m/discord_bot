@@ -201,9 +201,8 @@ export function getOption<T>(
 
 	if (defaultValue === undefined) {
 		return false
-	} else {
-		return defaultValue
 	}
+	return defaultValue
 }
 
 export function delay(ms: number): Promise<void> {
@@ -215,19 +214,32 @@ export function delay(ms: number): Promise<void> {
 }
 
 export function weightedRandom(weights: number[]): number {
-	if (weights.length == 0) {
+	if (weights.length === 0) {
 		throw new TypeError('invalid argument')
 	}
 
-	const list = weights.reduce((a, c) => [...a, a[a.length - 1] + c], [0])
-	const random = Math.floor(Math.random() * list[list.length - 1])
-	for (let i = 1; i < list.length; i++) {
-		if (list[i - 1] <= random && random < list[i]) {
-			return i - 1
+	let sum = 0
+	const cumulative_sum = [0]
+
+	for (const weight of weights) {
+		sum += weight
+		cumulative_sum.push(sum)
+	}
+
+	const random = Math.floor(Math.random() * sum)
+	let ok = cumulative_sum.length - 1
+	let ng = 0
+
+	while (ok - ng > 1) {
+		const mid = ok + Math.floor((ng - ok) / 2)
+		if (random < cumulative_sum[mid]) {
+			ok = mid
+		} else {
+			ng = mid
 		}
 	}
 
-	unreachable()
+	return ok - 1
 }
 
 export function randomPick<T>(array: T | T[]): T {
@@ -377,7 +389,7 @@ export function parseIndexes(strings: string[], min: number, max: number): numbe
 		}
 
 		const index = parseInt(str, 10)
-		if (isNaN(index)) {
+		if (Number.isNaN(index)) {
 			throw new Error(`failed to parse ${str} as int`)
 		}
 
@@ -406,4 +418,43 @@ export function removePrefix(str: string, prefix: string): string {
 	}
 
 	return str
+}
+
+export class ResultOk<T> {
+	constructor(readonly value: T) {}
+	isOk(): this is ResultOk<T> {
+		return true
+	}
+	isErr(): this is never {
+		return false
+	}
+	okOrThrow(_f: unknown): T {
+		return this.value
+	}
+}
+
+export class ResultErr<T> {
+	constructor(readonly value: T) {}
+	isOk(): this is never {
+		return false
+	}
+	isErr(): this is ResultErr<T> {
+		return true
+	}
+	okOrThrow(f: Error | ((err: T) => Error)): never {
+		if (typeof f === 'function') {
+			throw f(this.value)
+		}
+		throw f
+	}
+}
+
+export type Result<T, E> = ResultOk<T> | ResultErr<E>
+
+export function tryEither<T>(f: () => T): Result<T, unknown> {
+	try {
+		return new ResultOk(f())
+	} catch (e) {
+		return new ResultErr(e)
+	}
 }

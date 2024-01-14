@@ -63,7 +63,8 @@ export class MusicAdder {
 		msg: discordjs.Message,
 		rawArgs: string[]
 	): Promise<CommandOptions | undefined> {
-		let args: string[], options
+		let args: string[]
+		let options
 		try {
 			;({ args, options } = utils.parseCommandArgs(rawArgs, []))
 		} catch (e) {
@@ -91,15 +92,9 @@ export class MusicAdder {
 	}
 
 	async #resolveMusicKeyword(keyword: string, isYouTube: boolean): Promise<Music[]> {
-		let url: URL | undefined
-		try {
-			url = new URL(keyword)
-		} catch {
-			// pass
-		}
-
-		if (url !== undefined) {
-			return resolveUrl(this.guildInstance.feature, url)
+		const url = utils.tryEither(() => new URL(keyword))
+		if (url.isOk()) {
+			return resolveUrl(this.guildInstance.feature, url.value)
 		}
 
 		if (isYouTube) {
@@ -119,15 +114,12 @@ export class MusicAdder {
 
 		const listMusics = this.listMusics
 		if (listMusics !== undefined) {
-			let indexes: number[] | undefined
-			try {
-				indexes = utils.parseIndexes(keywords, 0, listMusics.length)
-			} catch {
-				// pass
-			}
+			const indexes = utils.tryEither(() =>
+				utils.parseIndexes(keywords, 0, listMusics.length)
+			)
 
-			if (indexes !== undefined) {
-				return indexes.map((x) => listMusics[x])
+			if (indexes.isOk()) {
+				return indexes.value.map((x) => listMusics[x])
 			}
 		}
 

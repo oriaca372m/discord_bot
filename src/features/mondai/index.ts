@@ -47,7 +47,9 @@ export class Mondai {
 	}
 
 	async onCommand(msg: discordjs.Message, rawArgs: string[]): Promise<void> {
-		let args, options
+		let args
+		let options
+
 		try {
 			;({ args, options } = utils.parseCommandArgs(rawArgs, ['life', 'l']))
 		} catch (e) {
@@ -101,7 +103,7 @@ export class Mondai {
 
 	async onMessage(msg: discordjs.Message): Promise<void> {
 		if (this.game !== undefined) {
-			let res
+			let res: boolean
 			try {
 				res = await this.game.onMessage(msg)
 			} catch (e) {

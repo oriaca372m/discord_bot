@@ -60,9 +60,8 @@ export class MusicFile implements Music {
 	toListString(): string {
 		if (this.memberMusicList !== undefined) {
 			return `${this.metadata.title} (from: ${this.memberMusicList})`
-		} else {
-			return this.metadata.title
 		}
+		return this.metadata.title
 	}
 
 	select(): Music[] | undefined {

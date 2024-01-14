@@ -47,7 +47,7 @@ export class Config {
 		this.#objectStorage = storage
 		await this.#objectStorage.mkdir('.')
 
-		let json
+		let json: string
 		try {
 			json = (await this.#objectStorage.readFile('sources.json')).toString('utf-8')
 		} catch (_) {
@@ -64,7 +64,6 @@ export class Config {
 				await this.updateConfig(id)
 			} catch (e) {
 				console.error(e)
-				continue
 			}
 		}
 	}
@@ -82,7 +81,7 @@ export class Config {
 			throw new Error(`undefined id: ${id}`)
 		}
 
-		let parsed
+		let parsed: TOML.JsonMap
 		try {
 			parsed = await TOML.parse.async(text)
 		} catch (e) {
@@ -114,7 +113,7 @@ export class Config {
 			throw new Error(`undefined id: ${id}`)
 		}
 
-		let text
+		let text: string
 		if (viaInternet) {
 			const req = await fetch(`${source.source}?${Math.random()}`)
 			text = await req.text()
@@ -136,7 +135,6 @@ export class Config {
 				await this.gc.send(msg, 'customReply.config.errorOnReloading', {
 					id,
 				})
-				continue
 			}
 		}
 		await this.gc.send(msg, 'customReply.config.localReloadingComplete')

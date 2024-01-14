@@ -242,7 +242,7 @@ export class GuildInstance {
 			await msg.reply('今流れている曲は無いよ…')
 		} else {
 			const title = music.getTitle()
-			await msg.reply('今流れている曲はこれだよ！' + title)
+			await msg.reply(`今流れている曲はこれだよ！${title}`)
 		}
 	}
 

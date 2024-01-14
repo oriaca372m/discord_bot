@@ -11,7 +11,7 @@ export class Playlist {
 
 	get currentMusic(): Music | undefined {
 		if (this.#playingTrack === undefined) {
-			return
+			return undefined
 		}
 
 		return this.musics[this.#playingTrack]

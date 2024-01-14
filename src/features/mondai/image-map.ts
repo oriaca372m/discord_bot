@@ -4,8 +4,8 @@ export function calcDivisionNumber(total: number): { x: number; y: number } {
 	if (total < 1) {
 		throw new Error('だめ')
 	}
-	let x = 1,
-		y = 1
+	let x = 1
+	let y = 1
 
 	for (;;) {
 		if (total <= x * y) {

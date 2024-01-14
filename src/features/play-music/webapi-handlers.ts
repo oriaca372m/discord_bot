@@ -1,6 +1,8 @@
 import { z } from 'zod'
 import * as discordjs from 'discord.js'
 
+import * as u from 'Src/utils'
+
 import { WebApiHandler, AccessTokenInfo, HandlerError } from 'Src/features/webapi'
 
 import { FeaturePlayMusic } from 'Src/features/play-music'
@@ -79,15 +81,10 @@ export const AddToPlaylist = createHandlerConstructor(
 	z.object({ music: SerializedMusic }),
 	z.object({}),
 	(req, ctx) => {
-		let music
-		try {
-			music = deserializeMusic(ctx.feature.database, req.music)
-		} catch (e) {
-			throw new HandlerError(`Could not deserialize the music: ${String(e)}`)
-		}
-
+		const music = u
+			.tryEither(() => deserializeMusic(ctx.feature.database, req.music))
+			.okOrThrow((e) => new HandlerError(`Could not deserialize the music: ${String(e)}`))
 		ctx.guildInstance.playlist.addMusic(music)
-
 		return Promise.resolve({})
 	}
 )
@@ -97,12 +94,9 @@ export const AddUrlToPlaylist = createHandlerConstructor(
 	z.object({ url: z.string() }),
 	z.object({ added: z.array(SerializedMusic) }),
 	async (req, ctx) => {
-		let url
-		try {
-			url = new URL(req.url)
-		} catch {
-			throw new HandlerError('url is not an url.')
-		}
+		const url = u
+			.tryEither(() => new URL(req.url))
+			.okOrThrow(new HandlerError('url is not an url.'))
 
 		const musics = await resolveUrl(ctx.feature, url)
 		for (const music of musics) {

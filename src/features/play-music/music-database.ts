@@ -20,7 +20,7 @@ export type MusicListFormat = {
 async function loadMusicLists(dir: string): Promise<MusicLists> {
 	const musicLists = new Map<string, MusicList>()
 
-	let files
+	let files: string[]
 	try {
 		files = await fs.readdir(dir)
 	} catch (e) {
@@ -92,7 +92,7 @@ export class MusicDatabase {
 	}
 
 	getByUuid(uuid: string): Music | undefined {
-		return this.allMusics.find((x) => x.uuid == uuid)
+		return this.allMusics.find((x) => x.uuid === uuid)
 	}
 
 	search(keyword: string): Music[] {

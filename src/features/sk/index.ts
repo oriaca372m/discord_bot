@@ -36,7 +36,7 @@ class SetSkCommand implements Command {
 			const res = /^(.+):(\d+)$/.exec(x)
 			if (res !== null) {
 				const nb = parseInt(res[2], 10)
-				if (!isNaN(nb) && 0 < nb) {
+				if (!Number.isNaN(nb) && 0 < nb) {
 					return { message: res[1], weight: nb }
 				}
 			}
