@@ -13,7 +13,7 @@
 	"license": "Zlib",
 	"private": true,
 	"dependencies": {
-		"@aws-sdk/client-s3": "^3.515.0",
+		"@aws-sdk/client-s3": "^3.525.0",
 		"@discordjs/opus": "^0.9.0",
 		"@discordjs/voice": "^0.16.1",
 		"@iarna/toml": "^2.2.5",
@@ -32,17 +32,17 @@
 		"@biomejs/biome": "^1.5.3",
 		"@types/jest": "^29.5.12",
 		"@types/lodash": "^4.14.202",
-		"@types/node": "^20.11.19",
+		"@types/node": "^20.11.25",
 		"@types/pako": "^2.0.3",
-		"@typescript-eslint/eslint-plugin": "^7.0.2",
-		"@typescript-eslint/parser": "^7.0.2",
-		"eslint": "^8.56.0",
+		"@typescript-eslint/eslint-plugin": "^7.1.1",
+		"@typescript-eslint/parser": "^7.1.1",
+		"eslint": "^8.57.0",
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-jest": "^27.9.0",
 		"jest": "^29.7.0",
 		"ts-jest": "^29.1.2",
 		"tsc-alias": "^1.8.8",
-		"typescript": "^5.3.3"
+		"typescript": "^5.4.2"
 	},
 	"packageManager": "pnpm@8.14.1+sha1.d039b38e0b20ad012ed548e44267b8d4c88b447a"
 }
