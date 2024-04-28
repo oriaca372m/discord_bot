@@ -3,6 +3,7 @@ import stream from 'stream'
 import * as discordjs from 'discord.js'
 
 export function unreachable(): never
+// eslint-disable-next-line @typescript-eslint/unified-signatures -- 意味を変えずに統合する方法がわからない
 export function unreachable(_: never): never
 
 export function unreachable(_?: unknown): never {
@@ -92,9 +93,9 @@ export function parseCommand(string: string): { commandName: string; args: strin
 		return
 	}
 
-	if (0 < res.length && /^!([a-zA-Z_-]+)$/.test(res[0])) {
+	if (res[0] && /^!([a-zA-Z_-]+)$/.test(res[0])) {
 		const [name, ...args] = res
-		return { commandName: name.substring(1).toLowerCase(), args: args ?? [] }
+		return { commandName: name.substring(1).toLowerCase(), args }
 	}
 }
 
@@ -105,9 +106,19 @@ export function parseCommandArgs(
 ): { args: string[]; options: { [_: string]: string | boolean } } {
 	const args = []
 	const options: { [_: string]: string | boolean } = {}
+	let i = 0
 
-	for (let i = 0; i < argsToParse.length; i++) {
-		const arg = argsToParse[i]
+	const consumeValue = (name: string) => {
+		if (i + 1 === argsToParse.length) {
+			throw new Error(`引数には値が必要です: ${name}`)
+		}
+		i++
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- 境界チェックを既に行っているため
+		return argsToParse[i]!
+	}
+
+	for (; i < argsToParse.length; i++) {
+		const arg = argsToParse[i] ?? unreachable()
 
 		if (arg !== '--' && arg.startsWith('--')) {
 			let optName = arg.slice(2)
@@ -119,7 +130,7 @@ export function parseCommandArgs(
 			}
 
 			if (optName === '') {
-				throw `オプション名を指定してください: ${arg}`
+				throw new Error(`オプション名を指定してください: ${arg}`)
 			}
 
 			const isWithValue = optionsWithValue.includes(optName)
@@ -128,15 +139,11 @@ export function parseCommandArgs(
 				if (equalIndex !== -1) {
 					optValue = arg.slice(equalIndex + 1)
 				} else {
-					if (i + 1 === argsToParse.length) {
-						throw `引数には値が必要です: ${optName}`
-					}
-					i++
-					optValue = argsToParse[i]
+					optValue = consumeValue(optName)
 				}
 			} else {
 				if (equalIndex !== -1) {
-					throw `引数は値を持てません: ${optName}`
+					throw new Error(`引数は値を持てません: ${optName}`)
 				}
 			}
 
@@ -147,19 +154,17 @@ export function parseCommandArgs(
 		if (arg !== '-' && arg.startsWith('-')) {
 			const opts = arg.slice(1).split('')
 			if (opts.length === 1) {
-				if (optionsWithValue.includes(opts[0])) {
-					if (i + 1 === argsToParse.length) {
-						throw `引数には値が必要です: ${opts[0]}`
-					}
-					i++
-					options[opts[0]] = argsToParse[i]
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- 境界チェックを既に行っているため
+				const optName = opts[0]!
+				if (optionsWithValue.includes(optName)) {
+					options[optName] = consumeValue(optName)
 					continue
 				}
 			}
 
 			for (const opt of opts) {
 				if (optionsWithValue.includes(opt)) {
-					throw `引数には値が必要です: ${opt}`
+					throw new Error(`引数には値が必要です: ${opt}`)
 				}
 				options[opt] = true
 			}
@@ -171,7 +176,7 @@ export function parseCommandArgs(
 	}
 
 	if (args.length < minimumArgs) {
-		throw '引数の数が足りません'
+		throw new Error('引数の数が足りません')
 	}
 
 	return { args, options }
@@ -193,16 +198,7 @@ export function getOption<T>(
 	keys: string[],
 	defaultValue?: T
 ): T | string | boolean {
-	for (const key of keys) {
-		if (key in options) {
-			return options[key]
-		}
-	}
-
-	if (defaultValue === undefined) {
-		return false
-	}
-	return defaultValue
+	return keys.find((x) => options[x] !== undefined) ?? defaultValue ?? false
 }
 
 export function delay(ms: number): Promise<void> {
@@ -232,7 +228,8 @@ export function weightedRandom(weights: number[]): number {
 
 	while (ok - ng > 1) {
 		const mid = ok + Math.floor((ng - ok) / 2)
-		if (random < cumulative_sum[mid]) {
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- 範囲外になり得ない
+		if (random < cumulative_sum[mid]!) {
 			ok = mid
 		} else {
 			ng = mid
@@ -247,8 +244,12 @@ export function randomPick<T>(array: T | T[]): T {
 		return array
 	}
 
-	const weights = array.map((x) => lodash.get(x, 'weight', 100) as number)
-	return array[weightedRandom(weights)]
+	const weights = array.map((x) => {
+		const value = lodash.get(x, 'weight')
+		return Number.isFinite(value) ? (value as number) : 100
+	})
+	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- 範囲外になり得ない
+	return array[weightedRandom(weights)]!
 }
 
 export async function subCommandProxy(
@@ -310,6 +311,8 @@ export async function forEachAsyncOf<T>(
 	)
 
 	if (errors.length !== 0) {
+		// TODO: 専用のエラー型でラップする?
+		// eslint-disable-next-line @typescript-eslint/only-throw-error
 		throw errors
 	}
 }
@@ -377,8 +380,9 @@ export function parseIndexes(strings: string[], min: number, max: number): numbe
 	for (const str of strings) {
 		const match = /(\d+)(?:-|\.\.)(\d+)/.exec(str)
 		if (match) {
-			const start = parseInt(match[1], 10)
-			const end = parseInt(match[2], 10)
+			const [, startStr, endStr] = match as unknown as [unknown, string, string]
+			const start = parseInt(startStr, 10)
+			const end = parseInt(endStr, 10)
 
 			if (!(start < end)) {
 				throw new Error('invalid expression')
@@ -401,6 +405,12 @@ export function parseIndexes(strings: string[], min: number, max: number): numbe
 	}
 
 	return ret
+}
+
+export function mapIndexes<T>(list: readonly T[], indexStrs: string[]): T[] {
+	const indexes = parseIndexes(indexStrs, 0, list.length - 1)
+	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- 境界チェックを既に行っているため
+	return indexes.map((index) => list[index]!)
 }
 
 export async function readAll(rs: stream.Readable): Promise<Buffer> {
@@ -457,4 +467,8 @@ export function tryEither<T>(f: () => T): Result<T, unknown> {
 	} catch (e) {
 		return new ResultErr(e)
 	}
+}
+
+export function upCast<T>(x: T): T {
+	return x
 }

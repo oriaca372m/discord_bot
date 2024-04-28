@@ -6,8 +6,7 @@ export class TypedEvent<T> {
 	readonly #listeners = new Set<Listener<T>>()
 	readonly #listenersOncer = new Set<Listener<T>>()
 
-	on(listener: Listener<T>): void
-	on(listener: Listener<T>, runOnceImmediately: false): void
+	on(listener: Listener<T>, runOnceImmediately?: false): void
 	on(listener: Listener<T | undefined>, runOnceImmediately: true): void
 	on(listener: Listener<T> | Listener<T | undefined>, runOnceImmediately = false): void {
 		this.#listeners.add(listener)

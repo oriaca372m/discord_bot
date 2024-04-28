@@ -72,8 +72,8 @@ export default class {
 		this._state = 'finalizing'
 
 		// 初期化と逆順に処理
-		for (let i = this.sorteadFeatures.length; 0 <= --i; ) {
-			await this.sorteadFeatures[i].finalize()
+		for (const feature of this.sorteadFeatures.toReversed()) {
+			await feature.finalize()
 		}
 		this._state = 'finalized'
 	}

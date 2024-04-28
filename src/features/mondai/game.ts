@@ -16,6 +16,7 @@ export type GameOption = {
 
 type GameMode = string
 
+// TODO: 戻り値の型をどうにかする
 function generateMondaiImage(
 	mode: string,
 	inPath: string,
@@ -23,9 +24,9 @@ function generateMondaiImage(
 	opts: { [_: string]: string } = {}
 ): Promise<{ [_: string]: string }> {
 	const optArgs: string[] = []
-	for (const key of Object.keys(opts)) {
+	for (const [key, value] of Object.entries(opts)) {
 		optArgs.push(`-${key}`)
-		optArgs.push(opts[key])
+		optArgs.push(value)
 	}
 
 	return new Promise((resolve, reject) => {
@@ -37,7 +38,7 @@ function generateMondaiImage(
 			try {
 				resolve(JSON.parse(stdout as string) as { [_: string]: string })
 			} catch (e) {
-				reject(e)
+				reject(e as Error)
 			}
 		})
 	})
@@ -124,7 +125,7 @@ export class Game {
 					this.answer = {
 						title: episode.title,
 						pattern: episode.pattern,
-						time: res.time,
+						time: res.time as string,
 					}
 				} catch (e) {
 					// TODO: 特別なエラー型にラップする

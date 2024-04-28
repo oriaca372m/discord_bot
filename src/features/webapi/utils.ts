@@ -7,7 +7,7 @@ export function bufferToHex(buffer: Uint8Array): string {
 export function hexToBuffer(str: string): Uint8Array {
 	const splited = str.match(/.{2}/g)
 	if (splited === null) {
-		throw 'not hex string!'
+		throw new Error('not hex string!')
 	}
 	return new Uint8Array(splited.map((x) => parseInt(x, 16)))
 }

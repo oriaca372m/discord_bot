@@ -40,7 +40,9 @@ export class WebApiServer {
 		) => Promise<unknown>
 	) {
 		this._server = http.createServer((req, res) => void this._handleRequest(req, res))
-		this._server.on('error', (e) => console.error(e))
+		this._server.on('error', (e) => {
+			console.error(e)
+		})
 	}
 
 	private _getAccessToken(req: http.IncomingMessage): BasicAccessTokenInfo | undefined {

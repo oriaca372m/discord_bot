@@ -28,7 +28,12 @@ class MoveAction implements ListAction {
 	constructor(private readonly lv: PlaylistListView) {}
 
 	async do(args: string[]): Promise<void> {
-		this.lv.playlist.switch(parseInt(args[0], 10))
+		const to = args[0]
+		if (to === undefined) {
+			// TODO: エラーを通知する
+			return Promise.resolve()
+		}
+		this.lv.playlist.switch(parseInt(to, 10))
 		this.lv.interactor.guildInstance.playIfHasConnection()
 		return Promise.resolve()
 	}

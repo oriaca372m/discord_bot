@@ -66,7 +66,7 @@ export class StorageDriver {
 	guild(msg: discordjs.Message): StorageType {
 		const guild = msg.guild
 		if (guild === null) {
-			throw 'だめ'
+			throw new Error('だめ')
 		}
 
 		return this.getBase(guild.id, this._guilds, () => this.guildStorageConstructor(guild))

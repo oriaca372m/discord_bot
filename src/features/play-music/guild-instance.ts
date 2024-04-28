@@ -125,12 +125,14 @@ export class GuildInstance {
 		// TODO: エラーをユーザーに通知したい
 
 		this.#connection = new Connection(channel)
-		this.#connection.init().catch((e) => {
+		this.#connection.init().catch((e: unknown) => {
 			console.error(e)
 			this.stop()
 		})
 
-		this.#connection.onMusicStopped.on(() => this.#next())
+		this.#connection.onMusicStopped.on(() => {
+			this.#next()
+		})
 		this.#connection.onError.on(console.error)
 	}
 
@@ -230,10 +232,10 @@ export class GuildInstance {
 
 		const i = this.#createInteractor(msg)
 		await i.welcome()
-		if (args.length === 1) {
-			await i.search(args[0])
+		const keyword = args[0]
+		if (keyword !== undefined) {
+			await i.search(keyword)
 		}
-		return
 	}
 
 	async nowPlaying(_rawArgs: string[], msg: discordjs.Message): Promise<void> {

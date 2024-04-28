@@ -23,7 +23,7 @@ export interface ObjectStorage {
 
 // https://www.stackhawk.com/blog/node-js-path-traversal-guide-examples-and-prevention/
 function joinPathSafe(base: string, user_input: string) {
-	if (user_input.indexOf('\0') !== -1) {
+	if (user_input.includes('\0')) {
 		throw new Error('invalid string')
 	}
 	const safe_input = normalize(user_input).replace(/^(\.\.(\/|\\|$))+/, '')

@@ -30,14 +30,18 @@ class SetSkCommand implements Command {
 			return
 		}
 
-		const nbs = utils.parseIndexes(args[0].split(','), 1, 256)
+		const [nbsStr, ...msgs] = args
 
-		const skmsgs = args.splice(1).map((x) => {
+		utils.mustExist(nbsStr)
+		const nbs = utils.parseIndexes(nbsStr.split(','), 1, 256)
+
+		const skmsgs = msgs.map((x) => {
 			const res = /^(.+):(\d+)$/.exec(x)
 			if (res !== null) {
-				const nb = parseInt(res[2], 10)
-				if (!Number.isNaN(nb) && 0 < nb) {
-					return { message: res[1], weight: nb }
+				const [, message, weightStr] = res as unknown as [unknown, string, string]
+				const weight = parseInt(weightStr, 10)
+				if (0 < weight) {
+					return { message, weight }
 				}
 			}
 
