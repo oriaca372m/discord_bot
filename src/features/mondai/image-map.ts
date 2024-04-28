@@ -1,4 +1,4 @@
-import { createCanvas, loadImage, Image, CanvasRenderingContext2D } from 'canvas'
+import { createCanvas, loadImage, Image, SKRSContext2D } from '@napi-rs/canvas'
 
 export function calcDivisionNumber(total: number): { x: number; y: number } {
 	if (total < 1) {
@@ -21,7 +21,7 @@ export function calcDivisionNumber(total: number): { x: number; y: number } {
 }
 
 function drawKeepAspectRatio(
-	ctx: CanvasRenderingContext2D,
+	ctx: SKRSContext2D,
 	image: Image,
 	x: number,
 	y: number,
