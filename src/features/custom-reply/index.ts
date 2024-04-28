@@ -22,6 +22,7 @@ export class CustomReply {
 	private readonly images: Images
 	readonly config: Config
 	private gc: FeatureGlobalConfig
+	readonly #defaultAction: Action
 	private readonly _actions: { [key: string]: Action }
 
 	constructor(
@@ -32,12 +33,14 @@ export class CustomReply {
 		this.images = new Images(this.gc)
 		this.config = new Config(this.gc)
 
+		this.#defaultAction = new ActionDefault(this.images, this.gc)
+
 		this._actions = {
 			gacha: new ActionGacha(this.images, this.gc),
 			senko: new ActionSenko(),
 			'do-nothing': new ActionDoNothing(),
 			'jakurai-clock': new ActionJakuraiClock(),
-			default: new ActionDefault(this.images, this.gc),
+			default: this.#defaultAction,
 		}
 	}
 
@@ -49,7 +52,7 @@ export class CustomReply {
 	}
 
 	private async processPickedResponse(msg: discordjs.Message, response: Response): Promise<void> {
-		const action = this._actions[response.action ?? ''] ?? this._actions.default
+		const action = this._actions[response.action ?? ''] ?? this.#defaultAction
 		const result = await action.handle(msg, response)
 
 		if (result === undefined) {

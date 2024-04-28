@@ -92,9 +92,9 @@ export function parseCommand(string: string): { commandName: string; args: strin
 		return
 	}
 
-	if (0 < res.length && /^!([a-zA-Z_-]+)$/.test(res[0])) {
+	if (res[0] && /^!([a-zA-Z_-]+)$/.test(res[0])) {
 		const [name, ...args] = res
-		return { commandName: name.substring(1).toLowerCase(), args: args ?? [] }
+		return { commandName: name.substring(1).toLowerCase(), args }
 	}
 }
 
@@ -107,7 +107,7 @@ export function parseCommandArgs(
 	const options: { [_: string]: string | boolean } = {}
 
 	for (let i = 0; i < argsToParse.length; i++) {
-		const arg = argsToParse[i]
+		const arg = argsToParse[i] ?? unreachable()
 
 		if (arg !== '--' && arg.startsWith('--')) {
 			let optName = arg.slice(2)
@@ -132,7 +132,7 @@ export function parseCommandArgs(
 						throw `引数には値が必要です: ${optName}`
 					}
 					i++
-					optValue = argsToParse[i]
+					optValue = argsToParse[i]!
 				}
 			} else {
 				if (equalIndex !== -1) {
@@ -147,12 +147,13 @@ export function parseCommandArgs(
 		if (arg !== '-' && arg.startsWith('-')) {
 			const opts = arg.slice(1).split('')
 			if (opts.length === 1) {
-				if (optionsWithValue.includes(opts[0])) {
+				const firstOpt = opts[0]!
+				if (optionsWithValue.includes(firstOpt)) {
 					if (i + 1 === argsToParse.length) {
-						throw `引数には値が必要です: ${opts[0]}`
+						throw `引数には値が必要です: ${firstOpt}`
 					}
 					i++
-					options[opts[0]] = argsToParse[i]
+					options[firstOpt] = argsToParse[i]!
 					continue
 				}
 			}
@@ -193,16 +194,7 @@ export function getOption<T>(
 	keys: string[],
 	defaultValue?: T
 ): T | string | boolean {
-	for (const key of keys) {
-		if (key in options) {
-			return options[key]
-		}
-	}
-
-	if (defaultValue === undefined) {
-		return false
-	}
-	return defaultValue
+	return keys.find((x) => options[x] !== undefined) ?? defaultValue ?? false
 }
 
 export function delay(ms: number): Promise<void> {
@@ -232,7 +224,7 @@ export function weightedRandom(weights: number[]): number {
 
 	while (ok - ng > 1) {
 		const mid = ok + Math.floor((ng - ok) / 2)
-		if (random < cumulative_sum[mid]) {
+		if (random < cumulative_sum[mid]!) {
 			ok = mid
 		} else {
 			ng = mid
@@ -248,7 +240,7 @@ export function randomPick<T>(array: T | T[]): T {
 	}
 
 	const weights = array.map((x) => lodash.get(x, 'weight', 100) as number)
-	return array[weightedRandom(weights)]
+	return array[weightedRandom(weights)]!
 }
 
 export async function subCommandProxy(
@@ -377,8 +369,8 @@ export function parseIndexes(strings: string[], min: number, max: number): numbe
 	for (const str of strings) {
 		const match = /(\d+)(?:-|\.\.)(\d+)/.exec(str)
 		if (match) {
-			const start = parseInt(match[1], 10)
-			const end = parseInt(match[2], 10)
+			const start = parseInt(match[1]!, 10)
+			const end = parseInt(match[2]!, 10)
 
 			if (!(start < end)) {
 				throw new Error('invalid expression')

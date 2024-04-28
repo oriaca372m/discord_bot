@@ -92,12 +92,16 @@ export class AddInteractor {
 		}
 
 		const res = utils.parseShellLikeCommand(msg.content)
-		if (res === undefined || res.length < 1) {
+		if (res === undefined) {
 			await this.gc.send(msg, 'playMusic.interactor.invalidCommand')
 			return
 		}
 
 		const [cmdname, ...rawArgs] = res
+		if (cmdname === undefined) {
+			await this.gc.send(msg, 'playMusic.interactor.invalidCommand')
+			return
+		}
 
 		if (['play', 'add'].includes(cmdname)) {
 			const adder = (() => {
@@ -142,31 +146,34 @@ export class AddInteractor {
 					await this.gc.send(msg, 'playMusic.interactor.help')
 				},
 				search: async (args) => {
-					if (args.length < 1) {
+					const keyword = args[0]
+					if (keyword === undefined) {
 						await this.gc.send(msg, 'playMusic.interactor.haveToSpecifyKeyword')
 						return
 					}
 
-					await this.search(args[0])
+					await this.search(keyword)
 				},
 				searchArtist: async (args) => {
-					if (args.length < 1) {
+					const artist = args[0]
+					if (artist === undefined) {
 						await this.gc.send(msg, 'playMusic.interactor.haveToSpecifyKeyword')
 						return
 					}
 
-					await this.searchArtist(args[0])
+					await this.searchArtist(artist)
 				},
 				searchAlbum: async (args) => {
-					if (args.length < 1) {
+					const album = args[0]
+					if (album === undefined) {
 						await this.gc.send(msg, 'playMusic.interactor.haveToSpecifyKeyword')
 						return
 					}
 
-					await this.searchAlbum(args[0])
+					await this.searchAlbum(album)
 				},
 				show: async (args) => {
-					await this.show(parseInt(args[0], 10) || 1)
+					await this.show((args[0] ? parseInt(args[0], 10) : undefined) ?? 1)
 				},
 				quit: async () => {
 					this.done()

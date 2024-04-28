@@ -72,10 +72,11 @@ export class Mondai {
 		const validModes =
 			this.config.options.type === 'music' ? ['music', 'intro'] : ['image', 'mosaic', 'audio']
 
-		let mode = validModes[0]
-		if (1 <= args.length) {
-			if (validModes.includes(args[0])) {
-				mode = args[0]
+		let mode = validModes[0]!
+		const modeArg = args[0]
+		if (modeArg !== undefined) {
+			if (validModes.includes(modeArg)) {
+				mode = modeArg
 			} else {
 				await this.gc.send(msg, 'mondai.invalidCommandMode')
 				return

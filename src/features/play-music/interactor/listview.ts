@@ -68,7 +68,7 @@ class SelectAction implements ListAction {
 		const res = lodash.flatten(
 			utils
 				.parseIndexes(indexes, 0, this.lv.selectable.length)
-				.map((i) => this.lv.selectable[i].select())
+				.map((i) => this.lv.selectable[i]!.select())
 		)
 
 		if (res.every((x) => x !== undefined)) {

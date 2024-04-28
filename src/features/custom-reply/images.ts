@@ -47,17 +47,18 @@ export class Images {
 			this.state = 'free'
 		}
 
-		if (args.length < 1) {
+		const id = args[0]
+		if (id === undefined) {
 			await this.gc.send(msg, 'customReply.images.haveToSpecifyId')
 			return
 		}
 
-		if (!isValidImageId(args[0])) {
+		if (!isValidImageId(id)) {
 			await this.gc.send(msg, 'customReply.images.haveToSpecifyValidIdAndSorry')
 			return
 		}
 
-		this.imageName = args[0]
+		this.imageName = id
 		this.state = 'waitingImage'
 		await this.gc.send(msg, 'customReply.images.readyToUpload')
 	}
@@ -85,7 +86,7 @@ export class Images {
 			return
 		}
 
-		const pageNumber = parseInt(args[0], 10) || 1
+		const pageNumber = (args[0] ? parseInt(args[0], 10) : undefined) ?? 1
 
 		// 1ページあたり何枚の画像を表示させるか
 		const imagesPerPage = 20
@@ -111,40 +112,42 @@ export class Images {
 	}
 
 	async removeCommand(args: string[], msg: discordjs.Message): Promise<void> {
-		if (args.length < 1) {
+		const id = args[0]
+		if (id === undefined) {
 			await this.gc.send(msg, 'customReply.images.haveToSpecifyId')
 			return
 		}
 
-		if (!isValidImageId(args[0])) {
+		if (!isValidImageId(id)) {
 			await this.gc.send(msg, 'customReply.images.haveToSpecifyId')
 			return
 		}
 
-		const index = this._images.indexOf(args[0])
+		const index = this._images.indexOf(id)
 		if (index === -1) {
 			await this.gc.send(msg, 'customReply.images.imageIdThatDoesNotExist')
 			return
 		}
 
 		this._images.splice(index)
-		await this.#objectStorage.unlink(this.#getImagePathById(args[0]))
+		await this.#objectStorage.unlink(this.#getImagePathById(id))
 
 		await this.gc.send(msg, 'customReply.images.removingComplete')
 	}
 
 	async previewCommand(args: string[], msg: discordjs.Message): Promise<void> {
-		if (args.length < 1) {
+		const id = args[0]
+		if (id === undefined) {
 			await this.gc.send(msg, 'customReply.images.haveToSpecifyId')
 			return
 		}
 
-		if (!isValidImageId(args[0])) {
+		if (!isValidImageId(id)) {
 			await this.gc.send(msg, 'customReply.images.haveToSpecifyId')
 			return
 		}
 
-		if (!this._images.includes(args[0])) {
+		if (!this._images.includes(id)) {
 			await this.gc.send(msg, 'customReply.images.imageIdThatDoesNotExist')
 			return
 		}
@@ -154,7 +157,7 @@ export class Images {
 			'customReply.images.sendPreview',
 			{},
 			{
-				files: [await this.getImageBufById(args[0])],
+				files: [await this.getImageBufById(id)],
 			}
 		)
 	}

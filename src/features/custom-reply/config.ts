@@ -141,12 +141,11 @@ export class Config {
 	}
 
 	private async reloadCommand(args: string[], msg: discordjs.Message): Promise<void> {
-		if (args.length < 1) {
+		const id = args[0]
+		if (id === undefined) {
 			await this.gc.send(msg, 'customReply.config.haveToSpecifyId')
 			return
 		}
-
-		const id = args[0]
 
 		if (!this.configSources.has(id)) {
 			await this.gc.send(msg, 'customReply.config.idThatDoesNotExist')
@@ -171,12 +170,11 @@ export class Config {
 	}
 
 	private async addCommand(args: string[], msg: discordjs.Message): Promise<void> {
-		if (args.length < 2) {
+		const [id, url] = args
+		if (id === undefined || url === undefined) {
 			await this.gc.send(msg, 'customReply.config.haveToSpecifyIdAndUrl')
 			return
 		}
-
-		const [id, url] = args
 
 		if (!isValidId(id)) {
 			await this.gc.send(msg, 'customReply.config.haveToSpecifyValidId')
@@ -202,12 +200,11 @@ export class Config {
 	}
 
 	private async removeCommand(args: string[], msg: discordjs.Message): Promise<void> {
-		if (args.length < 1) {
+		const id = args[0]
+		if (id === undefined) {
 			await this.gc.send(msg, 'customReply.config.haveToSpecifyId')
 			return
 		}
-
-		const id = args[0]
 
 		if (!this.configSources.has(id)) {
 			await this.gc.send(msg, 'customReply.config.idThatDoesNotExist')

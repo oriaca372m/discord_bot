@@ -119,15 +119,13 @@ export class MusicAdder {
 			)
 
 			if (indexes.isOk()) {
-				return indexes.value.map((x) => listMusics[x])
+				return indexes.value.map((x) => listMusics[x]!)
 			}
 		}
 
 		for (const keyword of keywords) {
 			const music = await this.#resolveMusicKeyword(keyword, isYouTube)
-			if (music !== undefined) {
-				musics.push(...music)
-			}
+			musics.push(...music)
 		}
 
 		return musics

@@ -230,10 +230,10 @@ export class GuildInstance {
 
 		const i = this.#createInteractor(msg)
 		await i.welcome()
-		if (args.length === 1) {
-			await i.search(args[0])
+		const keyword = args[0]
+		if (keyword !== undefined) {
+			await i.search(keyword)
 		}
-		return
 	}
 
 	async nowPlaying(_rawArgs: string[], msg: discordjs.Message): Promise<void> {

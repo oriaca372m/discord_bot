@@ -63,8 +63,8 @@ export async function generateImageMap(
 	let nowX = 0
 	let nowY = 0
 
-	for (let i = 0; i < files.length; i++) {
-		const image = await loadImage(files[i])
+	for (const file of files) {
+		const image = await loadImage(file)
 		drawKeepAspectRatio(ctx, image, nowX * singleX, nowY * singleY, singleX, singleY)
 
 		nowX++

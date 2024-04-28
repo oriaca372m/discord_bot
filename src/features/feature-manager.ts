@@ -73,7 +73,7 @@ export default class {
 
 		// 初期化と逆順に処理
 		for (let i = this.sorteadFeatures.length; 0 <= --i; ) {
-			await this.sorteadFeatures[i].finalize()
+			await this.sorteadFeatures[i]!.finalize()
 		}
 		this._state = 'finalized'
 	}
