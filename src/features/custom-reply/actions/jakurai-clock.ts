@@ -2,8 +2,7 @@ import * as utils from 'Src/utils'
 import * as discordjs from 'discord.js'
 import { Action, ActionResult } from 'Src/features/custom-reply/actions/action'
 import { Response } from 'Src/features/custom-reply/config'
-import canvas from 'canvas'
-const { createCanvas, loadImage } = canvas
+import { createCanvas, loadImage } from '@napi-rs/canvas'
 
 async function genImageJakurai(str: string): Promise<Buffer> {
 	const img = await loadImage('./assets/jakurai-clock.png')
