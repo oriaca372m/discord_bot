@@ -1,7 +1,6 @@
 FROM alpine:3 AS builder
 
-RUN apk add --update --no-cache nodejs-current pixman cairo pango libpng jpeg giflib \
-	build-base pkgconfig pixman-dev cairo-dev pango-dev libpng-dev jpeg-dev giflib-dev libtool autoconf automake curl
+RUN apk add --update --no-cache nodejs-current curl build-base python3
 
 RUN corepack enable pnpm
 
@@ -22,7 +21,7 @@ RUN pnpm install --frozen-lockfile --prod
 
 FROM alpine:3
 
-RUN apk add --update --no-cache nodejs-current ruby ruby-json pixman cairo pango libpng jpeg giflib imagemagick python3 font-noto font-noto-cjk ffmpeg
+RUN apk add --update --no-cache nodejs-current ruby ruby-json imagemagick python3 font-noto font-noto-cjk ffmpeg
 
 WORKDIR /usr/src/app
 
