@@ -3,6 +3,7 @@ import stream from 'stream'
 import * as discordjs from 'discord.js'
 
 export function unreachable(): never
+// eslint-disable-next-line @typescript-eslint/unified-signatures -- 意味を変えずに統合する方法がわからない
 export function unreachable(_: never): never
 
 export function unreachable(_?: unknown): never {
@@ -119,7 +120,7 @@ export function parseCommandArgs(
 			}
 
 			if (optName === '') {
-				throw `オプション名を指定してください: ${arg}`
+				throw new Error(`オプション名を指定してください: ${arg}`)
 			}
 
 			const isWithValue = optionsWithValue.includes(optName)
@@ -129,14 +130,14 @@ export function parseCommandArgs(
 					optValue = arg.slice(equalIndex + 1)
 				} else {
 					if (i + 1 === argsToParse.length) {
-						throw `引数には値が必要です: ${optName}`
+						throw new Error(`引数には値が必要です: ${optName}`)
 					}
 					i++
 					optValue = argsToParse[i]!
 				}
 			} else {
 				if (equalIndex !== -1) {
-					throw `引数は値を持てません: ${optName}`
+					throw new Error(`引数は値を持てません: ${optName}`)
 				}
 			}
 
@@ -150,7 +151,7 @@ export function parseCommandArgs(
 				const firstOpt = opts[0]!
 				if (optionsWithValue.includes(firstOpt)) {
 					if (i + 1 === argsToParse.length) {
-						throw `引数には値が必要です: ${firstOpt}`
+						throw new Error(`引数には値が必要です: ${firstOpt}`)
 					}
 					i++
 					options[firstOpt] = argsToParse[i]!
@@ -160,7 +161,7 @@ export function parseCommandArgs(
 
 			for (const opt of opts) {
 				if (optionsWithValue.includes(opt)) {
-					throw `引数には値が必要です: ${opt}`
+					throw new Error(`引数には値が必要です: ${opt}`)
 				}
 				options[opt] = true
 			}
@@ -172,7 +173,7 @@ export function parseCommandArgs(
 	}
 
 	if (args.length < minimumArgs) {
-		throw '引数の数が足りません'
+		throw new Error('引数の数が足りません')
 	}
 
 	return { args, options }
@@ -302,6 +303,8 @@ export async function forEachAsyncOf<T>(
 	)
 
 	if (errors.length !== 0) {
+		// TODO: 専用のエラー型でラップする?
+		// eslint-disable-next-line @typescript-eslint/only-throw-error
 		throw errors
 	}
 }

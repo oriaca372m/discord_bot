@@ -26,19 +26,32 @@ class PlayMusicCommand implements Command {
 		if (msg.guild === null) {
 			return
 		}
+		const feature = this.feature
 		const guildInstance = this.feature.getGuildInstance(msg.guild)
 		await utils.subCommandProxy(
 			{
-				play: async (a, m) => await guildInstance.playCommand(a, m),
-				add: async (a, m) => await guildInstance.addCommand(a, m),
-				stop: () => {
+				async play(a, m) {
+					await guildInstance.playCommand(a, m)
+				},
+				async add(a, m) {
+					await guildInstance.addCommand(a, m)
+				},
+				stop() {
 					guildInstance.stop()
 					return Promise.resolve()
 				},
-				reload: async () => await this.feature.reload(),
-				next: async (a, m) => await guildInstance.nextCommand(a, m),
-				edit: async (a, m) => await guildInstance.edit(a, m),
-				now: async (a, m) => await guildInstance.nowPlaying(a, m),
+				async reload() {
+					await feature.reload()
+				},
+				async next(a, m) {
+					await guildInstance.nextCommand(a, m)
+				},
+				async edit(a, m) {
+					await guildInstance.edit(a, m)
+				},
+				async now(a, m) {
+					await guildInstance.nowPlaying(a, m)
+				},
 			},
 			args,
 			msg

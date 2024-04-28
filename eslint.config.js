@@ -10,12 +10,14 @@ export default tseslint.config(
 		ignores: ['dist/'],
 	},
 	eslint.configs.recommended,
-	...tseslint.configs.recommendedTypeChecked,
+	...tseslint.configs.strictTypeChecked,
 	eslintConfigPrettier,
 	{
 		rules: {
 			'@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
 			'@typescript-eslint/no-empty-interface': 'off',
+			'@typescript-eslint/restrict-template-expressions': ['error', { allowBoolean: true }],
+			'@typescript-eslint/no-non-null-assertion': 'off',
 		},
 		languageOptions: {
 			globals: globals.node,

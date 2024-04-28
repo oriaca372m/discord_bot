@@ -71,7 +71,8 @@ export class AddInteractor {
 			await this.gc.sendToChannel(this.channel, 'playMusic.interactor.invalidPageId', {
 				maxPage: res.maxPage,
 			})
-		} else if (res.kind === 'ok') {
+		} else {
+			res.kind satisfies 'ok'
 			const text = (res.value as Music[])
 				.map((v, i) => `${res.firstIndex + i}: ${v.toListString()}`)
 				.join('\n')
@@ -81,8 +82,6 @@ export class AddInteractor {
 				maxPage: res.maxPage,
 				results: text,
 			})
-		} else {
-			utils.unreachable(res)
 		}
 	}
 

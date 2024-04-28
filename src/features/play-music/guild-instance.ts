@@ -125,12 +125,14 @@ export class GuildInstance {
 		// TODO: エラーをユーザーに通知したい
 
 		this.#connection = new Connection(channel)
-		this.#connection.init().catch((e) => {
+		this.#connection.init().catch((e: unknown) => {
 			console.error(e)
 			this.stop()
 		})
 
-		this.#connection.onMusicStopped.on(() => this.#next())
+		this.#connection.onMusicStopped.on(() => {
+			this.#next()
+		})
 		this.#connection.onError.on(console.error)
 	}
 

@@ -38,7 +38,7 @@ function generateMondaiImage(
 			try {
 				resolve(JSON.parse(stdout as string) as { [_: string]: string })
 			} catch (e) {
-				reject(e)
+				reject(e as Error)
 			}
 		})
 	})

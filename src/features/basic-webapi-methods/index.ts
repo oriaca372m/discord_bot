@@ -92,8 +92,9 @@ export class FeatureBasicWebApiMethods extends CommonFeatureBase {
 
 	preInitImpl(): void {
 		super.preInitImpl()
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- !の担保をここでする必要がある
 		if (this.featureWebApi === undefined) {
-			throw 'webapiにFeatureWebApiがセットされていない'
+			throw new Error('webapiにFeatureWebApiがセットされていない')
 		}
 	}
 

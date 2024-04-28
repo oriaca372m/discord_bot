@@ -38,7 +38,7 @@ async function main() {
 	})()
 
 	const config = new ConfigLoader((await storage.readFile('features.toml')).toString('utf-8'))
-	if ((await config.load()) === false) {
+	if (!(await config.load())) {
 		process.exit(1)
 	}
 
@@ -71,11 +71,9 @@ async function main() {
 		}
 
 		client.on('messageCreate', (msg) => {
-			if (msg.partial) {
-				return
-			}
+			msg.partial satisfies false
 
-			featureManager.onMessage(msg).catch((e) => {
+			featureManager.onMessage(msg).catch((e: unknown) => {
 				console.log(e)
 			})
 		})
@@ -87,7 +85,7 @@ async function main() {
 			await featureManager.finalize()
 			console.log('discord bot was shut down.')
 			process.exit(0)
-		})().catch((e) => {
+		})().catch((e: unknown) => {
 			console.error(e)
 			process.exit(1)
 		})
