@@ -19,7 +19,12 @@ class Handler implements WebApiHandler {
 }
 
 class CommandOpenWebUi implements Command {
-	constructor(private readonly _feature: FeatureBasicWebApiMethods) {}
+	constructor(
+		private readonly _feature: FeatureBasicWebApiMethods,
+		private readonly _featureWebApi: FeatureWebApi,
+		private readonly externalApiUrl: string,
+		private readonly localApiUrl: string
+	) {}
 
 	name(): string {
 		return this._feature.webuiCmdName
@@ -43,7 +48,7 @@ class CommandOpenWebUi implements Command {
 			return
 		}
 
-		const info = this._feature.featureWebApi.createAccessToken({
+		const info = this._featureWebApi.createAccessToken({
 			channel: msg.channel,
 			guild: msg.guild,
 		})
@@ -53,14 +58,9 @@ class CommandOpenWebUi implements Command {
 
 		const url = new URL(this._feature.webuiUrl)
 
-		let apiUrl =
-			this._feature.apiUrl ??
-			`http://${this._feature.globalIpAddr ?? utils.unreachable()}:${
-				this._feature.featureWebApi.port
-			}/`
-		if (utils.getOption(options, ['l', 'local', 'localhost'])) {
-			apiUrl = `http://127.0.0.1:${this._feature.featureWebApi.port}/`
-		}
+		const apiUrl = utils.getOption(options, ['l', 'local', 'localhost'])
+			? this.localApiUrl
+			: this.externalApiUrl
 		url.searchParams.append('server', apiUrl)
 		url.searchParams.append('accessToken', token)
 		url.searchParams.append('accessTokenSecret', secret)
@@ -79,9 +79,6 @@ async function getGlobalIpAddr(): Promise<string> {
 }
 
 export class FeatureBasicWebApiMethods extends CommonFeatureBase {
-	featureWebApi!: FeatureWebApi
-	globalIpAddr: string | undefined
-
 	constructor(
 		public readonly webuiCmdName: string,
 		public readonly webuiUrl: string,
@@ -92,19 +89,21 @@ export class FeatureBasicWebApiMethods extends CommonFeatureBase {
 
 	preInitImpl(): void {
 		super.preInitImpl()
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- !の担保をここでする必要がある
 		if (this.featureWebApi === undefined) {
 			throw new Error('webapiにFeatureWebApiがセットされていない')
 		}
 	}
 
 	async initImpl(): Promise<void> {
+		utils.mustExist(this.featureWebApi)
+
 		this.featureWebApi.registerHandler(new Handler())
 
-		this.featureCommand.registerCommand(new CommandOpenWebUi(this))
-
-		if (this.apiUrl === undefined) {
-			this.globalIpAddr = await getGlobalIpAddr()
-		}
+		const externalApiUrl =
+			this.apiUrl ?? `http://${await getGlobalIpAddr()}:${this.featureWebApi.port}/`
+		const localApiUrl = `http://127.0.0.1:${this.featureWebApi.port}/`
+		this.featureCommand.registerCommand(
+			new CommandOpenWebUi(this, this.featureWebApi, externalApiUrl, localApiUrl)
+		)
 	}
 }

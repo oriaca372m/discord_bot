@@ -114,12 +114,10 @@ export class MusicAdder {
 
 		const listMusics = this.listMusics
 		if (listMusics !== undefined) {
-			const indexes = utils.tryEither(() =>
-				utils.parseIndexes(keywords, 0, listMusics.length)
-			)
+			const indexes = utils.tryEither(() => utils.mapIndexes(listMusics, keywords))
 
 			if (indexes.isOk()) {
-				return indexes.value.map((x) => listMusics[x]!)
+				return indexes.value
 			}
 		}
 
