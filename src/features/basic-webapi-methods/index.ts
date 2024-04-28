@@ -20,14 +20,15 @@ class Handler implements WebApiHandler {
 
 class CommandOpenWebUi implements Command {
 	constructor(
-		private readonly _feature: FeatureBasicWebApiMethods,
-		private readonly _featureWebApi: FeatureWebApi,
+		private readonly featureWebApi: FeatureWebApi,
+		private readonly cmdName: string,
+		private readonly webuiUrl: string,
 		private readonly externalApiUrl: string,
 		private readonly localApiUrl: string
 	) {}
 
 	name(): string {
-		return this._feature.webuiCmdName
+		return this.cmdName
 	}
 
 	description(): string {
@@ -48,7 +49,7 @@ class CommandOpenWebUi implements Command {
 			return
 		}
 
-		const info = this._featureWebApi.createAccessToken({
+		const info = this.featureWebApi.createAccessToken({
 			channel: msg.channel,
 			guild: msg.guild,
 		})
@@ -56,7 +57,7 @@ class CommandOpenWebUi implements Command {
 		const token = info.basicInfo.accessToken
 		const secret = bufferToHex(info.basicInfo.accessTokenSecret)
 
-		const url = new URL(this._feature.webuiUrl)
+		const url = new URL(this.webuiUrl)
 
 		const apiUrl = utils.getOption(options, ['l', 'local', 'localhost'])
 			? this.localApiUrl
@@ -103,7 +104,13 @@ export class FeatureBasicWebApiMethods extends CommonFeatureBase {
 			this.apiUrl ?? `http://${await getGlobalIpAddr()}:${this.featureWebApi.port}/`
 		const localApiUrl = `http://127.0.0.1:${this.featureWebApi.port}/`
 		this.featureCommand.registerCommand(
-			new CommandOpenWebUi(this, this.featureWebApi, externalApiUrl, localApiUrl)
+			new CommandOpenWebUi(
+				this.featureWebApi,
+				this.webuiCmdName,
+				this.webuiUrl,
+				externalApiUrl,
+				localApiUrl
+			)
 		)
 	}
 }
