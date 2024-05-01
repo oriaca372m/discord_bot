@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { f, iface } from 'Src/rpc/core'
-import { bindContext, type RpcServer } from './server'
+import { bindContext, type RpcServer, adaptContext } from './server'
 
 describe('RpcServer', () => {
 	const dummyIface = iface(
@@ -55,5 +55,15 @@ describe('RpcServer', () => {
 	it('期待したコンテキストを持っていること', async () => {
 		const res = await server.handle(context, 'dumpContext', {})
 		expect(res).toEqual({ val: 'ctx' })
+	})
+
+	describe('adaptContext', () => {
+		const numberDummyServer = adaptContext(dummyServer)((num: number) => num.toString())
+		const numberServer = new TestServer<number>(numberDummyServer)
+
+		it('期待したコンテキストを持っていること', async () => {
+			const res = await numberServer.handle(42, 'dumpContext', {})
+			expect(res).toEqual({ val: '42' })
+		})
 	})
 })
