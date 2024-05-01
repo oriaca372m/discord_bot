@@ -416,7 +416,7 @@ export function mapIndexes<T>(list: readonly T[], indexStrs: string[]): T[] {
 export async function readAll(rs: stream.Readable): Promise<Buffer> {
 	const buffers: Uint8Array[] = []
 	for await (const chunk of rs) {
-		buffers.push(chunk)
+		buffers.push(chunk as Uint8Array)
 	}
 
 	return Buffer.concat(buffers)
