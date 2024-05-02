@@ -18,14 +18,14 @@ export const playMusicIface = iface(
 	'playMusic',
 	[
 		f('getAllMusics', z.object({}), z.object({ musics: z.array(WebApiMusic) })),
-		f('addToPlaylist', z.object({ musics: SerializedMusic }), z.undefined()),
+		f('addToPlaylist', z.object({ music: SerializedMusic }), z.object({})),
 		f(
 			'addUrlToPlaylist',
 			z.object({ url: z.string() }),
 			z.object({ added: z.array(SerializedMusic) })
 		),
-		f('get-playlist', z.object({}), z.object({ musics: z.array(SerializedMusic) })),
-		f('set-playlist', z.object({ musics: z.array(SerializedMusic) }), z.object({})),
+		f('getPlaylist', z.object({}), z.object({ musics: z.array(SerializedMusic) })),
+		f('setPlaylist', z.object({ musics: z.array(SerializedMusic) }), z.object({})),
 		f('play', z.object({ index: z.number() }), z.object({})),
 	],
 	[]
