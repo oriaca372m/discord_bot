@@ -472,3 +472,17 @@ export function tryEither<T>(f: () => T): Result<T, unknown> {
 export function upCast<T>(x: T): T {
 	return x
 }
+
+export async function getGlobalIpAddr(): Promise<string> {
+	const res = await fetch('https://ipinfo.io/ip')
+	const text = await res.text()
+	if (!res.ok) {
+		throw new Error(`Failed to get ip address: ${text}`)
+	}
+	return text
+}
+
+export function lazyValue<T>(f: () => Promise<T>): () => Promise<T> {
+	let promise: Promise<T> | undefined
+	return () => promise ?? (promise = f())
+}

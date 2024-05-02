@@ -70,15 +70,6 @@ class CommandOpenWebUi implements Command {
 	}
 }
 
-async function getGlobalIpAddr(): Promise<string> {
-	const res = await fetch('https://ipinfo.io/ip')
-	const text = await res.text()
-	if (!res.ok) {
-		throw new Error(`Failed to get ip address: ${text}`)
-	}
-	return text
-}
-
 export class FeatureBasicWebApiMethods extends CommonFeatureBase {
 	constructor(
 		public readonly webuiCmdName: string,
@@ -101,7 +92,7 @@ export class FeatureBasicWebApiMethods extends CommonFeatureBase {
 		this.featureWebApi.registerHandler(new Handler())
 
 		const externalApiUrl =
-			this.apiUrl ?? `http://${await getGlobalIpAddr()}:${this.featureWebApi.port}/`
+			this.apiUrl ?? `http://${await utils.getGlobalIpAddr()}:${this.featureWebApi.port}/`
 		const localApiUrl = `http://127.0.0.1:${this.featureWebApi.port}/`
 		this.featureCommand.registerCommand(
 			new CommandOpenWebUi(
