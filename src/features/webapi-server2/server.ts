@@ -103,7 +103,7 @@ export class WebApiServer<Context> {
 			res.writeHead(200, {
 				'Access-Control-Allow-Origin': '*',
 				'Access-Control-Allow-Methods': 'POST',
-				'Access-Control-Allow-Headers': 'Content-Type, X-Access-Token, X-IV',
+				'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 			})
 			res.end()
 			return
@@ -151,16 +151,23 @@ export class WebApiServer<Context> {
 	}
 
 	#getAccessToken(req: http.IncomingMessage): BasicAccessTokenInfo {
-		const accessToken = req.headers['x-access-token']
-		if (typeof accessToken === 'string') {
-			const tokenInfo = this.authorizer.getBasicAccessTokenInfo(accessToken)
-			if (tokenInfo !== undefined) {
-				return tokenInfo
-			}
+		const authorization = req.headers.authorization
+		if (authorization === undefined) {
+			throw new HttpError(401)
 		}
 
-		console.error('不正なアクセストークンを利用してのアクセス')
-		throw new HttpError(401)
+		const [type, credential] = authorization.split(' ')
+		if (type !== 'Bearer' || credential === undefined) {
+			throw new HttpError(401)
+		}
+
+		const tokenInfo = this.authorizer.getBasicAccessTokenInfo(credential)
+		if (tokenInfo === undefined) {
+			console.error('不正なアクセストークンを利用してのアクセス')
+			throw new HttpError(401)
+		}
+
+		return tokenInfo
 	}
 
 	async #parseRequest(req: http.IncomingMessage, reqType: z.ZodType): Promise<never> {

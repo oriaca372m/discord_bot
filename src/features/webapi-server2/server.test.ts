@@ -49,7 +49,7 @@ describe('WebApiServer', () => {
 	const callApi = async (path: string, req: unknown): Promise<Response> =>
 		await fetch(`http://localhost:${port}/${path}`, {
 			method: 'POST',
-			headers: { 'Content-Type': 'application/json', 'X-Access-Token': accessToken },
+			headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
 			body: JSON.stringify(req),
 		})
 
@@ -78,7 +78,7 @@ describe('WebApiServer', () => {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
-				'X-Access-Token': 'invalid access token',
+				Authorization: 'Bearer aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
 			},
 			body: JSON.stringify({}),
 		})
