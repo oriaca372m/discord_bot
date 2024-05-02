@@ -23,7 +23,7 @@ class CommandOpenWebUi implements Command {
 		private readonly featureWebApi: FeatureWebApi,
 		private readonly cmdName: string,
 		private readonly webuiUrl: string,
-		private readonly externalApiUrl: string,
+		private readonly externalApiUrl: () => Promise<string>,
 		private readonly localApiUrl: string
 	) {}
 
@@ -61,7 +61,7 @@ class CommandOpenWebUi implements Command {
 
 		const apiUrl = utils.getOption(options, ['l', 'local', 'localhost'])
 			? this.localApiUrl
-			: this.externalApiUrl
+			: await this.externalApiUrl()
 		url.searchParams.append('server', apiUrl)
 		url.searchParams.append('accessToken', token)
 		url.searchParams.append('accessTokenSecret', secret)
@@ -86,14 +86,16 @@ export class FeatureBasicWebApiMethods extends CommonFeatureBase {
 		}
 	}
 
-	async initImpl(): Promise<void> {
+	initImpl(): Promise<void> {
 		utils.mustExist(this.featureWebApi)
 
 		this.featureWebApi.registerHandler(new Handler())
 
-		const externalApiUrl =
-			this.apiUrl ?? `http://${await utils.getGlobalIpAddr()}:${this.featureWebApi.port}/`
-		const localApiUrl = `http://127.0.0.1:${this.featureWebApi.port}/`
+		const port = this.featureWebApi.port
+		const externalApiUrl = utils.lazyValue(
+			async () => this.apiUrl ?? `http://${await utils.getGlobalIpAddr()}:${port}/`
+		)
+		const localApiUrl = `http://127.0.0.1:${port}/`
 		this.featureCommand.registerCommand(
 			new CommandOpenWebUi(
 				this.featureWebApi,
@@ -103,5 +105,7 @@ export class FeatureBasicWebApiMethods extends CommonFeatureBase {
 				localApiUrl
 			)
 		)
+
+		return Promise.resolve()
 	}
 }
