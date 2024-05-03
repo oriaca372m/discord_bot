@@ -70,7 +70,7 @@ export class FeatureOpenWebui2 extends CommonFeatureBase implements Command {
 		const apiUrl = u.getOption(options, ['l', 'local', 'localhost'])
 			? this.#localApiUrl
 			: await this.#externalApiUrl()
-		url.hash = JSON.stringify({ server: apiUrl, accessToken })
+		url.hash = encodeURIComponent(JSON.stringify({ server: apiUrl, accessToken }))
 
 		await msg.reply(url.toString())
 	}
