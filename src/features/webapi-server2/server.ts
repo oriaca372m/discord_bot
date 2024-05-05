@@ -100,10 +100,11 @@ export class WebApiServer<Context> {
 
 	async #handleRequest(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
 		if (req.method === 'OPTIONS') {
-			res.writeHead(200, {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Methods': 'POST',
-				'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+			res.writeHead(204, {
+				'access-control-allow-origin': '*',
+				'access-control-allow-methods': 'POST',
+				'access-control-allow-headers': 'Content-Type, Authorization',
+				'access-control-max-age': '86400',
 			})
 			res.end()
 			return
@@ -136,7 +137,7 @@ export class WebApiServer<Context> {
 		const checkedRet = await this.#callFuncHandler(handler, ctx, checkedReq, resType)
 
 		res.writeHead(200, {
-			'Access-Control-Allow-Origin': '*',
+			'access-control-allow-origin': '*',
 		})
 		res.end(JSON.stringify(checkedRet))
 	}
