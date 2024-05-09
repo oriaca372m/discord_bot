@@ -5,6 +5,7 @@ import { FeatureCommand } from 'Src/features/command'
 import { StorageDriver, FeatureStorage } from 'Src/features/storage'
 import { FeatureGlobalConfig } from 'Src/features/global-config'
 import { FeatureWebApi } from 'Src/features/webapi'
+import { FeatureWebApiServer2 } from 'Src/features/webapi-server2'
 
 export default class extends FeatureBase {
 	public gc!: FeatureGlobalConfig
@@ -12,6 +13,7 @@ export default class extends FeatureBase {
 	protected featureCommand!: FeatureCommand
 	protected featureStorage!: FeatureStorage
 	protected featureWebApi: FeatureWebApi | undefined
+	protected featureWebApiServer2: FeatureWebApiServer2 | undefined
 	public storageDriver!: StorageDriver
 
 	protected preInitImpl(): void {
@@ -20,6 +22,7 @@ export default class extends FeatureBase {
 		this.featureStorage = this.manager.registerFeature('storage', () => new FeatureStorage())
 		this.storageDriver = this.featureStorage.getStorageDriver(this)
 		this.featureWebApi = this.manager.getFeature<FeatureWebApi>('webapi')
+		this.featureWebApiServer2 = this.manager.getFeature<FeatureWebApiServer2>('webapi-server2')
 	}
 
 	onMessage(msg: discordjs.Message, context: FeatureEventContext): FeatureEventResult {
