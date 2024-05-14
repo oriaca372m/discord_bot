@@ -6,7 +6,6 @@ import * as utils from 'Src/utils'
 
 import { MusicDatabase } from 'Src/features/play-music/music-database'
 import { GuildInstance } from 'Src/features/play-music/guild-instance'
-import { allHandlers } from 'Src/features/play-music/webapi-handlers'
 import { adaptContext } from 'Src/rpc/server'
 import { playMusicServer } from 'Src/features/play-music/rpc-server'
 
@@ -82,15 +81,6 @@ export class FeaturePlayMusic extends CommonFeatureBase {
 	protected override async initImpl(): Promise<void> {
 		await this.reload()
 		this.featureCommand.registerCommand(new PlayMusicCommand(this.cmdname, this))
-
-		const webApi = this.featureWebApi
-		if (webApi === undefined) {
-			return
-		}
-
-		for (const handler of allHandlers) {
-			webApi.registerHandler(new handler(this))
-		}
 
 		const webApiServer2 = this.featureWebApiServer2
 		if (webApiServer2 !== undefined) {
