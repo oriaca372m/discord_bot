@@ -1,7 +1,19 @@
+import { z } from 'zod'
+import { f, iface } from './core'
 import type { RpcFunc, RpcInterface } from './core'
 import { type RpcClientContext, type RpcClient, createRpcClient } from './client'
 
-import { playMusicIface } from 'Src/features/play-music/rpc-interface'
+const testIface = iface(
+	'test',
+	[
+		f(
+			'addUrlToPlaylist',
+			z.object({ url: z.string() }),
+			z.object({ added: z.array(z.object({ kind: z.string() })) })
+		),
+	],
+	[]
+)
 
 describe('RpcClient', () => {
 	class TestCtx implements RpcClientContext {
@@ -27,21 +39,21 @@ describe('RpcClient', () => {
 	}
 
 	let ctx: TestCtx
-	let playMusic: RpcClient<TestCtx, typeof playMusicIface>
+	let testClient: RpcClient<TestCtx, typeof testIface>
 
 	beforeEach(() => {
 		ctx = new TestCtx()
-		playMusic = createRpcClient(ctx, playMusicIface)
+		testClient = createRpcClient(ctx, testIface)
 	})
 
 	test('シグネチャに沿った戻り値が帰ってくること', async () => {
 		const expected = { added: [{ kind: 'youtube' }] }
 		ctx.addResponse('addUrlToPlaylist', expected)
-		expect(await playMusic.addUrlToPlaylist({ url: 'https://youtu.be/' })).toEqual(expected)
+		expect(await testClient.addUrlToPlaylist({ url: 'https://youtu.be/' })).toEqual(expected)
 	})
 
 	test('シグネチャに沿わない戻り値が帰ってこないこと', async () => {
 		ctx.addResponse('addUrlToPlaylist', { added: { kind: 'youtube' } })
-		await expect(playMusic.addUrlToPlaylist({ url: 'https://youtu.be/' })).rejects.toThrow()
+		await expect(testClient.addUrlToPlaylist({ url: 'https://youtu.be/' })).rejects.toThrow()
 	})
 })
