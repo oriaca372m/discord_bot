@@ -18,7 +18,7 @@ export class PlaylistListView implements ListView {
 	readonly gc: FeatureGlobalConfig
 
 	getItems(): readonly Music[] {
-		return this.playlist.musics
+		return this.playlist.items.map((x) => x.music)
 	}
 }
 
