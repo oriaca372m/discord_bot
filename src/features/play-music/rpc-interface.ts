@@ -40,6 +40,7 @@ export const playlistIface = iface(
 			z.object({})
 		),
 		f('delete', z.object({ id: PlaylistItemId }), z.object({})),
+		f('clear', z.object({}), z.object({})),
 	],
 	[]
 )

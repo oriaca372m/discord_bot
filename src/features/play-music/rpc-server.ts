@@ -43,6 +43,11 @@ const playlistServer = pCreateRpcServer(
 			ctx.guildInstance.playlist.deleteItem(req.id)
 			return Promise.resolve({})
 		}),
+
+		pF('clear', (ctx, _req) => {
+			ctx.guildInstance.playlist.clear()
+			return Promise.resolve({})
+		}),
 	],
 	[]
 )
