@@ -125,7 +125,7 @@ export class IdReorderableList<Id, V> implements ReadonlyBindable<readonly V[]> 
 		if (to < 0 || to > this.#values.length) {
 			throw new RangeError('invalid to')
 		}
-		if (from === to || from === to + 1) {
+		if (to === from || to === from + 1) {
 			return
 		}
 

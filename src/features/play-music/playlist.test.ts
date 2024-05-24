@@ -82,6 +82,21 @@ describe('Playlist', () => {
 			expect(playlist.items).toEqual([items[2], items[0], items[1]])
 		})
 
+		test('moveのdestBeforeにsrcの直前のIDを指定した場合にsrcがdestBeforeの直前に移動すること', () => {
+			playlist.moveItem(2, 1)
+			expect(playlist.items).toEqual([items[0], items[2], items[1]])
+		})
+
+		test('moveのdestBeforeにsrcと同じIDを指定した場合に変化が起きないこと', () => {
+			playlist.moveItem(1, 1)
+			expect(playlist.items).toEqual([items[0], items[1], items[2]])
+		})
+
+		test('moveのdestBeforeにsrcの直後のIDを指定した場合に変化が起きないこと', () => {
+			playlist.moveItem(1, 2)
+			expect(playlist.items).toEqual([items[0], items[1], items[2]])
+		})
+
 		test('moveのdestBeforeにundefinedを指定した場合srcが最後に移動すること', () => {
 			playlist.moveItem(0, undefined)
 			expect(playlist.items).toEqual([items[1], items[2], items[0]])
