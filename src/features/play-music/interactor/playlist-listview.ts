@@ -33,7 +33,7 @@ class MoveAction implements ListAction {
 			// TODO: エラーを通知する
 			return Promise.resolve()
 		}
-		this.lv.playlist.switch(parseInt(to, 10))
+		this.lv.playlist.switchIndex(parseInt(to, 10))
 		this.lv.interactor.guildInstance.playIfHasConnection()
 		return Promise.resolve()
 	}

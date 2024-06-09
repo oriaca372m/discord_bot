@@ -166,7 +166,7 @@ export class GuildInstance {
 			return false
 		}
 
-		this.#currentItem ??= this.playlist.currentItem
+		this.#currentItem = this.playlist.currentItem
 		this.#playCurrentItem()
 		return true
 	}
