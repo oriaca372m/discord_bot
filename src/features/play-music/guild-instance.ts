@@ -8,7 +8,7 @@ import * as utils from 'Src/utils'
 import { FeaturePlayMusic } from 'Src/features/play-music/'
 import { MusicPlayResource } from 'Src/features/play-music/music'
 import { MusicAdder } from 'Src/features/play-music/music-adder'
-import { Playlist } from 'Src/features/play-music/playlist'
+import { Playlist, PlaylistItem } from 'Src/features/play-music/playlist'
 import { AddInteractor } from 'Src/features/play-music/interactor/interactor'
 
 class Connection {
@@ -113,6 +113,7 @@ class Connection {
 export class GuildInstance {
 	#connection: Connection | undefined
 	readonly playlist: Playlist = new Playlist()
+	#currentItem: PlaylistItem | undefined
 
 	readonly #interactors: Set<AddInteractor> = new Set()
 	readonly #gc: FeatureGlobalConfig
@@ -136,19 +137,27 @@ export class GuildInstance {
 		this.#connection.onError.on(console.error)
 	}
 
-	playOn(channel: discordjs.BaseGuildVoiceChannel, reuseCurrentConnection = true): void {
+	#disconnect(): void {
+		this.#connection?.finalize()
+		this.#connection = undefined
+	}
+
+	#ensureConnection(channel: discordjs.BaseGuildVoiceChannel, forceReconnect = false): void {
 		if (
-			reuseCurrentConnection &&
+			!forceReconnect &&
 			this.#connection !== undefined &&
 			this.#connection.channel.equals(channel)
 		) {
-			this.#playCurrentMusic()
 			return
 		}
 
-		this.stop()
+		this.#disconnect()
 		this.#connect(channel)
-		this.#playCurrentMusic()
+	}
+
+	playOn(channel: discordjs.BaseGuildVoiceChannel, reuseCurrentConnection = true): void {
+		this.#ensureConnection(channel, !reuseCurrentConnection)
+		this.playIfHasConnection()
 	}
 
 	// 再生されたらtrue
@@ -157,7 +166,8 @@ export class GuildInstance {
 			return false
 		}
 
-		this.#playCurrentMusic()
+		this.#currentItem = this.playlist.currentItem
+		this.#playCurrentItem()
 		return true
 	}
 
@@ -166,25 +176,29 @@ export class GuildInstance {
 			return
 		}
 
-		if (this.playlist.isEmpty) {
+		if (this.playlist.currentItem === undefined) {
 			this.stop()
 			return
 		}
 
-		this.playlist.next()
-		this.#playCurrentMusic()
+		if (this.#currentItem?.id === this.playlist.currentItem.id) {
+			this.playlist.next()
+		}
+		this.#currentItem = this.playlist.currentItem
+		this.#playCurrentItem()
 	}
 
 	stop(): void {
 		this.#connection?.finalize()
 		this.#connection = undefined
+		this.#currentItem = undefined
 	}
 
-	#playCurrentMusic(): void {
-		utils.mustExist(this.playlist.currentMusic)
+	#playCurrentItem(): void {
+		utils.mustExist(this.#currentItem)
 		utils.mustExist(this.#connection)
 
-		this.#connection.play(this.playlist.currentMusic.createResource())
+		this.#connection.play(this.#currentItem.music.createResource())
 	}
 
 	async finalize(): Promise<void> {
@@ -239,7 +253,7 @@ export class GuildInstance {
 	}
 
 	async nowPlaying(_rawArgs: string[], msg: discordjs.Message): Promise<void> {
-		const music = this.playlist.currentMusic
+		const music = this.playlist.currentItem?.music
 		if (music === undefined) {
 			await msg.reply('今流れている曲は無いよ…')
 		} else {

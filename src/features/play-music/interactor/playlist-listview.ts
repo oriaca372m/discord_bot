@@ -18,7 +18,7 @@ export class PlaylistListView implements ListView {
 	readonly gc: FeatureGlobalConfig
 
 	getItems(): readonly Music[] {
-		return this.playlist.musics
+		return this.playlist.items.map((x) => x.music)
 	}
 }
 
@@ -33,7 +33,7 @@ class MoveAction implements ListAction {
 			// TODO: エラーを通知する
 			return Promise.resolve()
 		}
-		this.lv.playlist.switch(parseInt(to, 10))
+		this.lv.playlist.switchIndex(parseInt(to, 10))
 		this.lv.interactor.guildInstance.playIfHasConnection()
 		return Promise.resolve()
 	}

@@ -2,8 +2,8 @@ import * as discordjs from 'discord.js'
 
 import type { FeaturePlayMusic } from './'
 import type { GuildInstance } from './guild-instance'
-import { playMusicIface } from './rpc-interface'
-import { deserializeMusic } from './music-deserialize'
+import { playMusicIface, playlistIface } from './rpc-interface'
+import { MusicDeserializer } from './music-deserializer'
 import { resolveUrl } from './music-adder'
 
 import { bindContext } from 'Src/rpc/server'
@@ -14,6 +14,43 @@ export interface PlayMusicContext extends WebApi2Context {
 	feature: FeaturePlayMusic
 	guildInstance: GuildInstance
 }
+
+const { f: pF, createRpcServer: pCreateRpcServer } = bindContext<
+	PlayMusicContext,
+	typeof playlistIface
+>(playlistIface)
+const playlistServer = pCreateRpcServer(
+	[
+		pF('get', (ctx, _req) => {
+			return Promise.resolve({ playlist: ctx.guildInstance.playlist.serialize() })
+		}),
+
+		pF('add', (ctx, req) => {
+			const deserializer = new MusicDeserializer(ctx.feature.database)
+			const musics = u
+				.tryEither(() => req.musics.map((x) => deserializer.deserialize(x)))
+				.okOrThrow((e) => new HandlerError(`Could not deserialize the music: ${String(e)}`))
+			ctx.guildInstance.playlist.addMusics(musics, req.destBefore)
+			return Promise.resolve({})
+		}),
+
+		pF('move', (ctx, req) => {
+			ctx.guildInstance.playlist.moveItem(req.src, req.destBefore)
+			return Promise.resolve({})
+		}),
+
+		pF('delete', (ctx, req) => {
+			ctx.guildInstance.playlist.deleteItem(req.id)
+			return Promise.resolve({})
+		}),
+
+		pF('clear', (ctx, _req) => {
+			ctx.guildInstance.playlist.clear()
+			return Promise.resolve({})
+		}),
+	],
+	[]
+)
 
 const { f, createRpcServer } = bindContext<PlayMusicContext, typeof playMusicIface>(playMusicIface)
 export const playMusicServer = createRpcServer(
@@ -27,42 +64,15 @@ export const playMusicServer = createRpcServer(
 			}))
 			return Promise.resolve({ musics })
 		}),
-		f('addUrlToPlaylist', async (ctx, req) => {
+
+		f('resolveUrl', async (ctx, req) => {
 			const url = u
 				.tryEither(() => new URL(req.url))
 				.okOrThrow(new HandlerError('url is not an url.'))
-
 			const musics = await resolveUrl(ctx.feature, url)
-			for (const music of musics) {
-				ctx.guildInstance.playlist.addMusic(music)
-			}
-			return { added: musics.map((x) => x.serialize()) }
+			return { musics: musics.map((x) => x.serialize()) }
 		}),
-		f('addToPlaylist', (ctx, req) => {
-			const music = u
-				.tryEither(() => deserializeMusic(ctx.feature.database, req.music))
-				.okOrThrow((e) => new HandlerError(`Could not deserialize the music: ${String(e)}`))
-			ctx.guildInstance.playlist.addMusic(music)
-			return Promise.resolve({})
-		}),
-		f('getPlaylist', (ctx, _req) => {
-			return Promise.resolve({
-				musics: ctx.guildInstance.playlist.musics.map((x) => x.serialize()),
-			})
-		}),
-		f('setPlaylist', (ctx, req) => {
-			ctx.guildInstance.playlist.clear()
-			for (const serializedMusic of req.musics) {
-				try {
-					const music = deserializeMusic(ctx.feature.database, serializedMusic)
-					ctx.guildInstance.playlist.addMusic(music)
-				} catch (_) {
-					// pass
-				}
-			}
 
-			return Promise.resolve({})
-		}),
 		f('play', (ctx, req) => {
 			let foundVoiceChannel: discordjs.VoiceChannel | undefined
 			for (const [, channel] of ctx.guild.channels.cache) {
@@ -85,10 +95,10 @@ export const playMusicServer = createRpcServer(
 				throw new HandlerError('Could not find a suitable voice channel to play musics.')
 			}
 
-			ctx.guildInstance.playlist.switch(req.index)
+			ctx.guildInstance.playlist.switch(req.id)
 			ctx.guildInstance.playOn(foundVoiceChannel)
 			return Promise.resolve({})
 		}),
 	],
-	[]
+	[playlistServer]
 )
