@@ -245,7 +245,7 @@ export function randomPick<T>(array: T | T[]): T {
 	}
 
 	const weights = array.map((x) => {
-		const value = lodash.get(x, 'weight')
+		const value = lodash.get(x as { weight?: unknown }, 'weight')
 		return Number.isFinite(value) ? (value as number) : 100
 	})
 	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- 範囲外になり得ない
