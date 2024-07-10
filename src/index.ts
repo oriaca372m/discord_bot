@@ -56,26 +56,26 @@ async function main() {
 		() => new FeatureGlobalConfig(storage, ['messages-default.toml', 'messages.toml'])
 	)
 
-	client.on('ready', async (client) => {
-		console.log(`Logged in as ${client.user.tag}!`)
+	client.on('ready', (client) => {
+		;(async () => {
+			console.log(`Logged in as ${client.user.tag}!`)
 
-		try {
 			for (const [k, v] of config.features) {
 				featureManager.registerFeature(k, () => v)
 			}
 
 			await featureManager.init()
-		} catch (e) {
+
+			client.on('messageCreate', (msg) => {
+				msg.partial satisfies false
+
+				featureManager.onMessage(msg).catch((e: unknown) => {
+					console.log(e)
+				})
+			})
+		})().catch((e: unknown) => {
 			console.error(e)
 			process.exit(1)
-		}
-
-		client.on('messageCreate', (msg) => {
-			msg.partial satisfies false
-
-			featureManager.onMessage(msg).catch((e: unknown) => {
-				console.log(e)
-			})
 		})
 	})
 
