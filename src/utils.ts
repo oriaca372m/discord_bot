@@ -198,7 +198,13 @@ export function getOption<T>(
 	keys: string[],
 	defaultValue?: T
 ): T | string | boolean {
-	return keys.find((x) => options[x] !== undefined) ?? defaultValue ?? false
+	for (const key of keys) {
+		if (options[key] !== undefined) {
+			return options[key]
+		}
+	}
+
+	return defaultValue === undefined ? false : defaultValue
 }
 
 export function delay(ms: number): Promise<void> {

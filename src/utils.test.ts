@@ -251,3 +251,13 @@ describe('tryEither', () => {
 		expect(res.value).toHaveProperty('message', 'hoge')
 	})
 })
+
+describe('getOption', () => {
+	test('指定したキーの値が返ること', () => {
+		expect(utils.getOption({ key: 'value' }, ['key'])).toBe('value')
+	})
+
+	test('defaultValueがnullのときにnullが返ること', () => {
+		expect(utils.getOption({}, ['a'], null)).toBeNull()
+	})
+})
