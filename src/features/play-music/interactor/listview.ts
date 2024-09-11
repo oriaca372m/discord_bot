@@ -1,10 +1,10 @@
-import * as discordjs from 'discord.js'
+import type * as discordjs from 'discord.js'
 
-import { FeatureGlobalConfig } from 'Src/features/global-config'
+import type { FeatureGlobalConfig } from 'Src/features/global-config'
 import * as utils from 'Src/utils'
 
-import { Music } from 'Src/features/play-music/music'
-import { AddInteractor } from 'Src/features/play-music/interactor/interactor'
+import type { Music } from 'Src/features/play-music/music'
+import type { AddInteractor } from 'Src/features/play-music/interactor/interactor'
 
 export interface ListItem {
 	toListString(): string

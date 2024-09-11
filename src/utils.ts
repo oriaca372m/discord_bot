@@ -1,6 +1,6 @@
 import lodash from 'lodash'
-import stream from 'stream'
-import * as discordjs from 'discord.js'
+import type stream from 'node:stream'
+import type * as discordjs from 'discord.js'
 
 export function unreachable(): never
 // eslint-disable-next-line @typescript-eslint/unified-signatures -- 意味を変えずに統合する方法がわからない
@@ -402,8 +402,8 @@ export function parseIndexes(strings: string[], min: number, max: number): numbe
 		const match = /(\d+)(?:-|\.\.)(\d+)/.exec(str)
 		if (match) {
 			const [, startStr, endStr] = match as unknown as [unknown, string, string]
-			const start = parseInt(startStr, 10)
-			const end = parseInt(endStr, 10)
+			const start = Number.parseInt(startStr, 10)
+			const end = Number.parseInt(endStr, 10)
 
 			if (!(start < end)) {
 				throw new Error('invalid expression')
@@ -413,7 +413,7 @@ export function parseIndexes(strings: string[], min: number, max: number): numbe
 			continue
 		}
 
-		const index = parseInt(str, 10)
+		const index = Number.parseInt(str, 10)
 		if (Number.isNaN(index)) {
 			throw new Error(`failed to parse ${str} as int`)
 		}

@@ -1,8 +1,8 @@
 import TOML from '@iarna/toml'
-import * as discordjs from 'discord.js'
+import type * as discordjs from 'discord.js'
 
-import { FeatureGlobalConfig } from 'Src/features/global-config'
-import { ObjectStorage } from 'Src/object-storage'
+import type { FeatureGlobalConfig } from 'Src/features/global-config'
+import type { ObjectStorage } from 'Src/object-storage'
 import * as utils from 'Src/utils'
 
 function validateParsedConfig(_config: unknown): _config is ReplyConfig {

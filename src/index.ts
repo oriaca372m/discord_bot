@@ -4,7 +4,7 @@ import FeatureManager from 'Src/features/feature-manager'
 import { FeatureGlobalConfig } from 'Src/features/global-config'
 import { FileSystemObjectStorage, S3ObjectStorage } from 'Src/object-storage'
 import { ConfigLoader } from 'Src/config'
-import * as path from 'path'
+import * as path from 'node:path'
 
 async function main() {
 	const storage = (() => {

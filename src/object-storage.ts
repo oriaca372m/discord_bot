@@ -1,5 +1,5 @@
-import { promises as fs } from 'fs'
-import { join, normalize } from 'path'
+import { promises as fs } from 'node:fs'
+import { join, normalize } from 'node:path'
 import {
 	DeleteObjectCommand,
 	GetObjectCommand,
@@ -9,7 +9,7 @@ import {
 } from '@aws-sdk/client-s3'
 import * as u from 'Src/utils'
 import l from 'lodash'
-import stream from 'stream'
+import type stream from 'node:stream'
 
 export interface ObjectStorage {
 	readFile(path: string): Promise<Buffer>

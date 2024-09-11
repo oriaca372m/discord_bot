@@ -1,6 +1,6 @@
 import TOML from '@iarna/toml'
-import fs from 'fs'
-import path from 'path'
+import fs from 'node:fs'
+import path from 'node:path'
 import * as mm from 'music-metadata'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -95,7 +95,7 @@ async function main() {
 	const musics = []
 	for (const [, music] of cache) {
 		if (music.used) {
-			delete music.used
+			music.used = undefined
 			musics.push(music)
 		}
 	}

@@ -1,7 +1,7 @@
-import * as discordjs from 'discord.js'
+import type * as discordjs from 'discord.js'
 
 import CommonFeatureBase from 'Src/features/common-feature-base'
-import { Command } from 'Src/features/command'
+import type { Command } from 'Src/features/command'
 import * as utils from 'Src/utils'
 
 import { MusicDatabase } from 'Src/features/play-music/music-database'

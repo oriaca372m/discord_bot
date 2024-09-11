@@ -1,7 +1,7 @@
-import * as discordjs from 'discord.js'
+import type * as discordjs from 'discord.js'
 
-import { FeatureGlobalConfig } from 'Src/features/global-config'
-import { ObjectStorage } from 'Src/object-storage'
+import type { FeatureGlobalConfig } from 'Src/features/global-config'
+import type { ObjectStorage } from 'Src/object-storage'
 import * as utils from 'Src/utils'
 
 export function isValidImageId(id: string): boolean {
@@ -64,8 +64,8 @@ export class Images {
 	}
 
 	async listCommand(rawArgs: string[], msg: discordjs.Message): Promise<void> {
-		let args
-		let options: { [_: string]: string | boolean }
+		let args: string[]
+		let options: utils.Options
 
 		try {
 			;({ args, options } = utils.parseCommandArgs(rawArgs, ['s', 'search']))
@@ -86,7 +86,7 @@ export class Images {
 			return
 		}
 
-		const pageNumber = (args[0] ? parseInt(args[0], 10) : undefined) ?? 1
+		const pageNumber = (args[0] ? Number.parseInt(args[0], 10) : undefined) ?? 1
 
 		// 1ページあたり何枚の画像を表示させるか
 		const imagesPerPage = 20

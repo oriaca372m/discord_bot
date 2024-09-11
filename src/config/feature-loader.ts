@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { FeatureInterface } from 'Src/features/feature'
+import type { FeatureInterface } from 'Src/features/feature'
 
 import { FeatureMondai } from 'Src/features/mondai'
 import { FeatureSimpleReply } from 'Src/features/simple-reply'

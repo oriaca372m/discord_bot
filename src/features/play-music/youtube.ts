@@ -1,10 +1,10 @@
-import { spawn, execFile } from 'child_process'
+import { spawn, execFile } from 'node:child_process'
 import { z } from 'zod'
 import * as voice from '@discordjs/voice'
 
 import * as utils from 'Src/utils'
 
-import { Music, MusicPlayResource } from 'Src/features/play-music/music'
+import type { Music, MusicPlayResource } from 'Src/features/play-music/music'
 
 const ytdlPath = 'yt-dlp'
 

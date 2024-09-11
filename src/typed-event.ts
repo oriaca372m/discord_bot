@@ -1,6 +1,4 @@
-export interface Listener<T> {
-	(event: T): unknown
-}
+export type Listener<T> = (event: T) => unknown
 
 export class TypedEvent<T> {
 	readonly #listeners = new Set<Listener<T>>()

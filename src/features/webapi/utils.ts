@@ -1,4 +1,4 @@
-import crypto from 'crypto'
+import crypto from 'node:crypto'
 
 export function bufferToHex(buffer: Uint8Array): string {
 	return [...buffer].map((x) => x.toString(16).padStart(2, '0')).join('')
@@ -9,7 +9,7 @@ export function hexToBuffer(str: string): Uint8Array {
 	if (splited === null) {
 		throw new Error('not hex string!')
 	}
-	return new Uint8Array(splited.map((x) => parseInt(x, 16)))
+	return new Uint8Array(splited.map((x) => Number.parseInt(x, 16)))
 }
 
 // 戻り値は [iv, encrypted]

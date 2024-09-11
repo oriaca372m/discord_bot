@@ -2,8 +2,8 @@ import { createReadStream } from 'node:fs'
 import { z } from 'zod'
 import * as voice from '@discordjs/voice'
 
-import { Music, MusicPlayResource } from 'Src/features/play-music/music'
-import { MusicDatabase } from 'Src/features/play-music/music-database'
+import type { Music, MusicPlayResource } from 'Src/features/play-music/music'
+import type { MusicDatabase } from 'Src/features/play-music/music-database'
 
 export class MusicMetadata {
 	readonly title: string

@@ -1,9 +1,9 @@
-import { FeatureGlobalConfig } from 'Src/features/global-config'
+import type { FeatureGlobalConfig } from 'Src/features/global-config'
 
-import { Playlist } from 'Src/features/play-music/playlist'
-import { Music } from 'Src/features/play-music/music'
-import { AddInteractor } from 'Src/features/play-music/interactor/interactor'
-import { ListView, ListAction } from 'Src/features/play-music/interactor/listview'
+import type { Playlist } from 'Src/features/play-music/playlist'
+import type { Music } from 'Src/features/play-music/music'
+import type { AddInteractor } from 'Src/features/play-music/interactor/interactor'
+import type { ListView, ListAction } from 'Src/features/play-music/interactor/listview'
 
 export class PlaylistListView implements ListView {
 	readonly actions = [new MoveAction(this), new ShuffleAction(this)] as const
@@ -33,7 +33,7 @@ class MoveAction implements ListAction {
 			// TODO: エラーを通知する
 			return Promise.resolve()
 		}
-		this.lv.playlist.switch(parseInt(to, 10))
+		this.lv.playlist.switch(Number.parseInt(to, 10))
 		this.lv.interactor.guildInstance.playIfHasConnection()
 		return Promise.resolve()
 	}

@@ -1,14 +1,14 @@
-import { promises as fs } from 'fs'
+import { promises as fs } from 'node:fs'
 import TOML from '@iarna/toml'
-import * as discordjs from 'discord.js'
+import type * as discordjs from 'discord.js'
 
 import CommonFeatureBase from 'Src/features/common-feature-base'
-import { Command } from 'Src/features/command'
+import type { Command } from 'Src/features/command'
 import { StorageType } from 'Src/features/storage'
-import { FeatureGlobalConfig } from 'Src/features/global-config'
+import type { FeatureGlobalConfig } from 'Src/features/global-config'
 
 import * as utils from 'Src/utils'
-import { Game, GameOption } from 'Src/features/mondai/game'
+import { Game, type GameOption } from 'Src/features/mondai/game'
 
 export type MondaiConfig = {
 	readonly options: {
@@ -47,8 +47,8 @@ export class Mondai {
 	}
 
 	async onCommand(msg: discordjs.Message, rawArgs: string[]): Promise<void> {
-		let args
-		let options
+		let args: string[]
+		let options: utils.Options
 
 		try {
 			;({ args, options } = utils.parseCommandArgs(rawArgs, ['life', 'l']))
@@ -94,7 +94,7 @@ export class Mondai {
 			const life = utils.getOption(options, ['life', 'l'], null)
 			if (life !== null) {
 				opts.repeat = true
-				opts.life = parseInt(life as string, 10)
+				opts.life = Number.parseInt(life as string, 10)
 			}
 
 			this.game = new Game(this, this.gc, mode, opts)

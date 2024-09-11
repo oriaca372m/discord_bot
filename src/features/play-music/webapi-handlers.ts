@@ -3,10 +3,10 @@ import * as discordjs from 'discord.js'
 
 import * as u from 'Src/utils'
 
-import { WebApiHandler, AccessTokenInfo, HandlerError } from 'Src/features/webapi'
+import { type WebApiHandler, type AccessTokenInfo, HandlerError } from 'Src/features/webapi'
 
-import { FeaturePlayMusic } from 'Src/features/play-music'
-import { GuildInstance } from 'Src/features/play-music/guild-instance'
+import type { FeaturePlayMusic } from 'Src/features/play-music'
+import type { GuildInstance } from 'Src/features/play-music/guild-instance'
 import { SerializedMusic } from 'Src/features/play-music/music'
 import { deserializeMusic } from 'Src/features/play-music/music-deserialize'
 import { resolveUrl } from 'Src/features/play-music/music-adder'

@@ -1,10 +1,14 @@
-import * as discordjs from 'discord.js'
+import type * as discordjs from 'discord.js'
 
-import { FeatureBase, FeatureEventContext, FeatureEventResult } from 'Src/features/feature'
+import {
+	FeatureBase,
+	type FeatureEventContext,
+	type FeatureEventResult,
+} from 'Src/features/feature'
 import { FeatureCommand } from 'Src/features/command'
-import { StorageDriver, FeatureStorage } from 'Src/features/storage'
-import { FeatureGlobalConfig } from 'Src/features/global-config'
-import { FeatureWebApi } from 'Src/features/webapi'
+import { type StorageDriver, FeatureStorage } from 'Src/features/storage'
+import type { FeatureGlobalConfig } from 'Src/features/global-config'
+import type { FeatureWebApi } from 'Src/features/webapi'
 
 export default class extends FeatureBase {
 	public gc!: FeatureGlobalConfig

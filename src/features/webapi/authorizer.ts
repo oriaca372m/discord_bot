@@ -1,4 +1,4 @@
-import crypto from 'crypto'
+import crypto from 'node:crypto'
 import { bufferToHex } from 'Src/features/webapi/utils'
 
 export interface BasicAccessTokenInfo {

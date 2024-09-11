@@ -1,9 +1,9 @@
-import * as discordjs from 'discord.js'
+import type * as discordjs from 'discord.js'
 
-import { Command } from 'Src/features/command'
+import type { Command } from 'Src/features/command'
 import CommonFeatureBase from 'Src/features/common-feature-base'
-import { StorageType, StorageDriver } from '../storage'
-import { FeatureGlobalConfig } from 'Src/features/global-config'
+import { StorageType, type StorageDriver } from '../storage'
+import type { FeatureGlobalConfig } from 'Src/features/global-config'
 import * as utils from 'Src/utils'
 
 type SkMessage = { message: string; weight: number }
@@ -39,7 +39,7 @@ class SetSkCommand implements Command {
 			const res = /^(.+):(\d+)$/.exec(x)
 			if (res !== null) {
 				const [, message, weightStr] = res as unknown as [unknown, string, string]
-				const weight = parseInt(weightStr, 10)
+				const weight = Number.parseInt(weightStr, 10)
 				if (0 < weight) {
 					return { message, weight }
 				}
@@ -83,7 +83,7 @@ export class FeatureSk extends CommonFeatureBase {
 
 			await msg.reply(
 				msg.content.replace(this.skRegExp, (match, strnb: string) => {
-					const nb = parseInt(strnb, 10)
+					const nb = Number.parseInt(strnb, 10)
 					let res = picked.get(nb)
 					if (res === undefined) {
 						res = match

@@ -1,14 +1,14 @@
-import * as discordjs from 'discord.js'
+import type * as discordjs from 'discord.js'
 
-import { FeatureGlobalConfig } from 'Src/features/global-config'
+import type { FeatureGlobalConfig } from 'Src/features/global-config'
 import * as utils from 'Src/utils'
 
-import { FeaturePlayMusic } from 'Src/features/play-music'
-import { GuildInstance } from 'Src/features/play-music/guild-instance'
-import { Music } from 'Src/features/play-music/music'
+import type { FeaturePlayMusic } from 'Src/features/play-music'
+import type { GuildInstance } from 'Src/features/play-music/guild-instance'
+import type { Music } from 'Src/features/play-music/music'
 import { YouTubeMusic, fetchPlaylistItems } from 'Src/features/play-music/youtube'
-import { Playlist } from 'Src/features/play-music/playlist'
-import { MusicDatabase } from 'Src/features/play-music/music-database'
+import type { Playlist } from 'Src/features/play-music/playlist'
+import type { MusicDatabase } from 'Src/features/play-music/music-database'
 
 interface CommandOptions {
 	args: string[]
@@ -64,7 +64,7 @@ export class MusicAdder {
 		rawArgs: string[]
 	): Promise<CommandOptions | undefined> {
 		let args: string[]
-		let options
+		let options: utils.Options
 		try {
 			;({ args, options } = utils.parseCommandArgs(rawArgs, []))
 		} catch (e) {
