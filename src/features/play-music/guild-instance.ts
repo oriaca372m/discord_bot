@@ -1,12 +1,12 @@
-import * as discordjs from 'discord.js'
+import type * as discordjs from 'discord.js'
 import * as voice from '@discordjs/voice'
 
-import { FeatureGlobalConfig } from 'Src/features/global-config'
+import type { FeatureGlobalConfig } from 'Src/features/global-config'
 import { TypedEvent } from 'Src/typed-event'
 import * as utils from 'Src/utils'
 
-import { FeaturePlayMusic } from 'Src/features/play-music/'
-import { MusicPlayResource } from 'Src/features/play-music/music'
+import type { FeaturePlayMusic } from 'Src/features/play-music/'
+import type { MusicPlayResource } from 'Src/features/play-music/music'
 import { MusicAdder } from 'Src/features/play-music/music-adder'
 import { Playlist } from 'Src/features/play-music/playlist'
 import { AddInteractor } from 'Src/features/play-music/interactor/interactor'

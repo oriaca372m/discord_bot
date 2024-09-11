@@ -1,6 +1,6 @@
-import http from 'http'
+import http from 'node:http'
 import * as msgpack from '@msgpack/msgpack'
-import { Authorizer, BasicAccessTokenInfo } from 'Src/features/webapi/authorizer'
+import type { Authorizer, BasicAccessTokenInfo } from 'Src/features/webapi/authorizer'
 import { bufferToHex, hexToBuffer, encrypt, decrypt } from 'Src/features/webapi/utils'
 import pako from 'pako'
 import * as utils from 'Src/utils'

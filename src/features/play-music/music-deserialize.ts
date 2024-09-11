@@ -1,6 +1,6 @@
-import { Music, SerializedMusic } from 'Src/features/play-music/music'
+import { type Music, SerializedMusic } from 'Src/features/play-music/music'
 import { MusicFile } from 'Src/features/play-music/music-file'
-import { MusicDatabase } from 'Src/features/play-music/music-database'
+import type { MusicDatabase } from 'Src/features/play-music/music-database'
 import { YouTubeMusic } from 'Src/features/play-music/youtube'
 
 export function deserializeMusic(database: MusicDatabase, data: unknown): Music {

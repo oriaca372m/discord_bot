@@ -1,8 +1,8 @@
-import * as discordjs from 'discord.js'
-import { Action, ActionResult } from 'Src/features/custom-reply/actions/action'
-import { Response } from 'Src/features/custom-reply/config'
-import { Images } from 'Src/features/custom-reply/images'
-import { FeatureGlobalConfig } from 'Src/features/global-config'
+import type * as discordjs from 'discord.js'
+import type { Action, ActionResult } from 'Src/features/custom-reply/actions/action'
+import type { Response } from 'Src/features/custom-reply/config'
+import type { Images } from 'Src/features/custom-reply/images'
+import type { FeatureGlobalConfig } from 'Src/features/global-config'
 import * as utils from 'Src/utils'
 
 export class ActionGacha implements Action {

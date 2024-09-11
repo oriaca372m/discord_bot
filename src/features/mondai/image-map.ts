@@ -1,4 +1,4 @@
-import { createCanvas, loadImage, Image, SKRSContext2D } from '@napi-rs/canvas'
+import { createCanvas, loadImage, type Image, type SKRSContext2D } from '@napi-rs/canvas'
 
 export function calcDivisionNumber(total: number): { x: number; y: number } {
 	if (total < 1) {

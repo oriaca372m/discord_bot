@@ -1,6 +1,6 @@
-import * as discordjs from 'discord.js'
+import type * as discordjs from 'discord.js'
 
-import { FeatureInterface, FeatureBase } from 'Src/features/feature'
+import { type FeatureInterface, FeatureBase } from 'Src/features/feature'
 import * as utils from 'Src/utils'
 
 export class StorageType {

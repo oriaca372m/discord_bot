@@ -1,4 +1,4 @@
-import { Music } from 'Src/features/play-music/music'
+import type { Music } from 'Src/features/play-music/music'
 import lodash from 'lodash'
 
 export class Playlist {

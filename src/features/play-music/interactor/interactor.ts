@@ -1,15 +1,15 @@
-import * as discordjs from 'discord.js'
+import type * as discordjs from 'discord.js'
 
-import { FeatureGlobalConfig } from 'Src/features/global-config'
+import type { FeatureGlobalConfig } from 'Src/features/global-config'
 import * as utils from 'Src/utils'
 
-import { GuildInstance } from 'Src/features/play-music/guild-instance'
-import { Music } from 'Src/features/play-music/music'
+import type { GuildInstance } from 'Src/features/play-music/guild-instance'
+import type { Music } from 'Src/features/play-music/music'
 import { MusicAdder } from 'Src/features/play-music/music-adder'
-import { Playlist } from 'Src/features/play-music/playlist'
-import { MusicDatabase } from 'Src/features/play-music/music-database'
+import type { Playlist } from 'Src/features/play-music/playlist'
+import type { MusicDatabase } from 'Src/features/play-music/music-database'
 import {
-	ListView,
+	type ListView,
 	MusicListView,
 	SelectableListView,
 } from 'Src/features/play-music/interactor/listview'
@@ -172,7 +172,7 @@ export class AddInteractor {
 					await this.searchAlbum(album)
 				},
 				show: async (args) => {
-					await this.show((args[0] ? parseInt(args[0], 10) : undefined) ?? 1)
+					await this.show((args[0] ? Number.parseInt(args[0], 10) : undefined) ?? 1)
 				},
 				quit: async () => {
 					this.done()

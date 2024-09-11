@@ -1,4 +1,4 @@
-import * as discordjs from 'discord.js'
+import type * as discordjs from 'discord.js'
 
 import CommonFeatureBase from 'Src/features/common-feature-base'
 

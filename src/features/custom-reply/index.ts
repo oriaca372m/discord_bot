@@ -1,16 +1,16 @@
-import * as discordjs from 'discord.js'
+import type * as discordjs from 'discord.js'
 
 import CommonFeatureBase from 'Src/features/common-feature-base'
-import { Command } from 'Src/features/command'
+import type { Command } from 'Src/features/command'
 import { StorageType } from 'Src/features/storage'
-import { FeatureGlobalConfig } from 'Src/features/global-config'
+import type { FeatureGlobalConfig } from 'Src/features/global-config'
 
 import * as utils from 'Src/utils'
 import { Images } from 'Src/features/custom-reply/images'
-import { Config, Response } from 'Src/features/custom-reply/config'
+import { Config, type Response } from 'Src/features/custom-reply/config'
 import * as handlers from 'Src/features/custom-reply/webapi-handlers'
 
-import { Action } from 'Src/features/custom-reply/actions/action'
+import type { Action } from 'Src/features/custom-reply/actions/action'
 import { ActionGacha } from 'Src/features/custom-reply/actions/gacha'
 import { ActionSenko } from 'Src/features/custom-reply/actions/senko'
 import { ActionDefault } from 'Src/features/custom-reply/actions/default'

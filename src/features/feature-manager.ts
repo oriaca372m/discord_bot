@@ -1,9 +1,9 @@
-import * as discordjs from 'discord.js'
+import type * as discordjs from 'discord.js'
 
-import { FeatureInterface, FeatureEventContext } from 'Src/features/feature'
+import type { FeatureInterface, FeatureEventContext } from 'Src/features/feature'
 
 import * as utils from 'Src/utils'
-import { inspect } from 'util'
+import { inspect } from 'node:util'
 
 type State =
 	| 'constructed'

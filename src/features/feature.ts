@@ -1,6 +1,6 @@
-import * as discordjs from 'discord.js'
+import type * as discordjs from 'discord.js'
 
-import FeatureManager from 'Src/features/feature-manager'
+import type FeatureManager from 'Src/features/feature-manager'
 
 export interface FeatureEventResult {
 	preventNext?: boolean

@@ -1,6 +1,6 @@
-import { WebApiHandler, AccessTokenInfo, HandlerError } from 'Src/features/webapi'
+import { type WebApiHandler, type AccessTokenInfo, HandlerError } from 'Src/features/webapi'
 
-import { FeatureCustomReply } from 'Src/features/custom-reply'
+import type { FeatureCustomReply } from 'Src/features/custom-reply'
 
 type GetConifgListReq = object
 interface GetConfigListRes {

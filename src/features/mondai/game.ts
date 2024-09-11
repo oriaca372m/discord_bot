@@ -1,12 +1,12 @@
-import { execFile } from 'child_process'
-import * as os from 'os'
-import { promises as fs } from 'fs'
-import * as path from 'path'
-import * as discordjs from 'discord.js'
+import { execFile } from 'node:child_process'
+import * as os from 'node:os'
+import { promises as fs } from 'node:fs'
+import * as path from 'node:path'
+import type * as discordjs from 'discord.js'
 
-import { FeatureGlobalConfig } from 'Src/features/global-config'
+import type { FeatureGlobalConfig } from 'Src/features/global-config'
 import * as utils from 'Src/utils'
-import { Mondai, MondaiConfig } from 'Src/features/mondai'
+import type { Mondai, MondaiConfig } from 'Src/features/mondai'
 import { generateImageMap } from 'Src/features/mondai/image-map'
 
 export type GameOption = {

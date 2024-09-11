@@ -1,6 +1,6 @@
-import * as discordjs from 'discord.js'
+import type * as discordjs from 'discord.js'
 
-import { FeatureBase, FeatureEventResult } from 'Src/features/feature'
+import { FeatureBase, type FeatureEventResult } from 'Src/features/feature'
 import * as utils from 'Src/utils'
 
 export interface Command {

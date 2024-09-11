@@ -1,11 +1,11 @@
-import * as discordjs from 'discord.js'
+import type * as discordjs from 'discord.js'
 import * as utils from 'Src/utils'
 
 import CommonFeatureBase from 'Src/features/common-feature-base'
-import { Command } from 'Src/features/command'
-import { FeatureWebApi, WebApiHandler, AccessTokenInfo } from 'Src/features/webapi'
+import type { Command } from 'Src/features/command'
+import type { FeatureWebApi, WebApiHandler, AccessTokenInfo } from 'Src/features/webapi'
 import { bufferToHex } from 'Src/features/webapi/utils'
-import { URL } from 'url'
+import { URL } from 'node:url'
 
 class Handler implements WebApiHandler {
 	readonly methodName = 'sendToChannel'

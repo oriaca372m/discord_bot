@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import TOML from '@iarna/toml'
 
-import { FeatureInterface } from 'Src/features/feature'
+import type { FeatureInterface } from 'Src/features/feature'
 import { FeatureConfigBase, FeatureLoader } from 'Src/config/feature-loader'
 
 const Config = z.object({

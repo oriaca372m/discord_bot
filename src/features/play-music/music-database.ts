@@ -1,13 +1,13 @@
-import { promises as fs } from 'fs'
+import { promises as fs } from 'node:fs'
 import TOML from '@iarna/toml'
 import lodash from 'lodash'
-import * as path from 'path'
+import * as path from 'node:path'
 import Fuse from 'fuse.js'
 
 import * as utils from 'Src/utils'
 
-import { Music, MusicCollection } from 'Src/features/play-music/music'
-import { MusicFile, MusicObject } from 'Src/features/play-music/music-file'
+import { type Music, MusicCollection } from 'Src/features/play-music/music'
+import { MusicFile, type MusicObject } from 'Src/features/play-music/music-file'
 
 type MusicList = MusicFile[]
 type MusicLists = Map<string, MusicList>

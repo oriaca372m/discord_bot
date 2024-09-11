@@ -1,7 +1,7 @@
 import { z } from 'zod'
-import * as voice from '@discordjs/voice'
+import type * as voice from '@discordjs/voice'
 
-import { ListItem, Selectable } from 'Src/features/play-music/interactor/listview'
+import type { ListItem, Selectable } from 'Src/features/play-music/interactor/listview'
 
 export const SerializedMusic = z
 	.object({

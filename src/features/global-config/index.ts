@@ -1,8 +1,8 @@
 import TOML from '@iarna/toml'
 import lodash from 'lodash'
-import * as discordjs from 'discord.js'
+import type * as discordjs from 'discord.js'
 import { FeatureBase } from 'Src/features/feature'
-import { ObjectStorage } from 'Src/object-storage'
+import type { ObjectStorage } from 'Src/object-storage'
 
 import * as utils from 'Src/utils'
 

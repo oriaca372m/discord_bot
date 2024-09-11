@@ -1,10 +1,10 @@
-import * as discordjs from 'discord.js'
+import type * as discordjs from 'discord.js'
 
 import { FeatureBase } from 'Src/features/feature'
 
 import { WebApiServer } from 'Src/features/webapi/webapi-server'
-import { BasicAccessTokenInfo, BasicAuthorizer } from 'Src/features/webapi/authorizer'
-import * as utils from 'Src/utils'
+import { type BasicAccessTokenInfo, BasicAuthorizer } from 'Src/features/webapi/authorizer'
+import type * as utils from 'Src/utils'
 
 export interface WebApiHandler {
 	methodName: string

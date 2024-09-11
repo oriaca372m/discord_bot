@@ -1,8 +1,8 @@
-import * as discordjs from 'discord.js'
-import { Action, ActionResult } from 'Src/features/custom-reply/actions/action'
-import { Response } from 'Src/features/custom-reply/config'
-import { Images, isValidImageId } from 'Src/features/custom-reply/images'
-import { FeatureGlobalConfig } from 'Src/features/global-config'
+import type * as discordjs from 'discord.js'
+import type { Action, ActionResult } from 'Src/features/custom-reply/actions/action'
+import type { Response } from 'Src/features/custom-reply/config'
+import { type Images, isValidImageId } from 'Src/features/custom-reply/images'
+import type { FeatureGlobalConfig } from 'Src/features/global-config'
 
 export class ActionDefault implements Action {
 	constructor(

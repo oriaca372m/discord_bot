@@ -1,7 +1,7 @@
-import * as discordjs from 'discord.js'
+import type * as discordjs from 'discord.js'
 
 import CommonFeatureBase from 'Src/features/common-feature-base'
-import { FeatureCommand, Command } from 'Src/features/command'
+import type { FeatureCommand, Command } from 'Src/features/command'
 
 class CommandAliasCommand implements Command {
 	constructor(
