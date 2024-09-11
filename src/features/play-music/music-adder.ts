@@ -130,21 +130,19 @@ export class MusicAdder {
 	}
 
 	#addMusicsToPlaylist(musics: readonly Music[], parseResult: CommandOptions): void {
-		let counter = 0
-		if (parseResult.isAddToNext) {
-			const c = this.playlist.currentTrack
-			if (c !== undefined) {
-				counter = c + 1
+		const insertIndex = (() => {
+			if (parseResult.isAddToFirst) {
+				return 0
 			}
-		}
-		for (const music of musics) {
-			if (parseResult.isAddToFirst || parseResult.isAddToNext) {
-				this.playlist.addMusic(music, counter)
-				counter++
-			} else {
-				this.playlist.addMusic(music)
+			if (parseResult.isAddToNext) {
+				const i = this.playlist.currentItemIndex
+				if (i !== undefined) {
+					return i + 1
+				}
 			}
-		}
+		})()
+
+		this.playlist.addMusics(musics, insertIndex)
 	}
 
 	async #addInternal(

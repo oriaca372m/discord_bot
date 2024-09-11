@@ -2,12 +2,7 @@ import { z } from 'zod'
 import * as voice from '@discordjs/voice'
 
 import { ListItem, Selectable } from 'Src/features/play-music/interactor/listview'
-
-export const SerializedMusic = z
-	.object({
-		kind: z.string(),
-	})
-	.passthrough()
+import { SerializedMusic } from './rpc-interface'
 
 export interface MusicPlayResource {
 	audioResource: voice.AudioResource

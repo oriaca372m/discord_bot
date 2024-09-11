@@ -10,6 +10,8 @@ import { FeaturePlayMusic } from 'Src/features/play-music'
 import { FeatureSk } from 'Src/features/sk'
 import { FeatureWebApi } from 'Src/features/webapi'
 import { FeatureBasicWebApiMethods } from 'Src/features/basic-webapi-methods'
+import { FeatureWebApiServer2 } from 'Src/features/webapi-server2'
+import { FeatureOpenWebui2 } from 'Src/features/open-webui2'
 
 export const FeatureConfigBase = z
 	.object({
@@ -86,6 +88,22 @@ const loaders: { [key: string]: Loader } = {
 		}),
 		(cfg) => new FeatureBasicWebApiMethods(cfg.webui_command_name, cfg.webui_url, cfg.api_url)
 	),
+
+	webapi_server2: makeLoader(
+		z.object({
+			port: z.number().int(),
+		}),
+		(cfg) => new FeatureWebApiServer2(cfg.port)
+	),
+
+	open_webui2: makeLoader(
+		z.object({
+			command_name: z.string(),
+			webui_url: z.string(),
+			api_url: z.string().optional(),
+		}),
+		(cfg) => new FeatureOpenWebui2(cfg.command_name, cfg.webui_url, cfg.api_url)
+	),
 }
 
 export class FeatureLoader {
@@ -105,6 +123,8 @@ export class FeatureLoader {
 			if (entry.id === undefined) {
 				if (entry.feature === 'web_api') {
 					entry.id = 'webapi'
+				} else if (entry.feature === 'webapi_server2') {
+					entry.id = 'webapi-server2'
 				} else {
 					entry.id = `__unnamed_${this._unnamedCounter}`
 					++this._unnamedCounter
