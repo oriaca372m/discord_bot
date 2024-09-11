@@ -7,7 +7,7 @@
 		"build": "tsc --project tsconfig.build.json && tsc-alias -f -p tsconfig.build.json",
 		"start": "pnpm run build && node dist/index.js",
 		"test": "jest",
-		"lint": "tsc --noEmit && eslint && biome format",
+		"lint": "tsc --noEmit && eslint && biome check",
 		"fix": "eslint --fix && biome format --write"
 	},
 	"license": "Zlib",
