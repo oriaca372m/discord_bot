@@ -29,7 +29,7 @@ export class Mondai {
 
 	constructor(
 		public readonly feature: FeatureMondai,
-		public readonly channel: utils.LikeTextChannel,
+		public readonly channel: utils.SendableChannel,
 		public readonly config: MondaiConfig
 	) {
 		this.gc = feature.gc

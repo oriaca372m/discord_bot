@@ -27,7 +27,7 @@ export class CustomReply {
 
 	constructor(
 		readonly feature: FeatureCustomReply,
-		public readonly channel: utils.LikeTextChannel
+		public readonly channel: utils.SendableChannel
 	) {
 		this.gc = feature.gc
 		this.images = new Images(this.gc)
@@ -160,7 +160,7 @@ export class FeatureCustomReply extends CommonFeatureBase {
 		return Promise.resolve()
 	}
 
-	getChannelInstance(channel: utils.LikeTextChannel): CustomReply {
+	getChannelInstance(channel: utils.SendableChannel): CustomReply {
 		return this.storageDriver.channelFromChannel(channel).get<CustomReply>('customReply')
 	}
 

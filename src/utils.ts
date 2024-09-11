@@ -323,7 +323,19 @@ export async function forEachAsyncOf<T>(
 	}
 }
 
-export type LikeTextChannel = discordjs.TextBasedChannel
+export type SendableChannel =
+	| discordjs.NewsChannel
+	| discordjs.TextChannel
+	| discordjs.PublicThreadChannel
+	| discordjs.PrivateThreadChannel
+
+export function mustSendableChannel(x: discordjs.Channel): asserts x is SendableChannel {
+	if ('send' in x) {
+		return
+	}
+
+	throw new Error('not sendable channel')
+}
 
 export type PaginationResult<T> =
 	| { kind: 'ok'; maxPage: number; value: T[]; firstIndex: number }

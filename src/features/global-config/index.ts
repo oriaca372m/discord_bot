@@ -59,7 +59,7 @@ export class FeatureGlobalConfig extends FeatureBase {
 	}
 
 	async sendToChannel(
-		channel: utils.LikeTextChannel,
+		channel: utils.SendableChannel,
 		key: string,
 		args: object = {},
 		options: discordjs.MessageCreateOptions = {}
