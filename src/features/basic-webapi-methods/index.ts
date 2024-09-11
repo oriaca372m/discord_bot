@@ -36,10 +36,10 @@ class CommandOpenWebUi implements Command {
 	}
 
 	async command(msg: discordjs.Message, rawArgs: string[]): Promise<void> {
-		let options
+		let options: utils.Options
 		try {
 			;({ options } = utils.parseCommandArgs(rawArgs, [], 0))
-		} catch (e) {
+		} catch (_) {
 			await msg.reply('コマンドのパースに失敗しました')
 			return
 		}
@@ -49,10 +49,9 @@ class CommandOpenWebUi implements Command {
 			return
 		}
 
-		const info = this.featureWebApi.createAccessToken({
-			channel: msg.channel,
-			guild: msg.guild,
-		})
+		const channel = msg.channel
+		utils.mustSendableChannel(channel)
+		const info = this.featureWebApi.createAccessToken({ channel, guild: msg.guild })
 
 		const token = info.basicInfo.accessToken
 		const secret = bufferToHex(info.basicInfo.accessTokenSecret)

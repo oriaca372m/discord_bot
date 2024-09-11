@@ -22,7 +22,7 @@ export class MusicMetadata {
 }
 
 type FieldNames<T> = {
-	// eslint-disable-next-line @typescript-eslint/ban-types
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 	[P in keyof T]: T[P] extends Function ? never : P
 }[keyof T]
 type Fields<T> = { [P in FieldNames<T>]: T[P] }

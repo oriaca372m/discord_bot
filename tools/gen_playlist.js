@@ -33,7 +33,7 @@ async function main() {
 		usage()
 	}
 
-	let cache = new Map()
+	const cache = new Map()
 	try {
 		const str = fs.readFileSync(playlistPath, 'utf-8')
 		const toml = TOML.parse(str)
@@ -47,7 +47,7 @@ async function main() {
 			cache.set(music.path, music)
 		}
 	} catch (e) {
-		console.log('failed to parse the input file')
+		console.log('failed to parse the input file', e)
 	}
 
 	for (const line of stdinBuffer.split('\n')) {
@@ -85,7 +85,7 @@ async function main() {
 			metadata.track = common.track
 			metadata.disk = common.disk
 		} catch (e) {
-			console.error(`failed to parse metadata: ${line}`)
+			console.error(`failed to parse metadata: ${line}`, e)
 			continue
 		}
 

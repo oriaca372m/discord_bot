@@ -99,13 +99,17 @@ export function parseCommand(string: string): { commandName: string; args: strin
 	}
 }
 
+export type Options = Record<string, string | boolean>
 export function parseCommandArgs(
 	argsToParse: string[],
 	optionsWithValue: string[] = [],
 	minimumArgs = 0
-): { args: string[]; options: { [_: string]: string | boolean } } {
+): {
+	args: string[]
+	options: Options
+} {
 	const args = []
-	const options: { [_: string]: string | boolean } = {}
+	const options: Record<string, string | boolean> = {}
 	let i = 0
 
 	const consumeValue = (name: string) => {
@@ -182,19 +186,16 @@ export function parseCommandArgs(
 	return { args, options }
 }
 
-export function getOption(
-	options: { [_: string]: string | boolean },
-	keys: string[]
-): string | boolean
+export function getOption(options: Options, keys: string[]): string | boolean
 
 export function getOption<T>(
-	options: { [_: string]: string | boolean },
+	options: Options,
 	keys: string[],
 	defaultValue: T
 ): string | boolean | T
 
 export function getOption<T>(
-	options: { [_: string]: string | boolean },
+	options: Options,
 	keys: string[],
 	defaultValue?: T
 ): T | string | boolean {
@@ -266,8 +267,10 @@ export async function subCommandProxy(
 	msg: discordjs.Message
 ): Promise<void> {
 	const validSubCommands = Object.keys(table).join(' ')
+	const channel = msg.channel
+	mustSendableChannel(channel)
 	if (!subcommand) {
-		await msg.channel.send(`サブコマンドを指定して欲しいロボ: ${validSubCommands}`)
+		await channel.send(`サブコマンドを指定して欲しいロボ: ${validSubCommands}`)
 		return
 	}
 
@@ -275,7 +278,7 @@ export async function subCommandProxy(
 	if (func) {
 		await func(args, msg)
 	} else {
-		await msg.channel.send(`知らないサブコマンドロボねえ…: ${validSubCommands}`)
+		await channel.send(`知らないサブコマンドロボねえ…: ${validSubCommands}`)
 	}
 }
 
@@ -323,7 +326,19 @@ export async function forEachAsyncOf<T>(
 	}
 }
 
-export type LikeTextChannel = discordjs.TextBasedChannel
+export type SendableChannel =
+	| discordjs.NewsChannel
+	| discordjs.TextChannel
+	| discordjs.PublicThreadChannel
+	| discordjs.PrivateThreadChannel
+
+export function mustSendableChannel(x: discordjs.Channel): asserts x is SendableChannel {
+	if ('send' in x) {
+		return
+	}
+
+	throw new Error('not sendable channel')
+}
 
 export type PaginationResult<T> =
 	| { kind: 'ok'; maxPage: number; value: T[]; firstIndex: number }

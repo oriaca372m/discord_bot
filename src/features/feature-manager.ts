@@ -97,6 +97,7 @@ export default class {
 		return feature
 	}
 
+	// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
 	getFeature<T extends FeatureInterface>(id: string): T {
 		return this.features.get(id) as T
 	}
@@ -140,7 +141,7 @@ export default class {
 			await this.message(msg)
 		} catch (e) {
 			console.error(e)
-			await msg.channel.send('bot の処理中にエラーが発生しました')
+			await msg.reply('bot の処理中にエラーが発生しました')
 		}
 	}
 }

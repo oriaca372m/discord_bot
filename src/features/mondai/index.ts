@@ -29,7 +29,7 @@ export class Mondai {
 
 	constructor(
 		public readonly feature: FeatureMondai,
-		public readonly channel: utils.LikeTextChannel,
+		public readonly channel: utils.SendableChannel,
 		public readonly config: MondaiConfig
 	) {
 		this.gc = feature.gc
@@ -152,12 +152,12 @@ export class FeatureMondai extends CommonFeatureBase {
 	}
 
 	protected async initImpl(): Promise<void> {
-		this.storageDriver.setChannelStorageConstructor(
-			(ch) =>
-				new StorageType(
-					new Map<string, unknown>([['mondai', new Mondai(this, ch, this.config)]])
-				)
-		)
+		this.storageDriver.setChannelStorageConstructor((ch) => {
+			utils.mustSendableChannel(ch)
+			return new StorageType(
+				new Map<string, unknown>([['mondai', new Mondai(this, ch, this.config)]])
+			)
+		})
 		this.featureCommand.registerCommand(new FeatureMondaiCommand(this, this.cmdname))
 
 		const toml = await fs.readFile(this.configPath, 'utf-8')

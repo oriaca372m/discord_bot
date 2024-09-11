@@ -24,7 +24,7 @@ async function loadMusicLists(dir: string): Promise<MusicLists> {
 	try {
 		files = await fs.readdir(dir)
 	} catch (e) {
-		console.error(`couldn't read a playlist directory: ${dir}`)
+		console.error(`couldn't read a playlist directory: ${dir}`, e)
 		return musicLists
 	}
 

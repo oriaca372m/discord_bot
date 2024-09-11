@@ -197,6 +197,7 @@ export class GuildInstance {
 	}
 
 	#createInteractor(msg: discordjs.Message): AddInteractor {
+		utils.mustSendableChannel(msg.channel)
 		const i = new AddInteractor(this, msg.channel, this.playlist, () => {
 			this.#interactors.delete(i)
 		})

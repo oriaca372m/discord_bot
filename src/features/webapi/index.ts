@@ -14,7 +14,7 @@ export interface WebApiHandler {
 export class HandlerError extends Error {}
 
 export interface AdditionalAccessTokenInfo {
-	channel: utils.LikeTextChannel
+	channel: utils.SendableChannel
 	guild: discordjs.Guild
 }
 

@@ -27,7 +27,7 @@ export class CustomReply {
 
 	constructor(
 		readonly feature: FeatureCustomReply,
-		public readonly channel: utils.LikeTextChannel
+		public readonly channel: utils.SendableChannel
 	) {
 		this.gc = feature.gc
 		this.images = new Images(this.gc)
@@ -68,7 +68,7 @@ export class CustomReply {
 		if (response.reply) {
 			await msg.reply(options)
 		} else {
-			await msg.channel.send(options)
+			await this.channel.send(options)
 		}
 	}
 
@@ -143,6 +143,7 @@ export class FeatureCustomReply extends CommonFeatureBase {
 
 	async initImpl(): Promise<void> {
 		this.storageDriver.setChannelStorageConstructor((ch) => {
+			utils.mustSendableChannel(ch)
 			const client = new CustomReply(this, ch)
 			void client.init()
 			return new StorageType(new Map<string, unknown>([['customReply', client]]))
@@ -160,7 +161,7 @@ export class FeatureCustomReply extends CommonFeatureBase {
 		return Promise.resolve()
 	}
 
-	getChannelInstance(channel: utils.LikeTextChannel): CustomReply {
+	getChannelInstance(channel: utils.SendableChannel): CustomReply {
 		return this.storageDriver.channelFromChannel(channel).get<CustomReply>('customReply')
 	}
 

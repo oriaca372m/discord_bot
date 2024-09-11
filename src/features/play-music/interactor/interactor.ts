@@ -23,7 +23,7 @@ export class AddInteractor {
 
 	constructor(
 		readonly guildInstance: GuildInstance,
-		readonly channel: utils.LikeTextChannel,
+		readonly channel: utils.SendableChannel,
 		readonly playlist: Playlist,
 		private readonly done: () => void
 	) {

@@ -55,11 +55,12 @@ export class FeatureGlobalConfig extends FeatureBase {
 		args: object = {},
 		options: discordjs.MessageCreateOptions = {}
 	): Promise<discordjs.Message | discordjs.Message[]> {
+		utils.mustSendableChannel(msg.channel)
 		return await this.sendToChannel(msg.channel, key, args, options)
 	}
 
 	async sendToChannel(
-		channel: utils.LikeTextChannel,
+		channel: utils.SendableChannel,
 		key: string,
 		args: object = {},
 		options: discordjs.MessageCreateOptions = {}

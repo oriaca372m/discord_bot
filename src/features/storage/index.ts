@@ -27,7 +27,7 @@ export class StorageType {
 	}
 }
 
-type ChannelStorageConstructorType = (channel: utils.LikeTextChannel) => StorageType
+type ChannelStorageConstructorType = (channel: discordjs.Channel) => StorageType
 type GuildStorageConstructorType = (guild: discordjs.Guild) => StorageType
 
 export class StorageDriver {
@@ -49,7 +49,7 @@ export class StorageDriver {
 		return map.get(id) ?? utils.unreachable()
 	}
 
-	channelFromChannel(channel: utils.LikeTextChannel): StorageType {
+	channelFromChannel(channel: discordjs.Channel): StorageType {
 		return this.getBase(channel.id, this._channels, () =>
 			this.channelStorageConstructor(channel)
 		)

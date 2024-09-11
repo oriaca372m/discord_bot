@@ -32,7 +32,7 @@ function getTitle(url: string): Promise<string | undefined> {
 				try {
 					utils.mustString(stdout)
 					resolve(YtdlJson.parse(JSON.parse(stdout)).title)
-				} catch (e) {
+				} catch (_) {
 					resolve(undefined)
 				}
 			}
