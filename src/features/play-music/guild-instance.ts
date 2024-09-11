@@ -213,7 +213,7 @@ export class GuildInstance {
 	}
 
 	async edit(rawArgs: string[], msg: discordjs.Message): Promise<void> {
-		let args
+		let args: string[]
 		try {
 			;({ args } = utils.parseCommandArgs(rawArgs, [], 0))
 		} catch (e) {

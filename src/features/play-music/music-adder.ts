@@ -64,7 +64,7 @@ export class MusicAdder {
 		rawArgs: string[]
 	): Promise<CommandOptions | undefined> {
 		let args: string[]
-		let options
+		let options: utils.Options
 		try {
 			;({ args, options } = utils.parseCommandArgs(rawArgs, []))
 		} catch (e) {

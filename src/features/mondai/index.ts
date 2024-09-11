@@ -47,8 +47,8 @@ export class Mondai {
 	}
 
 	async onCommand(msg: discordjs.Message, rawArgs: string[]): Promise<void> {
-		let args
-		let options
+		let args: string[]
+		let options: utils.Options
 
 		try {
 			;({ args, options } = utils.parseCommandArgs(rawArgs, ['life', 'l']))
