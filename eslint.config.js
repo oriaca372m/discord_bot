@@ -14,7 +14,10 @@ export default tseslint.config(
 	eslintConfigPrettier,
 	{
 		rules: {
-			'@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+			'@typescript-eslint/no-unused-vars': [
+				'error',
+				{ argsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_$' },
+			],
 			'@typescript-eslint/no-empty-interface': 'off',
 			'@typescript-eslint/restrict-template-expressions': ['error', { allowBoolean: true }],
 		},

@@ -36,10 +36,10 @@ class CommandOpenWebUi implements Command {
 	}
 
 	async command(msg: discordjs.Message, rawArgs: string[]): Promise<void> {
-		let options
+		let options: utils.Options
 		try {
 			;({ options } = utils.parseCommandArgs(rawArgs, [], 0))
-		} catch (e) {
+		} catch (_) {
 			await msg.reply('コマンドのパースに失敗しました')
 			return
 		}

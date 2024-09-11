@@ -99,13 +99,17 @@ export function parseCommand(string: string): { commandName: string; args: strin
 	}
 }
 
+export type Options = Record<string, string | boolean>
 export function parseCommandArgs(
 	argsToParse: string[],
 	optionsWithValue: string[] = [],
 	minimumArgs = 0
-): { args: string[]; options: { [_: string]: string | boolean } } {
+): {
+	args: string[]
+	options: Options
+} {
 	const args = []
-	const options: { [_: string]: string | boolean } = {}
+	const options: Record<string, string | boolean> = {}
 	let i = 0
 
 	const consumeValue = (name: string) => {
@@ -182,19 +186,16 @@ export function parseCommandArgs(
 	return { args, options }
 }
 
-export function getOption(
-	options: { [_: string]: string | boolean },
-	keys: string[]
-): string | boolean
+export function getOption(options: Options, keys: string[]): string | boolean
 
 export function getOption<T>(
-	options: { [_: string]: string | boolean },
+	options: Options,
 	keys: string[],
 	defaultValue: T
 ): string | boolean | T
 
 export function getOption<T>(
-	options: { [_: string]: string | boolean },
+	options: Options,
 	keys: string[],
 	defaultValue?: T
 ): T | string | boolean {

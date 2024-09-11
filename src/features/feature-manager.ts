@@ -97,6 +97,7 @@ export default class {
 		return feature
 	}
 
+	// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
 	getFeature<T extends FeatureInterface>(id: string): T {
 		return this.features.get(id) as T
 	}
