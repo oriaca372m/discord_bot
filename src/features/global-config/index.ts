@@ -5,6 +5,7 @@ import { FeatureBase } from 'Src/features/feature'
 import { ObjectStorage } from 'Src/object-storage'
 
 import * as utils from 'Src/utils'
+import { util } from 'zod'
 
 type Message = string | (string | { text: string; weight?: number })[]
 
@@ -55,6 +56,7 @@ export class FeatureGlobalConfig extends FeatureBase {
 		args: object = {},
 		options: discordjs.MessageCreateOptions = {}
 	): Promise<discordjs.Message | discordjs.Message[]> {
+		utils.mustSendableChannel(msg.channel)
 		return await this.sendToChannel(msg.channel, key, args, options)
 	}
 

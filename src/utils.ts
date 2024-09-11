@@ -266,8 +266,10 @@ export async function subCommandProxy(
 	msg: discordjs.Message
 ): Promise<void> {
 	const validSubCommands = Object.keys(table).join(' ')
+	const channel = msg.channel
+	mustSendableChannel(channel)
 	if (!subcommand) {
-		await msg.channel.send(`サブコマンドを指定して欲しいロボ: ${validSubCommands}`)
+		await channel.send(`サブコマンドを指定して欲しいロボ: ${validSubCommands}`)
 		return
 	}
 
@@ -275,7 +277,7 @@ export async function subCommandProxy(
 	if (func) {
 		await func(args, msg)
 	} else {
-		await msg.channel.send(`知らないサブコマンドロボねえ…: ${validSubCommands}`)
+		await channel.send(`知らないサブコマンドロボねえ…: ${validSubCommands}`)
 	}
 }
 

@@ -68,7 +68,7 @@ export class CustomReply {
 		if (response.reply) {
 			await msg.reply(options)
 		} else {
-			await msg.channel.send(options)
+			await this.channel.send(options)
 		}
 	}
 
@@ -143,6 +143,7 @@ export class FeatureCustomReply extends CommonFeatureBase {
 
 	async initImpl(): Promise<void> {
 		this.storageDriver.setChannelStorageConstructor((ch) => {
+			utils.mustSendableChannel(ch)
 			const client = new CustomReply(this, ch)
 			void client.init()
 			return new StorageType(new Map<string, unknown>([['customReply', client]]))

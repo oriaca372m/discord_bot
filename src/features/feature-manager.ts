@@ -140,7 +140,7 @@ export default class {
 			await this.message(msg)
 		} catch (e) {
 			console.error(e)
-			await msg.channel.send('bot の処理中にエラーが発生しました')
+			await msg.reply('bot の処理中にエラーが発生しました')
 		}
 	}
 }
