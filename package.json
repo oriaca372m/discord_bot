@@ -13,7 +13,7 @@
 	"license": "Zlib",
 	"private": true,
 	"dependencies": {
-		"@aws-sdk/client-s3": "^3.744.0",
+		"@aws-sdk/client-s3": "^3.750.0",
 		"@discordjs/opus": "^0.10.0",
 		"@discordjs/voice": "^0.18.0",
 		"@iarna/toml": "^2.2.5",
@@ -22,10 +22,10 @@
 		"discord.js": "^14.18.0",
 		"fuse.js": "^7.1.0",
 		"lodash": "^4.17.21",
-		"music-metadata": "^10.9.0",
+		"music-metadata": "^11.0.0",
 		"pako": "^2.1.0",
-		"sodium-native": "^4.3.1",
-		"uuid": "^11.0.5",
+		"sodium-native": "^4.3.2",
+		"uuid": "^11.1.0",
 		"zod": "^3.24.2"
 	},
 	"devDependencies": {
@@ -33,7 +33,7 @@
 		"@eslint/js": "^9.20.0",
 		"@types/jest": "^29.5.14",
 		"@types/lodash": "^4.17.15",
-		"@types/node": "^22.13.2",
+		"@types/node": "^22.13.4",
 		"@types/pako": "^2.0.3",
 		"eslint": "^9.20.1",
 		"eslint-config-prettier": "^10.0.1",
@@ -43,7 +43,7 @@
 		"ts-jest": "^29.2.5",
 		"tsc-alias": "^1.8.10",
 		"typescript": "^5.7.3",
-		"typescript-eslint": "^8.24.0"
+		"typescript-eslint": "^8.24.1"
 	},
 	"packageManager": "pnpm@10.3.0+sha512.ee592eda8815a8a293c206bb0917c4bb0ff274c50def7cbc17be05ec641fc2d1b02490ce660061356bd0d126a4d7eb2ec8830e6959fb8a447571c631d5a2442d"
 }
