@@ -1,4 +1,6 @@
-import * as utils from 'Src/utils'
+import { describe, expect, test } from 'vitest'
+
+import * as utils from '#/utils.js'
 
 describe('parseShellLikeCommand', () => {
 	test('一般例A', () => {

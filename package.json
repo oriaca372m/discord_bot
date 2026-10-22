@@ -6,9 +6,12 @@
 	"scripts": {
 		"build": "tsc --project tsconfig.build.json && tsc-alias -f -p tsconfig.build.json",
 		"start": "pnpm run build && node dist/index.js",
-		"test": "jest",
+		"test": "vitest run",
 		"lint": "tsc --noEmit && biome check",
 		"fix": "biome format --write"
+	},
+	"imports": {
+		"#/*": "./src/*"
 	},
 	"license": "Zlib",
 	"private": true,
@@ -30,14 +33,12 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "*",
-		"@types/jest": "*",
 		"@types/lodash": "*",
 		"@types/node": "*",
 		"globals": "*",
-		"jest": "*",
-		"ts-jest": "*",
 		"tsc-alias": "*",
-		"typescript": "*"
+		"typescript": "*",
+		"vitest": "*"
 	},
 	"packageManager": "pnpm@12.15.0"
 }
