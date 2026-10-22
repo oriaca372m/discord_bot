@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import { calcDivisionNumber } from '#/features/mondai/image-map.js'
+import { calcDivisionNumber } from '#/features/mondai/image-map.ts'
 
 describe('calcDivisionNumber', () => {
 	test('1未満の引数を受け入れないこと', () => {

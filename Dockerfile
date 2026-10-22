@@ -36,4 +36,4 @@ COPY --chown=node:node --from=builder /usr/src/app/tools ./tools
 COPY --chown=node:node --from=builder /usr/src/app/node_modules ./node_modules
 COPY --chown=node:node --from=builder /usr/src/app/dist ./dist
 
-CMD ["dumb-init", "node", "dist/index.js"]
+CMD ["dumb-init", "node", "dist/index.mjs"]

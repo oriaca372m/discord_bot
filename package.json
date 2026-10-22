@@ -2,10 +2,9 @@
 	"name": "discord_bot",
 	"version": "1.0.0",
 	"type": "module",
-	"main": "src/index.js",
 	"scripts": {
-		"build": "tsc --project tsconfig.build.json && tsc-alias -f -p tsconfig.build.json",
-		"start": "pnpm run build && node dist/index.js",
+		"build": "tsdown",
+		"start": "pnpm run build && node dist/index.mjs",
 		"test": "vitest run",
 		"lint": "tsc --noEmit && biome check",
 		"fix": "biome format --write"
@@ -37,6 +36,7 @@
 		"@types/node": "*",
 		"globals": "*",
 		"tsc-alias": "*",
+		"tsdown": "*",
 		"typescript": "*",
 		"vitest": "*"
 	},

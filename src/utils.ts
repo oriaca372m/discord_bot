@@ -97,6 +97,8 @@ export function parseCommand(string: string): { commandName: string; args: strin
 		const [name, ...args] = res
 		return { commandName: name.substring(1).toLowerCase(), args }
 	}
+
+	return
 }
 
 export type Options = Record<string, string | boolean>
