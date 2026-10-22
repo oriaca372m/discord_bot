@@ -3,7 +3,7 @@ FROM node:slim AS builder
 RUN apt-get update -y && apt-get install -y --no-install-recommends curl ca-certificates build-essential python3 \
 	&& rm -rf /var/lib/apt/lists/*
 
-RUN corepack enable pnpm
+RUN npm install -g pnpm
 
 RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp
 RUN chmod a+rx /usr/local/bin/yt-dlp
@@ -13,8 +13,8 @@ WORKDIR /usr/src/app
 
 COPY --chown=node:node package.json .
 COPY --chown=node:node pnpm-lock.yaml .
-RUN corepack install
-RUN pnpm install --frozen-lockfile
+COPY --chown=node:node pnpm-workspace.yaml .
+RUN pnpm ci
 
 COPY --chown=node:node . .
 RUN pnpm run lint

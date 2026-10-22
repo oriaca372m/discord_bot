@@ -20,7 +20,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Upgrade packgaes
-        run: pnpm up --latest
+        run: pnpm up
 
       - uses: tibdex/github-app-token@v1
         id: generate-token

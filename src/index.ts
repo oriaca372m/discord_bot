@@ -1,4 +1,4 @@
-import discordjs from 'discord.js'
+import { Client, GatewayIntentBits } from 'discord.js'
 
 import FeatureManager from 'Src/features/feature-manager'
 import { FeatureGlobalConfig } from 'Src/features/global-config'
@@ -42,12 +42,12 @@ async function main() {
 		process.exit(1)
 	}
 
-	const client = new discordjs.Client({
+	const client = new Client({
 		intents: [
-			discordjs.GatewayIntentBits.Guilds,
-			discordjs.GatewayIntentBits.GuildMessages,
-			discordjs.GatewayIntentBits.MessageContent,
-			discordjs.GatewayIntentBits.GuildVoiceStates,
+			GatewayIntentBits.Guilds,
+			GatewayIntentBits.GuildMessages,
+			GatewayIntentBits.MessageContent,
+			GatewayIntentBits.GuildVoiceStates,
 		],
 	})
 	const featureManager = new FeatureManager(client)
@@ -56,7 +56,7 @@ async function main() {
 		() => new FeatureGlobalConfig(storage, ['messages-default.toml', 'messages.toml'])
 	)
 
-	client.on('ready', (client) => {
+	client.on('clientReady', (client) => {
 		;(async () => {
 			console.log(`Logged in as ${client.user.tag}!`)
 
