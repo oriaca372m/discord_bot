@@ -2,7 +2,7 @@ import http from 'node:http'
 import * as msgpack from '@msgpack/msgpack'
 import type { Authorizer, BasicAccessTokenInfo } from 'Src/features/webapi/authorizer'
 import { bufferToHex, hexToBuffer, encrypt, decrypt } from 'Src/features/webapi/utils'
-import pako from 'pako'
+import { inflateRaw, deflateRaw } from 'pako'
 import * as utils from 'Src/utils'
 
 interface Message {
@@ -78,7 +78,7 @@ export class WebApiServer {
 		const iv = hexToBuffer(req.headers['x-iv'] as string)
 		const decrypted = decrypt(encrypted, key, iv)
 
-		const message = msgpack.decode(pako.inflateRaw(decrypted))
+		const message = msgpack.decode(inflateRaw(decrypted))
 		if (!isMessage(message)) {
 			console.error('怪しげなアクセス')
 			this._writeErrorResponse(res, 400)
@@ -98,7 +98,7 @@ export class WebApiServer {
 			payload: await this._recievedMessageHandler(tokenInfo.accessToken, message.payload),
 		}
 
-		const content = pako.deflateRaw(msgpack.encode(resMessage))
+		const content = deflateRaw(msgpack.encode(resMessage))
 		const [resIv, resEncrypted] = encrypt(content, key)
 
 		res.writeHead(200, {

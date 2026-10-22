@@ -156,7 +156,7 @@ export async function fetchPlaylistItems(
 	const musics: YouTubeMusic[] = []
 	let pageCount = 0
 
-	let pageToken: string | undefined = undefined
+	let pageToken: string | undefined
 	do {
 		const url = new URL('https://youtube.googleapis.com/youtube/v3/playlistItems')
 		const params = url.searchParams

@@ -137,11 +137,7 @@ export class GuildInstance {
 	}
 
 	playOn(channel: discordjs.BaseGuildVoiceChannel, reuseCurrentConnection = true): void {
-		if (
-			reuseCurrentConnection &&
-			this.#connection !== undefined &&
-			this.#connection.channel.equals(channel)
-		) {
+		if (reuseCurrentConnection && this.#connection?.channel.equals(channel)) {
 			this.#playCurrentMusic()
 			return
 		}
